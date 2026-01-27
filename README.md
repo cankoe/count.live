@@ -29,7 +29,7 @@ https://count.live/#date=2025-12-31T23:59:59&title=New Year&units=d,h,m,s&end=Ha
 | `date` | Target date/time (ISO 8601) | `2025-12-31T23:59:59` |
 | `tz` | Timezone (IANA format, defaults to UTC) | `America/New_York` |
 | `title` | Event title (max 50 chars) | `New Year` |
-| `subtitle` | Subtitle text (max 100 chars) | `The countdown begins` |
+| `subtitle` | Subtitle text, supports multiple lines (max 200 chars) | `The countdown begins` |
 | `bg` | Background color (hex without #) | `1a1a2e` |
 | `fg` | Foreground color (hex without #) | `ffffff` |
 | `units` | Comma-separated time units | `d,h,m,s` |

@@ -282,7 +282,8 @@
 
     .builder-row input[type="text"],
     .builder-row input[type="datetime-local"],
-    .builder-row select {
+    .builder-row select,
+    .builder-row textarea {
       width: 100%;
       padding: 0.5rem 0.75rem;
       font-size: 1rem;
@@ -291,6 +292,11 @@
       background: rgba(255,255,255,0.1);
       color: inherit;
       font-family: inherit;
+    }
+
+    .builder-row textarea {
+      resize: vertical;
+      min-height: 2.5rem;
     }
 
     .builder-row select {
@@ -302,7 +308,8 @@
       color: #ffffff;
     }
 
-    .builder-row input:focus {
+    .builder-row input:focus,
+    .builder-row textarea:focus {
       outline: none;
       border-color: rgba(255,255,255,0.5);
     }
@@ -723,7 +730,8 @@
 
       .builder-row input[type="text"],
       .builder-row input[type="datetime-local"],
-      .builder-row select {
+      .builder-row select,
+      .builder-row textarea {
         padding: 0.75rem 0.5rem;
         font-size: 16px; /* Prevents zoom on iOS */
         min-height: 48px; /* Better touch target */
@@ -919,7 +927,7 @@
 
     <div class="builder-row">
       <label>Subtitle (optional)</label>
-      <input type="text" id="b-subtitle" maxlength="100" placeholder="The countdown begins...">
+      <textarea id="b-subtitle" maxlength="200" rows="2" placeholder="The countdown begins..."></textarea>
     </div>
 
     <div class="builder-row color-row">
@@ -1015,7 +1023,7 @@
               <tr><td><code>date</code></td><td>Target date/time (ISO 8601 format)</td><td><code>2025-12-31T23:59:59</code></td></tr>
               <tr><td><code>tz</code></td><td>Timezone (IANA format, defaults to UTC)</td><td><code>America/New_York</code></td></tr>
               <tr><td><code>title</code></td><td>Event title (max 50 chars)</td><td><code>New Year</code></td></tr>
-              <tr><td><code>subtitle</code></td><td>Subtitle text (max 100 chars)</td><td><code>The countdown begins</code></td></tr>
+              <tr><td><code>subtitle</code></td><td>Subtitle text, supports multiple lines (max 200 chars)</td><td><code>The countdown begins</code></td></tr>
               <tr><td><code>bg</code></td><td>Background color (hex without #)</td><td><code>1a1a2e</code></td></tr>
               <tr><td><code>fg</code></td><td>Foreground/text color (hex without #)</td><td><code>ffffff</code></td></tr>
               <tr><td><code>units</code></td><td>Comma-separated time units</td><td><code>d,h,m,s</code></td></tr>
@@ -1171,7 +1179,7 @@
 
     const MAX_LENGTHS = {
       title: 50,
-      subtitle: 100,
+      subtitle: 200,
       end: 100
     };
 
@@ -1227,9 +1235,11 @@
       if (!str) return '';
       // First escape HTML to prevent XSS
       const escaped = escapeHtml(str);
-      // Then convert URLs to links
+      // Convert URLs to links
       const urlPattern = /(https?:\/\/[^\s<]+)/g;
-      return escaped.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      const withLinks = escaped.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+      // Convert newlines to <br> for multiline support
+      return withLinks.replace(/\n/g, '<br>');
     }
 
     function parseColor(color) {
