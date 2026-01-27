@@ -218,7 +218,8 @@
     }
 
     .builder-row input[type="text"],
-    .builder-row input[type="datetime-local"] {
+    .builder-row input[type="datetime-local"],
+    .builder-row select {
       width: 100%;
       padding: 0.5rem 0.75rem;
       font-size: 1rem;
@@ -227,6 +228,15 @@
       background: rgba(255,255,255,0.1);
       color: inherit;
       font-family: inherit;
+    }
+
+    .builder-row select {
+      cursor: pointer;
+    }
+
+    .builder-row select option {
+      background: #1a1a2e;
+      color: #ffffff;
     }
 
     .builder-row input:focus {
@@ -562,7 +572,8 @@
       }
 
       .builder-row input[type="text"],
-      .builder-row input[type="datetime-local"] {
+      .builder-row input[type="datetime-local"],
+      .builder-row select {
         padding: 0.6rem 0.5rem;
         font-size: 16px; /* Prevents zoom on iOS */
       }
@@ -724,8 +735,13 @@
     <h1 class="logo">count<span class="dot">.</span>live</h1>
 
     <div class="builder-row">
-      <label>Date & Time (UTC)</label>
+      <label>Date & Time</label>
       <input type="datetime-local" id="b-date">
+    </div>
+
+    <div class="builder-row">
+      <label>Timezone</label>
+      <select id="b-timezone"></select>
     </div>
 
     <div class="builder-row">
@@ -1310,6 +1326,37 @@
     let builderInitialized = false;
     let previewSession = 0;
 
+    // Common timezones
+    const TIMEZONES = [
+      'UTC',
+      'America/New_York',
+      'America/Chicago',
+      'America/Denver',
+      'America/Los_Angeles',
+      'America/Toronto',
+      'America/Vancouver',
+      'America/Mexico_City',
+      'America/Sao_Paulo',
+      'Europe/London',
+      'Europe/Paris',
+      'Europe/Berlin',
+      'Europe/Amsterdam',
+      'Europe/Rome',
+      'Europe/Madrid',
+      'Europe/Moscow',
+      'Asia/Dubai',
+      'Asia/Kolkata',
+      'Asia/Singapore',
+      'Asia/Hong_Kong',
+      'Asia/Shanghai',
+      'Asia/Tokyo',
+      'Asia/Seoul',
+      'Australia/Sydney',
+      'Australia/Melbourne',
+      'Pacific/Auckland',
+      'Pacific/Honolulu'
+    ];
+
     function initBuilder() {
       if (builderInitialized) {
         updatePreview();
@@ -1317,11 +1364,34 @@
       }
       builderInitialized = true;
 
-      // Set default date to tomorrow
+      // Populate timezone dropdown
+      const tzSelect = document.getElementById('b-timezone');
+      const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // Add user's timezone at the top if not in list
+      const allTimezones = TIMEZONES.includes(userTz) ? TIMEZONES : [userTz, ...TIMEZONES];
+
+      allTimezones.forEach(tz => {
+        const option = document.createElement('option');
+        option.value = tz;
+        option.textContent = tz.replace(/_/g, ' ');
+        if (tz === userTz) option.selected = true;
+        tzSelect.appendChild(option);
+      });
+
+      // Set default date to tomorrow noon in local time
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(12, 0, 0, 0);
-      document.getElementById('b-date').value = tomorrow.toISOString().slice(0, 16);
+      // Format as local datetime string
+      const localDateStr = tomorrow.getFullYear() + '-' +
+        String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' +
+        String(tomorrow.getDate()).padStart(2, '0') + 'T' +
+        String(tomorrow.getHours()).padStart(2, '0') + ':' +
+        String(tomorrow.getMinutes()).padStart(2, '0');
+      document.getElementById('b-date').value = localDateStr;
+
+      tzSelect.addEventListener('change', updatePreview);
 
       // Sync color pickers with text inputs
       const bgPicker = document.getElementById('b-bg-picker');
@@ -1374,9 +1444,41 @@
       updatePreview();
     }
 
+    function localToUTC(dateStr, timezone) {
+      if (!dateStr) return '';
+      try {
+        // Create a date string that includes the timezone
+        const date = new Date(dateStr);
+        // Get the date parts in the specified timezone
+        const formatter = new Intl.DateTimeFormat('en-CA', {
+          timeZone: timezone,
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        });
+
+        // Parse the local time as if it's in the target timezone
+        // by calculating the offset
+        const localDate = new Date(dateStr);
+        const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: 'UTC' }));
+        const tzDate = new Date(localDate.toLocaleString('en-US', { timeZone: timezone }));
+        const offset = tzDate - utcDate;
+
+        const targetUTC = new Date(localDate.getTime() - offset);
+        return targetUTC.toISOString().slice(0, 19);
+      } catch (e) {
+        return dateStr;
+      }
+    }
+
     function getBuilderConfig() {
       const dateInput = document.getElementById('b-date').value;
-      const date = dateInput ? dateInput.replace('T', 'T') : '';
+      const timezone = document.getElementById('b-timezone').value;
+      const dateUTC = localToUTC(dateInput, timezone);
 
       const units = [];
       document.querySelectorAll('.units-grid input:checked').forEach(cb => {
@@ -1384,7 +1486,7 @@
       });
 
       return {
-        date,
+        date: dateUTC,
         title: document.getElementById('b-title').value,
         subtitle: document.getElementById('b-subtitle').value,
         bg: document.getElementById('b-bg').value,
