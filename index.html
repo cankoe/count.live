@@ -897,6 +897,75 @@
         padding: 1rem;
       }
     }
+
+    /* Promo badge */
+    .promo-badge {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 100;
+    }
+
+    .promo-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .promo-badge:hover .promo-icon {
+      background: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.8);
+    }
+
+    .promo-modal {
+      position: absolute;
+      bottom: 100%;
+      right: 0;
+      margin-bottom: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: rgba(30,30,50,0.95);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(5px);
+      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    }
+
+    .promo-badge:hover .promo-modal {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    .promo-modal p {
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .promo-modal a {
+      font-size: 0.85rem;
+      color: #ffdd00;
+      text-decoration: none;
+    }
+
+    .promo-modal a:hover {
+      text-decoration: underline;
+    }
+
+    body.builder-mode .promo-badge {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -904,6 +973,14 @@
     <h1 class="title" id="title"></h1>
     <p class="subtitle" id="subtitle"></p>
     <div class="countdown" id="countdown"></div>
+  </div>
+
+  <div class="promo-badge">
+    <span class="promo-icon">?</span>
+    <div class="promo-modal">
+      <p>Want to create your own countdown?</p>
+      <a href="/">Build one for free</a>
+    </div>
   </div>
 
   <div class="builder" id="builder-view" style="display: none;">
