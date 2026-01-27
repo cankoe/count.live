@@ -9,8 +9,11 @@
   <meta property="og:description" content="Create and share customizable countdown timers. No sign-up, no tracking, works offline.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://count.live">
+  <meta property="og:image" content="https://count.live/logo.png">
   <meta name="robots" id="robots-meta" content="index, follow">
   <link rel="canonical" id="canonical-link" href="https://count.live">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
   <title>Countdown</title>
   <style>
     * {
@@ -242,6 +245,15 @@
       font-family: 'Courier New', monospace;
       font-weight: 700;
       letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .logo img {
+      height: 64px;
+      width: auto;
     }
 
     .logo .dot {
@@ -879,7 +891,7 @@
   </div>
 
   <div class="builder" id="builder-view" style="display: none;">
-    <h1 class="logo">count<span class="dot">.</span>live</h1>
+    <h1 class="logo"><img src="logo.png" alt="count.live logo">count<span class="dot">.</span>live</h1>
 
     <div class="builder-row">
       <label>Date & Time</label>
