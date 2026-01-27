@@ -1732,6 +1732,26 @@ document.getElementById('countdown-share').addEventListener('click', async () =>
   }
 });
 
+// Fullscreen toggle
+document.getElementById('countdown-fullscreen').addEventListener('click', () => {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    // Enter fullscreen
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) {
+      elem.webkitRequestFullscreen();
+    }
+  } else {
+    // Exit fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+});
+
 // Accordion functionality
 document.querySelectorAll('.accordion-header').forEach(header => {
   header.addEventListener('click', () => {
