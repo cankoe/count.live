@@ -280,6 +280,28 @@
       min-width: 0;
     }
 
+    .quick-times {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .quick-time-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.05);
+      color: inherit;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .quick-time-btn:hover {
+      background: rgba(255,255,255,0.15);
+    }
+
     .color-row {
       display: flex;
       gap: 1rem;
@@ -779,6 +801,10 @@
       <div class="datetime-row">
         <input type="datetime-local" id="b-date">
         <select id="b-timezone"></select>
+      </div>
+      <div class="quick-times">
+        <button type="button" class="quick-time-btn" data-time="00:00">Midnight</button>
+        <button type="button" class="quick-time-btn" data-time="12:00">Noon</button>
       </div>
     </div>
 
@@ -1451,6 +1477,24 @@
       document.getElementById('b-date').value = localDateStr;
 
       tzSelect.addEventListener('change', updatePreview);
+
+      // Quick time buttons
+      document.querySelectorAll('.quick-time-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const dateInput = document.getElementById('b-date');
+          const currentVal = dateInput.value;
+          if (currentVal) {
+            const datePart = currentVal.split('T')[0];
+            dateInput.value = datePart + 'T' + btn.dataset.time;
+          } else {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const datePart = tomorrow.toISOString().slice(0, 10);
+            dateInput.value = datePart + 'T' + btn.dataset.time;
+          }
+          updatePreview();
+        });
+      });
 
       // Sync color pickers with text inputs
       const bgPicker = document.getElementById('b-bg-picker');
