@@ -9,6 +9,8 @@
   <meta property="og:description" content="Create and share customizable countdown timers. No sign-up, no tracking, works offline.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://count.live">
+  <meta name="robots" id="robots-meta" content="index, follow">
+  <link rel="canonical" id="canonical-link" href="https://count.live">
   <title>Countdown</title>
   <style>
     * {
@@ -1380,6 +1382,14 @@
       currentSession++;
       const session = currentSession;
       const params = parseHash();
+
+      // SEO: Only index the homepage, not individual countdown pages
+      const robotsMeta = document.getElementById('robots-meta');
+      if (params.date) {
+        robotsMeta.content = 'noindex, nofollow';
+      } else {
+        robotsMeta.content = 'index, follow';
+      }
 
       // Show builder if no date
       if (!params.date) {
