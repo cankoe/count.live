@@ -1269,6 +1269,19 @@
         }
       }
 
+      // Ceiling logic: if there's any remainder below smallest displayed unit,
+      // increment that unit by 1 (so countdown shows 1 until fully complete)
+      if (remainingMs > 0) {
+        const allUnitsInOrder = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'];
+        for (let i = allUnitsInOrder.length - 1; i >= 0; i--) {
+          const unit = allUnitsInOrder[i];
+          if (result[unit] !== undefined) {
+            result[unit]++;
+            break;
+          }
+        }
+      }
+
       return result;
     }
 
@@ -1423,20 +1436,17 @@
       };
       const smallestUnit = units[units.length - 1];
       const smallestDivisor = unitDivisors[smallestUnit];
+      // Calculate the effective end time (target rounded down to smallest unit)
+      const effectiveEndTime = Math.floor(targetDate.getTime() / smallestDivisor) * smallestDivisor;
       let showingZero = false;
 
       function update() {
         if (session !== currentSession) return; // Stop if config changed
 
         const now = Date.now();
-        const targetTime = targetDate.getTime();
-        const diff = targetTime - now;
 
-        // Calculate remaining in terms of smallest unit
-        const remainingUnits = Math.floor(diff / smallestDivisor);
-
-        // If smallest unit is 0 or less, show zero briefly then end
-        if (remainingUnits <= 0 && !showingZero) {
+        // If we've reached the effective end time, show zero briefly then end
+        if (now >= effectiveEndTime && !showingZero) {
           showingZero = true;
           // Show zeros
           const zeroValues = {};
@@ -1452,8 +1462,8 @@
           return;
         }
 
-        if (showingZero || diff <= 0) {
-          return; // Already showing zero or ended
+        if (showingZero) {
+          return; // Already showing zero
         }
 
         const values = calculateTimeUnits(targetDate, units);
