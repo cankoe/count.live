@@ -273,6 +273,17 @@
       border-color: rgba(255,255,255,0.5);
     }
 
+    .builder-row input[type="datetime-local"] {
+      min-height: 44px; /* iOS touch target guideline */
+    }
+
+    /* Style the datetime picker icon */
+    .builder-row input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+      padding: 4px;
+    }
+
     .datetime-row {
       display: flex;
       gap: 0.5rem;
@@ -328,10 +339,25 @@
     .color-input input[type="color"] {
       width: 40px;
       height: 34px;
-      border: none;
+      border: 2px solid rgba(255,255,255,0.3);
       border-radius: 4px;
       cursor: pointer;
       background: none;
+      padding: 2px;
+    }
+
+    .color-input input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-input input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 2px;
+    }
+
+    .color-input input[type="color"]::-moz-color-swatch {
+      border: none;
+      border-radius: 2px;
     }
 
     .color-input input[type="text"] {
@@ -664,17 +690,29 @@
       .builder-row input[type="text"],
       .builder-row input[type="datetime-local"],
       .builder-row select {
-        padding: 0.6rem 0.5rem;
+        padding: 0.75rem 0.5rem;
         font-size: 16px; /* Prevents zoom on iOS */
+        min-height: 48px; /* Better touch target */
+      }
+
+      .builder-row input[type="datetime-local"] {
+        -webkit-appearance: none;
+        appearance: none;
       }
 
       .datetime-row {
         flex-direction: column;
+        gap: 0.75rem;
       }
 
       .color-row {
         flex-direction: column;
         gap: 0.75rem;
+      }
+
+      .color-input input[type="color"] {
+        width: 48px;
+        height: 48px;
       }
 
       .units-grid {
