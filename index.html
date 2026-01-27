@@ -1609,28 +1609,30 @@
     function localToUTC(dateStr, timezone) {
       if (!dateStr) return '';
       try {
-        // Create a date string that includes the timezone
-        const date = new Date(dateStr);
-        // Get the date parts in the specified timezone
-        const formatter = new Intl.DateTimeFormat('en-CA', {
+        // Parse the input datetime string (e.g., "2026-01-27T12:00")
+        const [datePart, timePart] = dateStr.split('T');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hour, minute] = timePart.split(':').map(Number);
+
+        // Create a reference UTC date with these values
+        const utcRef = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
+
+        // Find what time it shows in the target timezone
+        const tzParts = new Intl.DateTimeFormat('en-US', {
           timeZone: timezone,
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        });
+          year: 'numeric', month: 'numeric', day: 'numeric',
+          hour: 'numeric', minute: 'numeric', hour12: false
+        }).formatToParts(utcRef);
 
-        // Parse the local time as if it's in the target timezone
-        // by calculating the offset
-        const localDate = new Date(dateStr);
-        const utcDate = new Date(localDate.toLocaleString('en-US', { timeZone: 'UTC' }));
-        const tzDate = new Date(localDate.toLocaleString('en-US', { timeZone: timezone }));
-        const offset = tzDate - utcDate;
+        const tzValues = {};
+        tzParts.forEach(p => tzValues[p.type] = parseInt(p.value) || 0);
 
-        const targetUTC = new Date(localDate.getTime() - offset);
+        // Calculate offset: how much the timezone differs from UTC
+        const tzTime = Date.UTC(tzValues.year, tzValues.month - 1, tzValues.day, tzValues.hour, tzValues.minute);
+        const offset = tzTime - utcRef.getTime();
+
+        // User's intended UTC time = their local time - offset
+        const targetUTC = new Date(utcRef.getTime() - offset);
         return targetUTC.toISOString().slice(0, 19);
       } catch (e) {
         return dateStr;
