@@ -939,7 +939,8 @@
             <p>All configuration is passed via the URL hash. Parameters are separated by <code>&</code>.</p>
             <table>
               <tr><th>Parameter</th><th>Description</th><th>Example</th></tr>
-              <tr><td><code>date</code></td><td>Target date/time in UTC (ISO 8601)</td><td><code>2025-12-31T23:59:59</code></td></tr>
+              <tr><td><code>date</code></td><td>Target date/time (ISO 8601 format)</td><td><code>2025-12-31T23:59:59</code></td></tr>
+              <tr><td><code>tz</code></td><td>Timezone (IANA format, defaults to UTC)</td><td><code>America/New_York</code></td></tr>
               <tr><td><code>title</code></td><td>Event title (max 50 chars)</td><td><code>New Year</code></td></tr>
               <tr><td><code>subtitle</code></td><td>Subtitle text (max 100 chars)</td><td><code>The countdown begins</code></td></tr>
               <tr><td><code>bg</code></td><td>Background color (hex without #)</td><td><code>1a1a2e</code></td></tr>
@@ -962,11 +963,11 @@
             </table>
 
             <h3>Date Formats</h3>
-            <p>The following date formats are supported (all interpreted as UTC):</p>
+            <p>The following date formats are supported (interpreted as UTC unless <code>tz</code> is specified):</p>
             <ul>
               <li><code>2025-12-31T23:59:59</code> - Full date and time</li>
               <li><code>2025-12-31T23:59</code> - Date and time without seconds</li>
-              <li><code>2025-12-31</code> - Date only (midnight UTC)</li>
+              <li><code>2025-12-31</code> - Date only (midnight)</li>
             </ul>
 
             <h3>How Units Work</h3>
@@ -974,9 +975,9 @@
             <p>Example: If you select <code>weeks</code> and <code>minutes</code> for a 15-day countdown, you'll see "2 Weeks, 1440 Minutes" (not "2 Weeks, 30 Minutes").</p>
 
             <h3>When Does the Countdown End?</h3>
-            <p>The countdown ends when the smallest displayed unit reaches zero. It shows "0" briefly (500ms), then displays the end message.</p>
-            <p>Example: If you select only <code>minutes</code> for a countdown to 12:30:45, the countdown ends at 12:30:00 (not 12:30:45). You'll see "1 minute" → "0 minutes" → end message.</p>
-            <p>This means the countdown doesn't wait for hidden smaller units to tick down.</p>
+            <p>The countdown ends at the exact target time. Hidden smaller units are accounted for using ceiling logic.</p>
+            <p>Example: If you select only <code>minutes</code> for a countdown to 12:30:45, you'll see "1 minute" until 12:30:45, then "0 minutes" briefly, then the end message.</p>
+            <p>This ensures the countdown reaches zero only when the target time has truly arrived.</p>
           </div>
         </div>
       </div>

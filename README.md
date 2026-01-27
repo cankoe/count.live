@@ -26,7 +26,8 @@ https://count.live/#date=2025-12-31T23:59:59&title=New Year&units=d,h,m,s&end=Ha
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `date` | Target date/time in UTC | `2025-12-31T23:59:59` |
+| `date` | Target date/time (ISO 8601) | `2025-12-31T23:59:59` |
+| `tz` | Timezone (IANA format, defaults to UTC) | `America/New_York` |
 | `title` | Event title (max 50 chars) | `New Year` |
 | `subtitle` | Subtitle text (max 100 chars) | `The countdown begins` |
 | `bg` | Background color (hex without #) | `1a1a2e` |
@@ -49,11 +50,11 @@ https://count.live/#date=2025-12-31T23:59:59&title=New Year&units=d,h,m,s&end=Ha
 
 ### Date Formats
 
-All dates are interpreted as UTC:
+Dates are interpreted as UTC unless a `tz` parameter is specified:
 
 - `2025-12-31T23:59:59` - Full date and time
 - `2025-12-31T23:59` - Without seconds
-- `2025-12-31` - Date only (midnight UTC)
+- `2025-12-31` - Date only (midnight)
 
 ## How Units Work
 
