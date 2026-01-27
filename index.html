@@ -1326,36 +1326,50 @@
     let builderInitialized = false;
     let previewSession = 0;
 
-    // Common timezones
+    // Common timezones with friendly names
     const TIMEZONES = [
-      'UTC',
-      'America/New_York',
-      'America/Chicago',
-      'America/Denver',
-      'America/Los_Angeles',
-      'America/Toronto',
-      'America/Vancouver',
-      'America/Mexico_City',
-      'America/Sao_Paulo',
-      'Europe/London',
-      'Europe/Paris',
-      'Europe/Berlin',
-      'Europe/Amsterdam',
-      'Europe/Rome',
-      'Europe/Madrid',
-      'Europe/Moscow',
-      'Asia/Dubai',
-      'Asia/Kolkata',
-      'Asia/Singapore',
-      'Asia/Hong_Kong',
-      'Asia/Shanghai',
-      'Asia/Tokyo',
-      'Asia/Seoul',
-      'Australia/Sydney',
-      'Australia/Melbourne',
-      'Pacific/Auckland',
-      'Pacific/Honolulu'
+      { id: 'Pacific/Honolulu', name: 'Hawaii' },
+      { id: 'America/Anchorage', name: 'Alaska' },
+      { id: 'America/Los_Angeles', name: 'Pacific Time (US & Canada)' },
+      { id: 'America/Denver', name: 'Mountain Time (US & Canada)' },
+      { id: 'America/Chicago', name: 'Central Time (US & Canada)' },
+      { id: 'America/New_York', name: 'Eastern Time (US & Canada)' },
+      { id: 'America/Sao_Paulo', name: 'Sao Paulo' },
+      { id: 'America/Argentina/Buenos_Aires', name: 'Buenos Aires' },
+      { id: 'Atlantic/Cape_Verde', name: 'Cape Verde' },
+      { id: 'UTC', name: 'UTC' },
+      { id: 'Europe/London', name: 'London, Dublin, Lisbon' },
+      { id: 'Europe/Paris', name: 'Paris, Berlin, Amsterdam' },
+      { id: 'Europe/Helsinki', name: 'Helsinki, Kyiv, Riga' },
+      { id: 'Europe/Moscow', name: 'Moscow, St. Petersburg' },
+      { id: 'Asia/Dubai', name: 'Dubai, Abu Dhabi' },
+      { id: 'Asia/Karachi', name: 'Karachi, Islamabad' },
+      { id: 'Asia/Kolkata', name: 'Mumbai, New Delhi' },
+      { id: 'Asia/Dhaka', name: 'Dhaka' },
+      { id: 'Asia/Bangkok', name: 'Bangkok, Hanoi, Jakarta' },
+      { id: 'Asia/Singapore', name: 'Singapore, Kuala Lumpur' },
+      { id: 'Asia/Hong_Kong', name: 'Hong Kong' },
+      { id: 'Asia/Shanghai', name: 'Beijing, Shanghai' },
+      { id: 'Asia/Tokyo', name: 'Tokyo, Osaka' },
+      { id: 'Asia/Seoul', name: 'Seoul' },
+      { id: 'Australia/Sydney', name: 'Sydney, Melbourne' },
+      { id: 'Pacific/Auckland', name: 'Auckland, Wellington' }
     ];
+
+    function getTimezoneOffset(tzId) {
+      try {
+        const now = new Date();
+        const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
+        const tzDate = new Date(now.toLocaleString('en-US', { timeZone: tzId }));
+        const offsetMinutes = (tzDate - utcDate) / 60000;
+        const hours = Math.floor(Math.abs(offsetMinutes) / 60);
+        const minutes = Math.abs(offsetMinutes) % 60;
+        const sign = offsetMinutes >= 0 ? '+' : '-';
+        return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+      } catch (e) {
+        return 'GMT+00:00';
+      }
+    }
 
     function initBuilder() {
       if (builderInitialized) {
@@ -1368,14 +1382,21 @@
       const tzSelect = document.getElementById('b-timezone');
       const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-      // Add user's timezone at the top if not in list
-      const allTimezones = TIMEZONES.includes(userTz) ? TIMEZONES : [userTz, ...TIMEZONES];
+      // Check if user's timezone is in the list
+      const userTzInList = TIMEZONES.find(tz => tz.id === userTz);
+
+      // Build timezone list, adding user's timezone if not present
+      let allTimezones = [...TIMEZONES];
+      if (!userTzInList) {
+        allTimezones.unshift({ id: userTz, name: userTz.replace(/_/g, ' ').split('/').pop() });
+      }
 
       allTimezones.forEach(tz => {
         const option = document.createElement('option');
-        option.value = tz;
-        option.textContent = tz.replace(/_/g, ' ');
-        if (tz === userTz) option.selected = true;
+        option.value = tz.id;
+        const offset = getTimezoneOffset(tz.id);
+        option.textContent = `(${offset}) ${tz.name}`;
+        if (tz.id === userTz) option.selected = true;
         tzSelect.appendChild(option);
       });
 
