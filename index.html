@@ -966,6 +966,11 @@
             <h3>How Units Work</h3>
             <p>The largest selected unit shows the total value. Smaller units show the remainder after subtracting larger units.</p>
             <p>Example: If you select <code>weeks</code> and <code>minutes</code> for a 15-day countdown, you'll see "2 Weeks, 1440 Minutes" (not "2 Weeks, 30 Minutes").</p>
+
+            <h3>When Does the Countdown End?</h3>
+            <p>The countdown ends when the smallest displayed unit reaches zero. It shows "0" briefly (500ms), then displays the end message.</p>
+            <p>Example: If you select only <code>minutes</code> for a countdown to 12:30:45, the countdown ends at 12:30:00 (not 12:30:45). You'll see "1 minute" → "0 minutes" → end message.</p>
+            <p>This means the countdown doesn't wait for hidden smaller units to tick down.</p>
           </div>
         </div>
       </div>
@@ -1401,13 +1406,50 @@
       }
 
       // Update function
+      // Get the divisor for the smallest unit to calculate display end time
+      const unitDivisors = {
+        years: 365 * 24 * 60 * 60 * 1000,
+        months: 30 * 24 * 60 * 60 * 1000,
+        weeks: 7 * 24 * 60 * 60 * 1000,
+        days: 24 * 60 * 60 * 1000,
+        hours: 60 * 60 * 1000,
+        minutes: 60 * 1000,
+        seconds: 1000,
+        milliseconds: 1
+      };
+      const smallestUnit = units[units.length - 1];
+      const smallestDivisor = unitDivisors[smallestUnit];
+      let showingZero = false;
+
       function update() {
         if (session !== currentSession) return; // Stop if config changed
 
-        if (targetDate.getTime() <= Date.now()) {
-          renderEndMessage(endMessage, isLarge);
-          document.title = (title ? title + ' - ' : '') + endMessage;
+        const now = Date.now();
+        const targetTime = targetDate.getTime();
+        const diff = targetTime - now;
+
+        // Calculate remaining in terms of smallest unit
+        const remainingUnits = Math.floor(diff / smallestDivisor);
+
+        // If smallest unit is 0 or less, show zero briefly then end
+        if (remainingUnits <= 0 && !showingZero) {
+          showingZero = true;
+          // Show zeros
+          const zeroValues = {};
+          units.forEach(u => zeroValues[u] = 0);
+          renderCountdown(zeroValues, units, isLarge);
+          document.title = title ? `0${UNIT_SHORT[smallestUnit]} - ${title}` : `0${UNIT_SHORT[smallestUnit]}`;
+          // After 500ms, show end message
+          setTimeout(() => {
+            if (session !== currentSession) return;
+            renderEndMessage(endMessage, isLarge);
+            document.title = (title ? title + ' - ' : '') + endMessage;
+          }, 500);
           return;
+        }
+
+        if (showingZero || diff <= 0) {
+          return; // Already showing zero or ended
         }
 
         const values = calculateTimeUnits(targetDate, units);
