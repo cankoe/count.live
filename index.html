@@ -126,67 +126,31 @@
       font-size: clamp(2rem, 8vw, 4rem);
       font-weight: 300;
       letter-spacing: 0.05em;
-      animation: celebrate 0.6s ease-out;
+      animation: fadeInUp 0.5s ease-out, subtlePulse 3s ease-in-out 0.5s infinite;
     }
 
     .end-message.large {
       font-size: clamp(3rem, 12vw, 6rem);
     }
 
-    @keyframes celebrate {
+    @keyframes fadeInUp {
       0% {
         opacity: 0;
-        transform: scale(0.5);
-      }
-      50% {
-        transform: scale(1.1);
+        transform: translateY(10px);
       }
       100% {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0);
       }
     }
 
-    .end-message::before,
-    .end-message::after {
-      content: '🎉';
-      position: absolute;
-      animation: float 2s ease-in-out infinite;
-    }
-
-    .end-message::before {
-      left: -1.5em;
-      animation-delay: 0s;
-    }
-
-    .end-message::after {
-      right: -1.5em;
-      animation-delay: 0.3s;
-    }
-
-    .end-message {
-      position: relative;
-      display: inline-block;
-    }
-
-    @keyframes float {
+    @keyframes subtlePulse {
       0%, 100% {
-        transform: translateY(0) rotate(-5deg);
+        opacity: 1;
       }
       50% {
-        transform: translateY(-10px) rotate(5deg);
+        opacity: 0.7;
       }
-    }
-
-    .preview-frame .end-message::before,
-    .preview-frame .end-message::after {
-      font-size: 0.8em;
-      left: -1.2em;
-    }
-
-    .preview-frame .end-message::after {
-      left: auto;
-      right: -1.2em;
     }
 
     .milliseconds .value {
