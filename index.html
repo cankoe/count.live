@@ -439,11 +439,35 @@
       background: rgba(0,0,0,0.3);
     }
 
-    .copy-hint {
-      font-size: 0.7rem;
-      opacity: 0.5;
-      text-align: center;
-      margin-top: 0.5rem;
+    .url-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      justify-content: center;
+    }
+
+    .url-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.1);
+      color: inherit;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+    }
+
+    .url-action-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .url-action-btn svg {
+      width: 16px;
+      height: 16px;
     }
 
     /* Support section */
@@ -872,7 +896,16 @@
         <div class="end-message" id="preview-end-message"></div>
       </div>
       <div class="url-output" id="url-output" title="Click to copy"></div>
-      <div class="copy-hint">Click URL to copy</div>
+      <div class="url-actions">
+        <button type="button" class="url-action-btn" id="copy-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy
+        </button>
+        <button type="button" class="url-action-btn" id="share-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+      </div>
     </div>
 
     <div class="support-section">
@@ -1540,14 +1573,34 @@
         cb.addEventListener('change', updatePreview);
       });
 
-      // Copy URL on click
-      document.getElementById('url-output').addEventListener('click', () => {
+      // Copy functionality
+      const copyUrl = () => {
         const url = document.getElementById('url-output').textContent;
         navigator.clipboard.writeText(url).then(() => {
-          const hint = document.querySelector('.copy-hint');
-          hint.textContent = 'Copied!';
-          setTimeout(() => hint.textContent = 'Click URL to copy', 1500);
+          const btn = document.getElementById('copy-btn');
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+          setTimeout(() => btn.innerHTML = originalText, 1500);
         });
+      };
+
+      document.getElementById('url-output').addEventListener('click', copyUrl);
+      document.getElementById('copy-btn').addEventListener('click', copyUrl);
+
+      // Share functionality
+      document.getElementById('share-btn').addEventListener('click', () => {
+        const url = document.getElementById('url-output').textContent;
+        const title = document.getElementById('b-title').value || 'Countdown Timer';
+
+        if (navigator.share) {
+          navigator.share({
+            title: title,
+            text: 'Check out this countdown!',
+            url: url
+          }).catch(() => {});
+        } else {
+          copyUrl();
+        }
       });
 
       updatePreview();
