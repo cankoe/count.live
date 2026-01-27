@@ -244,6 +244,21 @@
       border-color: rgba(255,255,255,0.5);
     }
 
+    .datetime-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .datetime-row input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .datetime-row select {
+      flex: 1.2;
+      min-width: 0;
+    }
+
     .color-row {
       display: flex;
       gap: 1rem;
@@ -578,6 +593,10 @@
         font-size: 16px; /* Prevents zoom on iOS */
       }
 
+      .datetime-row {
+        flex-direction: column;
+      }
+
       .color-row {
         flex-direction: column;
         gap: 0.75rem;
@@ -736,12 +755,10 @@
 
     <div class="builder-row">
       <label>Date & Time</label>
-      <input type="datetime-local" id="b-date">
-    </div>
-
-    <div class="builder-row">
-      <label>Timezone</label>
-      <select id="b-timezone"></select>
+      <div class="datetime-row">
+        <input type="datetime-local" id="b-date">
+        <select id="b-timezone"></select>
+      </div>
     </div>
 
     <div class="builder-row">
