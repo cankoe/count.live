@@ -1200,6 +1200,21 @@ body.builder-light .github-button-small {
   height: 14px;
 }
 
+/* Fullscreen button icons */
+#countdown-fullscreen .icon-compress {
+  display: none;
+}
+
+:fullscreen #countdown-fullscreen .icon-expand,
+:-webkit-full-screen #countdown-fullscreen .icon-expand {
+  display: none;
+}
+
+:fullscreen #countdown-fullscreen .icon-compress,
+:-webkit-full-screen #countdown-fullscreen .icon-compress {
+  display: block;
+}
+
 .promo-badge {
   position: relative;
 }
