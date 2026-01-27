@@ -15,995 +15,59 @@
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
   <title>Countdown</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-      padding: 2rem;
-      transition: background-color 0.3s, color 0.3s;
-    }
-
-    body.builder-mode {
-      min-height: auto;
-      justify-content: flex-start;
-      padding-top: 2rem;
-      padding-bottom: 2rem;
-    }
-
-    .container {
-      text-align: center;
-      max-width: 900px;
-      width: 100%;
-    }
-
-    .title {
-      font-size: clamp(1.5rem, 5vw, 3rem);
-      font-weight: 300;
-      margin-bottom: 0.5rem;
-      letter-spacing: 0.05em;
-    }
-
-    .subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
-      font-weight: 300;
-      opacity: 0.8;
-      margin-bottom: 2rem;
-    }
-
-    .title a,
-    .subtitle a,
-    .end-message a {
-      color: inherit;
-      text-decoration: underline;
-      text-underline-offset: 0.15em;
-    }
-
-    .title a:hover,
-    .subtitle a:hover,
-    .end-message a:hover {
-      opacity: 0.8;
-    }
-
-    .countdown {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: nowrap;
-      gap: clamp(0.25rem, 2vw, 1rem);
-      width: 100%;
-    }
-
-    .countdown.vertical {
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .countdown.large .unit {
-      padding: clamp(0.5rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 2rem);
-    }
-
-    .countdown.large .value {
-      font-size: clamp(2rem, 12vw, 8rem);
-    }
-
-    .countdown.large .label {
-      font-size: clamp(0.6rem, 1.5vw, 1.1rem);
-    }
-
-    .unit {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: clamp(0.25rem, 1vw, 1rem) clamp(0.25rem, 1.5vw, 1.5rem);
-      min-width: 0;
-      flex-shrink: 1;
-    }
-
-    .value {
-      font-size: clamp(1.5rem, 8vw, 5rem);
-      font-weight: 200;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-      white-space: nowrap;
-    }
-
-    .label {
-      font-size: clamp(0.5rem, 1.2vw, 0.9rem);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-top: 0.25rem;
-      opacity: 0.7;
-      white-space: nowrap;
-    }
-
-    .separator {
-      font-size: clamp(1rem, 6vw, 4rem);
-      font-weight: 200;
-      opacity: 0.5;
-      align-self: flex-start;
-      padding-top: clamp(0.25rem, 1vw, 1rem);
-      flex-shrink: 0;
-    }
-
-    .countdown.large .separator {
-      font-size: clamp(1.5rem, 10vw, 6rem);
-      padding-top: clamp(0.5rem, 2vw, 1.5rem);
-    }
-
-    .countdown.vertical .separator {
-      display: none;
-    }
-
-    .end-message {
-      font-size: clamp(2rem, 8vw, 4rem);
-      font-weight: 300;
-      letter-spacing: 0.05em;
-      animation: fadeInUp 0.5s ease-out, subtlePulse 3s ease-in-out 0.5s infinite;
-    }
-
-    .end-message.large {
-      font-size: clamp(3rem, 12vw, 6rem);
-    }
-
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes subtlePulse {
-      0%, 100% {
-        opacity: 1;
-      }
-      50% {
-        opacity: 0.7;
-      }
-    }
-
-    .milliseconds .value {
-      font-size: clamp(1.5rem, 6vw, 3rem);
-    }
-
-    .countdown.large .milliseconds .value {
-      font-size: clamp(2.5rem, 10vw, 5rem);
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-
-      .countdown:not(.vertical) {
-        gap: 0.25rem;
-      }
-
-      .countdown:not(.vertical) .unit {
-        padding: 0.25rem 0.35rem;
-      }
-
-      .countdown:not(.vertical) .value {
-        font-size: clamp(1rem, 5vw, 2rem);
-      }
-
-      .countdown:not(.vertical) .label {
-        font-size: 0.45rem;
-        letter-spacing: 0.05em;
-      }
-
-      .countdown:not(.vertical) .separator {
-        font-size: clamp(0.75rem, 4vw, 1.5rem);
-        padding-top: 0.15rem;
-      }
-
-      .countdown.vertical .unit {
-        padding: 0.5rem 1rem;
-      }
-
-      .countdown.vertical .value {
-        font-size: clamp(2rem, 10vw, 3rem);
-      }
-
-      .countdown.vertical .label {
-        font-size: 0.7rem;
-      }
-    }
-
-    /* Builder styles */
-    .builder {
-      max-width: 500px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .builder h1 {
-      font-size: 2rem;
-      font-weight: 300;
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-
-    .logo {
-      font-family: 'Courier New', monospace;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-    }
-
-    .logo a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .logo a:hover {
-      opacity: 0.8;
-    }
-
-    .logo .dot {
-      color: #ffdd00;
-    }
-
-    .builder-row {
-      margin-bottom: 1rem;
-    }
-
-    .builder-row label {
-      display: block;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.7;
-      margin-bottom: 0.25rem;
-    }
-
-    .input-hint {
-      display: block;
-      font-size: 0.7rem;
-      opacity: 0.5;
-      margin-top: 0.25rem;
-    }
-
-    .builder-row input[type="text"],
-    .builder-row input[type="datetime-local"],
-    .builder-row select,
-    .builder-row textarea {
-      width: 100%;
-      padding: 0.5rem 0.75rem;
-      font-size: 1rem;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 4px;
-      background: rgba(255,255,255,0.1);
-      color: inherit;
-      font-family: inherit;
-    }
-
-    .builder-row textarea {
-      resize: vertical;
-      min-height: 2.5rem;
-    }
-
-    .builder-row select {
-      cursor: pointer;
-    }
-
-    .builder-row select option {
-      background: #1a1a2e;
-      color: #ffffff;
-    }
-
-    .builder-row input:focus,
-    .builder-row textarea:focus {
-      outline: none;
-      border-color: rgba(255,255,255,0.5);
-    }
-
-    .builder-row input[type="datetime-local"] {
-      min-height: 44px; /* iOS touch target guideline */
-    }
-
-    /* Style the datetime picker icon */
-    .builder-row input[type="datetime-local"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    .datetime-row {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .datetime-row input {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .datetime-row select {
-      flex: 1.2;
-      min-width: 0;
-    }
-
-    .quick-times {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.4rem;
-    }
-
-    .quick-time-btn {
-      padding: 0.3rem 0.6rem;
-      font-size: 0.75rem;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 4px;
-      background: rgba(255,255,255,0.05);
-      color: inherit;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-
-    .quick-time-btn:hover {
-      background: rgba(255,255,255,0.15);
-    }
-
-    .color-row {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .color-row > div {
-      flex: 1;
-    }
-
-    .color-input {
-      display: flex;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .color-input input[type="color"] {
-      width: 40px;
-      height: 34px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 4px;
-      cursor: pointer;
-      background: none;
-      padding: 2px;
-    }
-
-    .color-input input[type="color"]::-webkit-color-swatch-wrapper {
-      padding: 0;
-    }
-
-    .color-input input[type="color"]::-webkit-color-swatch {
-      border: none;
-      border-radius: 2px;
-    }
-
-    .color-input input[type="color"]::-moz-color-swatch {
-      border: none;
-      border-radius: 2px;
-    }
-
-    .color-input input[type="text"] {
-      flex: 1;
-    }
-
-    .units-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.5rem;
-    }
-
-    .unit-checkbox {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-      font-size: 0.85rem;
-    }
-
-    .unit-checkbox input {
-      cursor: pointer;
-    }
-
-    .preview-section {
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .preview-section h2 {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.7;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .preview-frame {
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      min-height: 120px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      transition: background-color 0.2s, color 0.2s;
-    }
-
-    .preview-frame .title {
-      font-size: 1.25rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .preview-frame .subtitle {
-      font-size: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .preview-frame .countdown {
-      gap: 0.5rem;
-    }
-
-    .preview-frame .unit {
-      padding: 0.5rem;
-      min-width: 50px;
-    }
-
-    .preview-frame .value {
-      font-size: 1.5rem;
-    }
-
-    .preview-frame .label {
-      font-size: 0.6rem;
-    }
-
-    .preview-frame .separator {
-      font-size: 1.25rem;
-      padding-top: 0.5rem;
-    }
-
-    .preview-frame .end-message {
-      font-size: 1.25rem;
-    }
-
-    #preview-end-frame {
-      min-height: 60px;
-      margin-bottom: 1rem;
-    }
-
-    .url-output {
-      width: 100%;
-      padding: 0.75rem;
-      font-size: 0.8rem;
-      font-family: monospace;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 4px;
-      background: rgba(0,0,0,0.2);
-      color: inherit;
-      word-break: break-all;
-      cursor: pointer;
-    }
-
-    .url-output:hover {
-      background: rgba(0,0,0,0.3);
-    }
-
-    .url-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-      justify-content: center;
-    }
-
-    .url-action-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 6px;
-      background: rgba(255,255,255,0.1);
-      color: inherit;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-    }
-
-    .url-action-btn:hover {
-      background: rgba(255,255,255,0.2);
-    }
-
-    .url-action-btn svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* Support section */
-    .support-section {
-      margin-top: 2rem;
-      padding: 1.25rem;
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.03);
-      text-align: center;
-    }
-
-    .support-section p {
-      font-size: 0.85rem;
-      opacity: 0.8;
-      margin-bottom: 0.75rem;
-    }
-
-    .coffee-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.1rem;
-      background: #ffdd00;
-      color: #000000;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .coffee-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255,221,0,0.3);
-    }
-
-    .coffee-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .github-button {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.1rem;
-      background: #ffffff;
-      color: #24292e;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .github-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255,255,255,0.2);
-    }
-
-    .github-button svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* Accordion styles */
-    .accordion {
-      margin-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      padding-top: 1rem;
-    }
-
-    .accordion-item {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .accordion-header {
-      width: 100%;
-      padding: 0.75rem 0;
-      background: none;
-      border: none;
-      color: inherit;
-      font-family: inherit;
-      font-size: 0.9rem;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      opacity: 0.8;
-    }
-
-    .accordion-header:hover {
-      opacity: 1;
-    }
-
-    .accordion-header::after {
-      content: '+';
-      font-size: 1.2rem;
-      font-weight: 300;
-    }
-
-    .accordion-item.open .accordion-header::after {
-      content: '−';
-    }
-
-    .accordion-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-    }
-
-    .accordion-item.open .accordion-content {
-      max-height: 2000px;
-    }
-
-    .accordion-body {
-      padding: 0 0 1rem 0;
-      font-size: 0.8rem;
-      line-height: 1.6;
-      opacity: 0.7;
-    }
-
-    .accordion-body h3 {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin: 1rem 0 0.5rem 0;
-    }
-
-    .accordion-body h3:first-child {
-      margin-top: 0;
-    }
-
-    .accordion-body p {
-      margin: 0.5rem 0;
-    }
-
-    .accordion-body ul {
-      margin: 0.5rem 0;
-      padding-left: 1.25rem;
-    }
-
-    .accordion-body li {
-      margin: 0.25rem 0;
-    }
-
-    .accordion-body code {
-      background: rgba(255,255,255,0.1);
-      padding: 0.1rem 0.3rem;
-      border-radius: 3px;
-      font-size: 0.75rem;
-    }
-
-    .accordion-body table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 0.5rem 0;
-      font-size: 0.75rem;
-    }
-
-    .accordion-body th,
-    .accordion-body td {
-      text-align: left;
-      padding: 0.35rem 0.5rem;
-      border: 1px solid rgba(255,255,255,0.15);
-    }
-
-    .accordion-body th {
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* Mobile styles for builder */
-    @media (max-width: 500px) {
-      body.builder-mode {
-        padding-top: 1rem;
-      }
-
-      .builder {
-        padding: 0 0.5rem;
-      }
-
-      .builder h1 {
-        font-size: 1.25rem;
-        margin-bottom: 1rem;
-      }
-
-      .builder-row {
-        margin-bottom: 0.75rem;
-      }
-
-      .builder-row input[type="text"],
-      .builder-row input[type="datetime-local"],
-      .builder-row select,
-      .builder-row textarea {
-        padding: 0.75rem 0.5rem;
-        font-size: 16px; /* Prevents zoom on iOS */
-        min-height: 48px; /* Better touch target */
-      }
-
-      .builder-row input[type="datetime-local"] {
-        -webkit-appearance: none;
-        appearance: none;
-      }
-
-      .datetime-row {
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .color-row {
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-
-      .color-input input[type="color"] {
-        width: 48px;
-        height: 48px;
-      }
-
-      .units-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.4rem;
-      }
-
-      .unit-checkbox {
-        font-size: 0.8rem;
-      }
-
-      .preview-section {
-        margin-top: 1.5rem;
-        padding-top: 1rem;
-      }
-
-      .preview-section h2 {
-        font-size: 0.7rem;
-        margin-bottom: 0.75rem;
-      }
-
-      .preview-frame {
-        padding: 1rem;
-        min-height: 100px;
-      }
-
-      .preview-frame .title {
-        font-size: 1rem;
-      }
-
-      .preview-frame .subtitle {
-        font-size: 0.8rem;
-        margin-bottom: 0.75rem;
-      }
-
-      .preview-frame .value {
-        font-size: 1.2rem;
-      }
-
-      .preview-frame .label {
-        font-size: 0.5rem;
-      }
-
-      .preview-frame .unit {
-        padding: 0.3rem;
-        min-width: 40px;
-      }
-
-      .preview-frame .separator {
-        font-size: 1rem;
-        padding-top: 0.3rem;
-      }
-
-      .preview-frame .end-message {
-        font-size: 1rem;
-      }
-
-      #preview-end-frame {
-        min-height: 50px;
-      }
-
-      .url-output {
-        font-size: 0.7rem;
-        padding: 0.6rem;
-      }
-
-      .accordion {
-        margin-top: 1.5rem;
-        padding-top: 0.75rem;
-      }
-
-      .accordion-header {
-        font-size: 0.85rem;
-        padding: 0.6rem 0;
-      }
-
-      .accordion-body {
-        font-size: 0.75rem;
-      }
-
-      .accordion-body h3 {
-        font-size: 0.8rem;
-      }
-
-      .accordion-body table {
-        font-size: 0.65rem;
-      }
-
-      .accordion-body th,
-      .accordion-body td {
-        padding: 0.25rem 0.3rem;
-      }
-
-      .accordion-body code {
-        font-size: 0.65rem;
-        padding: 0.05rem 0.2rem;
-      }
-
-      .accordion-body ul {
-        padding-left: 1rem;
-      }
-    }
-
-    /* Extra small screens */
-    @media (max-width: 350px) {
-      body {
-        padding: 0.75rem;
-      }
-
-      .units-grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .preview-frame .countdown {
-        gap: 0.25rem;
-      }
-
-      .preview-frame .unit {
-        min-width: 35px;
-      }
-    }
-
-    /* Touch-friendly improvements */
-    @media (hover: none) and (pointer: coarse) {
-      .accordion-header {
-        padding: 1rem 0;
-      }
-
-      .unit-checkbox {
-        padding: 0.25rem 0;
-      }
-
-      .unit-checkbox input {
-        width: 18px;
-        height: 18px;
-      }
-
-      .url-output {
-        padding: 1rem;
-      }
-    }
-
-    /* Corner actions */
-    .corner-actions {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      z-index: 100;
-      display: flex;
-      gap: 0.5rem;
-      align-items: flex-end;
-    }
-
-    .corner-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.5);
-      border: none;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .corner-btn:hover {
-      background: rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.8);
-    }
-
-    .corner-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .promo-badge {
-      position: relative;
-    }
-
-    .promo-icon {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.5);
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .promo-badge:hover .promo-icon {
-      background: rgba(255,255,255,0.2);
-      color: rgba(255,255,255,0.8);
-    }
-
-    .promo-modal {
-      position: absolute;
-      bottom: 100%;
-      right: 0;
-      margin-bottom: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: rgba(30,30,50,0.95);
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(5px);
-      transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
-    }
-
-    .promo-badge:hover .promo-modal {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .promo-modal p {
-      font-size: 0.8rem;
-      margin-bottom: 0.5rem;
-      color: rgba(255,255,255,0.8);
-    }
-
-    .promo-modal a {
-      font-size: 0.85rem;
-      color: #ffdd00;
-      text-decoration: none;
-    }
-
-    .promo-modal a:hover {
-      text-decoration: underline;
-    }
-
-    body.builder-mode .corner-actions {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="container" id="countdown-view">
     <h1 class="title" id="title"></h1>
     <p class="subtitle" id="subtitle"></p>
+    <p class="timezone-display" id="timezone-display" style="display:none;"></p>
     <div class="countdown" id="countdown"></div>
+    <p class="next-occurrence" id="next-occurrence" style="display:none;"></p>
+    <div class="progress-container" id="progress-container" style="display:none;">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <p class="progress-text" id="progress-text"></p>
+    </div>
+  </div>
+
+  <!-- Multi-countdown container -->
+  <div class="multi-container" id="multi-view" style="display:none;"></div>
+
+  <!-- Calculator view -->
+  <div class="calculator-view" id="calc-view" style="display:none;">
+    <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
+    <h2 style="font-weight:300;margin-bottom:1.5rem;opacity:0.8;">Date Calculator</h2>
+    <div class="calc-inputs">
+      <div>
+        <label>Start Date</label>
+        <input type="date" id="calc-start">
+      </div>
+      <div>
+        <label>End Date</label>
+        <input type="date" id="calc-end">
+      </div>
+    </div>
+    <div class="calc-results" id="calc-results">
+      <h2>Difference</h2>
+      <div class="calc-result-grid" id="calc-result-grid">
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Years</div></div>
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Months</div></div>
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Weeks</div></div>
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Days</div></div>
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Hours</div></div>
+        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Minutes</div></div>
+      </div>
+    </div>
+    <div class="calc-actions">
+      <button type="button" class="url-action-btn" id="calc-create">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Create Countdown
+      </button>
+      <button type="button" class="url-action-btn" id="calc-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Back to Builder
+      </button>
+    </div>
   </div>
 
   <div class="corner-actions">
@@ -1022,8 +86,75 @@
   </div>
 
   <div class="builder" id="builder-view" style="display: none;">
-    <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
+    <div class="builder-header">
+      <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
+      <button type="button" class="theme-toggle" id="builder-theme-toggle" title="Toggle light/dark mode">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
 
+    <div class="builder-layout">
+      <!-- STICKY PREVIEW SECTION -->
+      <div class="preview-sticky">
+        <div class="preview-frame" id="preview-frame">
+          <p class="timezone-display" id="preview-tz" style="display:none;font-size:0.7rem;opacity:0.7;margin-bottom:0.5rem;"></p>
+          <h1 class="title" id="preview-title"></h1>
+          <p class="subtitle" id="preview-subtitle"></p>
+          <div class="countdown" id="preview-countdown"></div>
+          <div class="progress-container" id="preview-progress-container" style="display:none;margin-top:0.75rem;max-width:100%;">
+            <div class="progress-bar" style="height:6px;"><div class="progress-fill" id="preview-progress-fill" style="width:35%;"></div></div>
+            <p class="progress-text" id="preview-progress-text" style="font-size:0.7rem;margin-top:0.25rem;"></p>
+          </div>
+        </div>
+        <div class="preview-actions">
+          <button type="button" class="preview-btn" id="preview-end-btn">Preview End</button>
+        </div>
+        <div class="url-output" id="url-output" title="Click to copy"></div>
+        <div class="url-actions">
+          <button type="button" class="url-action-btn" id="copy-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <button type="button" class="url-action-btn" id="share-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Share
+          </button>
+          <button type="button" class="url-action-btn" id="open-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Open
+          </button>
+        </div>
+        <div class="url-actions">
+          <button type="button" class="url-action-btn" id="embed-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            Embed
+          </button>
+          <button type="button" class="url-action-btn" id="qr-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
+            QR
+          </button>
+          <button type="button" class="url-action-btn" id="calendar-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Calendar
+          </button>
+        </div>
+        <div class="preview-support">
+          <a href="https://buymeacoffee.com/cankoe" target="_blank" rel="noopener" class="coffee-button-small">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.216 6.415l-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 00-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 00-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 01-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 013.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 01-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 01-4.743.295 37.059 37.059 0 01-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0011.343.376.483.483 0 01.535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 01.39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 01-.169.364z"/></svg>
+            Buy me a coffee
+          </a>
+          <a href="https://github.com/cankoe/count.live/issues" target="_blank" rel="noopener" class="github-button-small">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            GitHub
+          </a>
+        </div>
+      </div>
+
+      <!-- CONTROLS SECTION -->
+      <div class="builder-controls">
+
+    <!-- ESSENTIAL CONTROLS -->
     <div class="builder-row">
       <label>Date & Time</label>
       <div class="datetime-row">
@@ -1033,33 +164,6 @@
       <div class="quick-times">
         <button type="button" class="quick-time-btn" data-time="00:00">Midnight</button>
         <button type="button" class="quick-time-btn" data-time="12:00">Noon</button>
-      </div>
-    </div>
-
-    <div class="builder-row">
-      <label>Title (optional)</label>
-      <input type="text" id="b-title" maxlength="50" placeholder="My Event">
-    </div>
-
-    <div class="builder-row">
-      <label>Subtitle (optional)</label>
-      <textarea id="b-subtitle" maxlength="200" rows="2" placeholder="The countdown begins..."></textarea>
-    </div>
-
-    <div class="builder-row color-row">
-      <div>
-        <label>Background</label>
-        <div class="color-input">
-          <input type="color" id="b-bg-picker" value="#1a1a2e">
-          <input type="text" id="b-bg" value="1a1a2e" maxlength="8">
-        </div>
-      </div>
-      <div>
-        <label>Foreground</label>
-        <div class="color-input">
-          <input type="color" id="b-fg-picker" value="#ffffff">
-          <input type="text" id="b-fg" value="ffffff" maxlength="8">
-        </div>
       </div>
     </div>
 
@@ -1077,55 +181,140 @@
       </div>
     </div>
 
+    <!-- TEXT INPUTS -->
+    <div class="builder-row">
+      <label>Title (optional)</label>
+      <input type="text" id="b-title" maxlength="50" placeholder="My Event">
+    </div>
+
+    <div class="builder-row">
+      <label>Subtitle (optional)</label>
+      <textarea id="b-subtitle" maxlength="200" rows="2" placeholder="The countdown begins..."></textarea>
+    </div>
+
     <div class="builder-row">
       <label>End message</label>
       <input type="text" id="b-end" maxlength="100" placeholder="Event Started!">
       <small class="input-hint">URLs will become clickable links</small>
     </div>
 
-    <div class="preview-section">
-      <h2>Preview</h2>
-      <div class="preview-frame" id="preview-frame">
-        <h1 class="title" id="preview-title"></h1>
-        <p class="subtitle" id="preview-subtitle"></p>
-        <div class="countdown" id="preview-countdown"></div>
+    <!-- THEME & STYLING -->
+    <div class="builder-row">
+      <label>Theme</label>
+      <div class="theme-presets" id="theme-presets"></div>
+    </div>
+
+    <div class="builder-row color-row">
+      <div>
+        <label>Background</label>
+        <div class="color-input">
+          <input type="color" id="b-bg-picker" value="#1a1a2e">
+          <input type="text" id="b-bg" value="1a1a2e" maxlength="8">
+        </div>
       </div>
-      <h2>End Message Preview</h2>
-      <div class="preview-frame" id="preview-end-frame">
-        <div class="end-message" id="preview-end-message"></div>
-      </div>
-      <div class="url-output" id="url-output" title="Click to copy"></div>
-      <div class="url-actions">
-        <button type="button" class="url-action-btn" id="copy-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy
-        </button>
-        <button type="button" class="url-action-btn" id="share-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Share
-        </button>
-        <button type="button" class="url-action-btn" id="open-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          Open
-        </button>
+      <div>
+        <label>Text Color</label>
+        <div class="color-input">
+          <input type="color" id="b-fg-picker" value="#ffffff">
+          <input type="text" id="b-fg" value="ffffff" maxlength="8">
+        </div>
       </div>
     </div>
 
-    <div class="support-section">
-      <p>If this tool saves you time, consider supporting its development</p>
-      <a href="https://buymeacoffee.com/cankoe" target="_blank" rel="noopener" class="coffee-button">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.216 6.415l-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 00-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 00-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 01-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 013.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 01-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 01-4.743.295 37.059 37.059 0 01-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0011.343.376.483.483 0 01.535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 01.39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 01-.169.364z"/></svg>
-        Buy me a coffee
-      </a>
+    <div class="builder-row">
+      <label>Font</label>
+      <select id="b-font">
+        <option value="sans">Sans-serif (Default)</option>
+        <option value="serif">Serif</option>
+        <option value="mono">Monospace</option>
+        <option value="display">Display</option>
+      </select>
     </div>
 
-    <div class="support-section">
-      <p>Found a bug, have feedback, or want to request a feature?</p>
-      <a href="https://github.com/cankoe/count.live/issues" target="_blank" rel="noopener" class="github-button">
-        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        Open an issue on GitHub
-      </a>
+    <!-- ADVANCED OPTIONS - Collapsible -->
+    <div class="accordion" style="margin-top:1rem;padding-top:0;border-top:none;">
+      <div class="accordion-item" style="border-top:1px solid rgba(255,255,255,0.1);">
+        <button class="accordion-header" type="button">Advanced Options</button>
+        <div class="accordion-content">
+          <div class="accordion-body" style="opacity:1;">
+
+            <div class="builder-row">
+              <label>Mode</label>
+              <select id="b-mode">
+                <option value="down">Count Down (to future date)</option>
+                <option value="up">Count Up (from past date)</option>
+              </select>
+            </div>
+
+            <div class="builder-row" id="recur-row">
+              <label>Recurring</label>
+              <select id="b-recur">
+                <option value="">One-time (no recurrence)</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+
+            <div class="builder-row">
+              <label>Background Image URL</label>
+              <input type="text" id="b-bgimg" placeholder="https://example.com/image.jpg">
+            </div>
+
+            <div class="builder-row builder-row-inline">
+              <div>
+                <label>End Sound</label>
+                <select id="b-sound">
+                  <option value="">None</option>
+                  <option value="chime">Chime</option>
+                  <option value="bell">Bell</option>
+                </select>
+              </div>
+              <div>
+                <label>Celebration</label>
+                <select id="b-celebrate">
+                  <option value="">None</option>
+                  <option value="confetti">Confetti</option>
+                  <option value="fireworks">Fireworks</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="builder-row">
+              <label>Display Options</label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="b-showtz">
+                <label for="b-showtz">Show timezone display</label>
+              </div>
+              <div class="checkbox-row">
+                <input type="checkbox" id="b-progress">
+                <label for="b-progress">Show progress bar</label>
+              </div>
+              <div class="checkbox-row">
+                <input type="checkbox" id="b-percent">
+                <label for="b-percent">Show percentage</label>
+              </div>
+              <div class="checkbox-row">
+                <input type="checkbox" id="b-notify">
+                <label for="b-notify">Browser notification when complete</label>
+              </div>
+            </div>
+
+            <div class="builder-row" id="start-date-row" style="display:none;">
+              <label>Progress Start Date</label>
+              <input type="datetime-local" id="b-start">
+              <small class="input-hint">When the countdown period started (for progress %)</small>
+            </div>
+
+          </div>
+        </div>
+      </div>
     </div>
+
+      </div><!-- end builder-controls -->
+    </div><!-- end builder-layout -->
+
 
     <div class="accordion">
       <div class="accordion-item">
@@ -1137,14 +326,31 @@
             <table>
               <tr><th>Parameter</th><th>Description</th><th>Example</th></tr>
               <tr><td><code>date</code></td><td>Target date/time (ISO 8601 format)</td><td><code>2025-12-31T23:59:59</code></td></tr>
-              <tr><td><code>tz</code></td><td>Timezone (IANA format, defaults to UTC)</td><td><code>America/New_York</code></td></tr>
+              <tr><td><code>mode</code></td><td>Count direction: <code>down</code> (default) or <code>up</code></td><td><code>up</code></td></tr>
               <tr><td><code>title</code></td><td>Event title (max 50 chars)</td><td><code>New Year</code></td></tr>
               <tr><td><code>subtitle</code></td><td>Subtitle text, supports multiple lines (max 200 chars)</td><td><code>The countdown begins</code></td></tr>
               <tr><td><code>bg</code></td><td>Background color (hex without #)</td><td><code>1a1a2e</code></td></tr>
               <tr><td><code>fg</code></td><td>Foreground/text color (hex without #)</td><td><code>ffffff</code></td></tr>
+              <tr><td><code>theme</code></td><td>Color theme preset</td><td><code>neon</code></td></tr>
+              <tr><td><code>font</code></td><td>Font style: <code>sans</code>, <code>serif</code>, <code>mono</code>, <code>display</code></td><td><code>mono</code></td></tr>
+              <tr><td><code>bgimg</code></td><td>Background image URL (URL encoded)</td><td><code>https://...</code></td></tr>
               <tr><td><code>units</code></td><td>Comma-separated time units</td><td><code>d,h,m,s</code></td></tr>
               <tr><td><code>end</code></td><td>Message when countdown ends (max 100 chars)</td><td><code>Happy New Year!</code></td></tr>
+              <tr><td><code>recur</code></td><td>Recurrence: <code>daily</code>, <code>weekly</code>, <code>monthly</code>, <code>yearly</code></td><td><code>weekly</code></td></tr>
+              <tr><td><code>sound</code></td><td>End sound: <code>chime</code>, <code>bell</code></td><td><code>chime</code></td></tr>
+              <tr><td><code>celebrate</code></td><td>End animation: <code>confetti</code>, <code>fireworks</code></td><td><code>confetti</code></td></tr>
+              <tr><td><code>notify</code></td><td>Browser notification on end (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>showtz</code></td><td>Show timezone display (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>progress</code></td><td>Show progress bar (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>percent</code></td><td>Show percentage text (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>start</code></td><td>Start date for progress calculation (ISO 8601)</td><td><code>2025-01-01T00:00:00</code></td></tr>
+              <tr><td><code>embed</code></td><td>Embed mode - minimal UI (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>multi</code></td><td>Multiple countdowns mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>calc</code></td><td>Date calculator mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
             </table>
+
+            <h3>Theme Presets</h3>
+            <p>Available themes: <code>dark</code>, <code>light</code>, <code>neon</code>, <code>pastel</code>, <code>ocean</code>, <code>sunset</code>, <code>forest</code></p>
 
             <h3>Available Units</h3>
             <table>
@@ -1159,8 +365,23 @@
               <tr><td>Milliseconds</td><td><code>ms</code>, <code>milliseconds</code></td></tr>
             </table>
 
+            <h3>Count-Up Mode</h3>
+            <p>Use <code>mode=up</code> to count up from a past date (e.g., "Days since I quit smoking"). The timer runs indefinitely, showing elapsed time since the target date.</p>
+
+            <h3>Recurring Countdowns</h3>
+            <p>Use <code>recur</code> to auto-reset the countdown. When the countdown reaches zero, it automatically calculates the next occurrence and continues.</p>
+
+            <h3>Multiple Countdowns</h3>
+            <p>Use <code>multi=1</code> with numbered parameters: <code>date1</code>, <code>title1</code>, <code>date2</code>, <code>title2</code>, etc. Up to 5 countdowns supported.</p>
+
+            <h3>Progress Tracking</h3>
+            <p>Use <code>progress=1</code> and/or <code>percent=1</code> with a <code>start</code> date to show a visual progress bar and percentage completion.</p>
+
+            <h3>Embedding</h3>
+            <p>Use the Embed button to get iframe code for your website. Add <code>embed=1</code> to the URL for minimal UI without the promo badge.</p>
+
             <h3>Date Formats</h3>
-            <p>The following date formats are supported (interpreted as UTC unless <code>tz</code> is specified):</p>
+            <p>The following date formats are supported (interpreted as UTC):</p>
             <ul>
               <li><code>2025-12-31T23:59:59</code> - Full date and time</li>
               <li><code>2025-12-31T23:59</code> - Date and time without seconds</li>
@@ -1285,818 +506,54 @@
     </div>
   </div>
 
-  <script>
-    const DEFAULTS = {
-      fg: '#ffffff',
-      bg: '#1a1a2e',
-      units: ['days', 'hours', 'minutes', 'seconds'],
-      end: 'Event Started!'
-    };
-
-    const MAX_LENGTHS = {
-      title: 50,
-      subtitle: 200,
-      end: 100
-    };
-
-    const UNIT_CONFIG = {
-      years: { label: 'Years', divisor: 31536000000 }, // 365 days
-      months: { label: 'Months', divisor: 2592000000, mod: 12 }, // 30 days
-      weeks: { label: 'Weeks', divisor: 604800000, mod: 4 }, // 7 days
-      days: { label: 'Days', divisor: 86400000, mod: 7 },
-      hours: { label: 'Hours', divisor: 3600000, mod: 24 },
-      minutes: { label: 'Minutes', divisor: 60000, mod: 60 },
-      seconds: { label: 'Seconds', divisor: 1000, mod: 60 },
-      milliseconds: { label: 'MS', divisor: 1, mod: 1000 }
-    };
-
-    // Abbreviation mappings
-    const UNIT_ALIASES = {
-      y: 'years', yr: 'years', yrs: 'years', years: 'years',
-      mo: 'months', mon: 'months', months: 'months',
-      w: 'weeks', wk: 'weeks', wks: 'weeks', weeks: 'weeks',
-      d: 'days', day: 'days', days: 'days',
-      h: 'hours', hr: 'hours', hrs: 'hours', hours: 'hours',
-      m: 'minutes', min: 'minutes', mins: 'minutes', minutes: 'minutes',
-      s: 'seconds', sec: 'seconds', secs: 'seconds', seconds: 'seconds',
-      ms: 'milliseconds', milliseconds: 'milliseconds'
-    };
-
-    function parseHash() {
-      const hash = window.location.hash.slice(1);
-      const params = {};
-
-      hash.split('&').forEach(pair => {
-        const [key, value] = pair.split('=').map(decodeURIComponent);
-        if (key && value !== undefined) {
-          params[key] = value;
-        }
-      });
-
-      return params;
-    }
-
-    function truncate(str, max) {
-      if (!str) return '';
-      return str.length > max ? str.slice(0, max) : str;
-    }
-
-    function escapeHtml(str) {
-      const div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
-    }
-
-    function linkifyText(str) {
-      if (!str) return '';
-      // First escape HTML to prevent XSS
-      const escaped = escapeHtml(str);
-      // Convert URLs to links
-      const urlPattern = /(https?:\/\/[^\s<]+)/g;
-      const withLinks = escaped.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-      // Convert newlines to <br> for multiline support
-      return withLinks.replace(/\n/g, '<br>');
-    }
-
-    function parseColor(color) {
-      if (!color) return null;
-      if (color.match(/^[0-9a-fA-F]{3,8}$/)) {
-        return '#' + color;
-      }
-      return color;
-    }
-
-    function parseDate(dateStr) {
-      if (!dateStr) return null;
-
-      // Support formats:
-      // 2025-12-31T23:59:59 (ISO without timezone, treated as UTC)
-      // 2025-12-31T23:59 (without seconds)
-      // 2025-12-31 (date only, midnight UTC)
-
-      let normalized = dateStr.trim();
-
-      // If no time component, add midnight
-      if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
-        normalized += 'T00:00:00';
-      }
-
-      // If no seconds, add them
-      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
-        normalized += ':00';
-      }
-
-      // Ensure UTC interpretation by adding Z if no timezone
-      if (!normalized.endsWith('Z') && !normalized.match(/[+-]\d{2}:\d{2}$/)) {
-        normalized += 'Z';
-      }
-
-      const date = new Date(normalized);
-      return isNaN(date.getTime()) ? null : date;
-    }
-
-    function parseUnits(unitsStr) {
-      if (!unitsStr) return DEFAULTS.units;
-
-      const validUnits = Object.keys(UNIT_CONFIG);
-      const requested = unitsStr.split(',').map(u => {
-        const trimmed = u.trim().toLowerCase();
-        return UNIT_ALIASES[trimmed] || trimmed;
-      });
-      const filtered = [...new Set(requested.filter(u => validUnits.includes(u)))];
-
-      // Sort by granularity (largest to smallest)
-      const order = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'];
-      filtered.sort((a, b) => order.indexOf(a) - order.indexOf(b));
-
-      return filtered.length > 0 ? filtered : DEFAULTS.units;
-    }
-
-    // Helper: add years to a date, handling leap year edge cases
-    function addYears(date, years) {
-      const result = new Date(date);
-      const originalMonth = result.getMonth();
-      const originalDay = result.getDate();
-      result.setFullYear(result.getFullYear() + years);
-      // Handle Feb 29 -> Feb 28 when going from leap to non-leap year
-      if (result.getMonth() !== originalMonth || result.getDate() !== originalDay) {
-        result.setDate(0); // Last day of previous month
-      }
-      return result;
-    }
-
-    // Helper: add months to a date, handling variable month lengths
-    function addMonths(date, months) {
-      const result = new Date(date);
-      const originalDay = result.getDate();
-      result.setMonth(result.getMonth() + months);
-      // Handle day overflow (e.g., Jan 31 + 1 month -> Feb 28)
-      if (result.getDate() !== originalDay) {
-        result.setDate(0); // Last day of previous month
-      }
-      return result;
-    }
-
-    function calculateTimeUnits(targetDate, units) {
-      const result = {};
-      let current = new Date();
-      const target = new Date(targetDate);
-
-      // If target is in the past, return zeros
-      if (target <= current) {
-        return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
-      }
-
-      // Handle calendar-based units precisely
-      if (units.includes('years')) {
-        let years = 0;
-        let next = addYears(current, 1);
-        while (next <= target) {
-          years++;
-          current = next;
-          next = addYears(current, 1);
-        }
-        result.years = years;
-      }
-
-      if (units.includes('months')) {
-        let months = 0;
-        let next = addMonths(current, 1);
-        while (next <= target) {
-          months++;
-          current = next;
-          next = addMonths(current, 1);
-        }
-        result.months = months;
-      }
-
-      // Handle fixed-duration units using remaining milliseconds
-      let remainingMs = target - current;
-
-      const fixedUnits = [
-        { name: 'weeks', ms: 7 * 24 * 60 * 60 * 1000 },
-        { name: 'days', ms: 24 * 60 * 60 * 1000 },
-        { name: 'hours', ms: 60 * 60 * 1000 },
-        { name: 'minutes', ms: 60 * 1000 },
-        { name: 'seconds', ms: 1000 },
-        { name: 'milliseconds', ms: 1 }
-      ];
-
-      for (const { name, ms } of fixedUnits) {
-        if (units.includes(name)) {
-          result[name] = Math.floor(remainingMs / ms);
-          remainingMs = remainingMs % ms;
-        }
-      }
-
-      // Ceiling logic: if there's any remainder below smallest displayed unit,
-      // increment that unit by 1 (so countdown shows 1 until fully complete)
-      if (remainingMs > 0) {
-        const allUnitsInOrder = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'];
-        for (let i = allUnitsInOrder.length - 1; i >= 0; i--) {
-          const unit = allUnitsInOrder[i];
-          if (result[unit] !== undefined) {
-            result[unit]++;
-            break;
-          }
-        }
-      }
-
-      return result;
-    }
-
-    function padValue(value, unit) {
-      if (unit === 'milliseconds') return String(value).padStart(3, '0');
-      if (['years', 'months', 'weeks', 'days'].includes(unit)) return String(value);
-      return String(value).padStart(2, '0');
-    }
-
-    const UNIT_SHORT = {
-      years: 'y', months: 'mo', weeks: 'w', days: 'd',
-      hours: 'h', minutes: 'm', seconds: 's', milliseconds: 'ms'
-    };
-
-    function formatTitleCountdown(values, units) {
-      return units
-        .filter(u => u !== 'milliseconds')
-        .map(u => values[u] + UNIT_SHORT[u])
-        .join(' ');
-    }
-
-    let lastVerticalState = false;
-
-    function renderCountdown(values, units, isLarge) {
-      const countdown = document.getElementById('countdown');
-      countdown.innerHTML = '';
-      countdown.className = 'countdown' + (isLarge ? ' large' : '') + (lastVerticalState ? ' vertical' : '');
-
-      units.forEach((unit, index) => {
-        const unitEl = document.createElement('div');
-        unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
-
-        const valueEl = document.createElement('span');
-        valueEl.className = 'value';
-        valueEl.textContent = padValue(values[unit], unit);
-
-        const labelEl = document.createElement('span');
-        labelEl.className = 'label';
-        labelEl.textContent = UNIT_CONFIG[unit].label;
-
-        unitEl.appendChild(valueEl);
-        unitEl.appendChild(labelEl);
-        countdown.appendChild(unitEl);
-
-        // Add colon separator only between time units (h:m:s)
-        const timeUnits = ['hours', 'minutes', 'seconds'];
-        const nextUnit = units[index + 1];
-        if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
-          const sep = document.createElement('span');
-          sep.className = 'separator';
-          sep.textContent = ':';
-          countdown.appendChild(sep);
-        }
-      });
-
-      // Check for overflow and switch to vertical if needed
-      requestAnimationFrame(() => {
-        const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-        if (needsVertical !== lastVerticalState) {
-          lastVerticalState = needsVertical;
-          countdown.classList.toggle('vertical', needsVertical);
-        }
-      });
-    }
-
-    function renderEndMessage(message, isLarge) {
-      const countdown = document.getElementById('countdown');
-      countdown.innerHTML = '';
-      countdown.className = 'countdown';
-
-      const msgEl = document.createElement('div');
-      msgEl.className = 'end-message' + (isLarge ? ' large' : '');
-      msgEl.innerHTML = linkifyText(message);
-      countdown.appendChild(msgEl);
-    }
-
-    let currentSession = 0;
-
-    function showCountdown() {
-      document.getElementById('countdown-view').style.display = '';
-      document.getElementById('builder-view').style.display = 'none';
-      document.body.classList.remove('builder-mode');
-    }
-
-    function showBuilder() {
-      document.getElementById('countdown-view').style.display = 'none';
-      document.getElementById('builder-view').style.display = '';
-      document.body.classList.add('builder-mode');
-      document.body.style.color = DEFAULTS.fg;
-      document.body.style.backgroundColor = DEFAULTS.bg;
-      document.title = 'count.live - Free Online Countdown Timer | Create & Share';
-      initBuilder();
-    }
-
-    function init() {
-      currentSession++;
-      const session = currentSession;
-      const params = parseHash();
-
-      // SEO: Only index the homepage, not individual countdown pages
-      const robotsMeta = document.getElementById('robots-meta');
-      if (params.date) {
-        robotsMeta.content = 'noindex, nofollow';
-      } else {
-        robotsMeta.content = 'index, follow';
-      }
-
-      // Show builder if no date
-      if (!params.date) {
-        showBuilder();
-        return;
-      }
-
-      showCountdown();
-
-      // Apply colors
-      const fg = parseColor(params.fg) || DEFAULTS.fg;
-      const bg = parseColor(params.bg) || DEFAULTS.bg;
-      document.body.style.color = fg;
-      document.body.style.backgroundColor = bg;
-
-      // Apply title and subtitle
-      const title = truncate(params.title, MAX_LENGTHS.title);
-      const subtitle = truncate(params.subtitle, MAX_LENGTHS.subtitle);
-      const titleEl = document.getElementById('title');
-      const subtitleEl = document.getElementById('subtitle');
-
-      titleEl.innerHTML = linkifyText(title);
-      subtitleEl.innerHTML = linkifyText(subtitle);
-      titleEl.style.display = title ? 'block' : 'none';
-      subtitleEl.style.display = subtitle ? 'block' : 'none';
-
-      // Update page title
-      document.title = title || 'Countdown';
-
-      // Determine if countdown should be large (no title/subtitle)
-      const isLarge = !title && !subtitle;
-
-      // Parse configuration
-      const targetDate = parseDate(params.date);
-      const units = parseUnits(params.units);
-      const endMessage = truncate(params.end, MAX_LENGTHS.end) || DEFAULTS.end;
-
-      if (!targetDate) {
-        renderEndMessage('Invalid or missing date', isLarge);
-        return;
-      }
-
-      // Update function
-      // Get the divisor for the smallest unit to calculate display end time
-      const unitDivisors = {
-        years: 365 * 24 * 60 * 60 * 1000,
-        months: 30 * 24 * 60 * 60 * 1000,
-        weeks: 7 * 24 * 60 * 60 * 1000,
-        days: 24 * 60 * 60 * 1000,
-        hours: 60 * 60 * 1000,
-        minutes: 60 * 1000,
-        seconds: 1000,
-        milliseconds: 1
-      };
-      const smallestUnit = units[units.length - 1];
-      const smallestDivisor = unitDivisors[smallestUnit];
-      // Calculate the effective end time (target rounded down to smallest unit)
-      const effectiveEndTime = Math.floor(targetDate.getTime() / smallestDivisor) * smallestDivisor;
-      let showingZero = false;
-
-      function update() {
-        if (session !== currentSession) return; // Stop if config changed
-
-        const now = Date.now();
-
-        // If we've reached the effective end time, show zero briefly then end
-        if (now >= effectiveEndTime && !showingZero) {
-          showingZero = true;
-          // Show zeros
-          const zeroValues = {};
-          units.forEach(u => zeroValues[u] = 0);
-          renderCountdown(zeroValues, units, isLarge);
-          document.title = title ? `0${UNIT_SHORT[smallestUnit]} - ${title}` : `0${UNIT_SHORT[smallestUnit]}`;
-          // After 500ms, show end message
-          setTimeout(() => {
-            if (session !== currentSession) return;
-            renderEndMessage(endMessage, isLarge);
-            document.title = (title ? title + ' - ' : '') + endMessage;
-          }, 500);
-          return;
-        }
-
-        if (showingZero) {
-          return; // Already showing zero
-        }
-
-        const values = calculateTimeUnits(targetDate, units);
-        renderCountdown(values, units, isLarge);
-
-        // Update page title with countdown
-        const countdownStr = formatTitleCountdown(values, units);
-        document.title = title ? `${countdownStr} - ${title}` : countdownStr;
-
-        // Schedule next update based on smallest unit
-        const interval = units.includes('milliseconds') ? 16 : 100;
-        requestAnimationFrame(() => setTimeout(update, interval));
-      }
-
-      update();
-    }
-
-    // Builder functionality
-    let builderInitialized = false;
-    let previewSession = 0;
-
-    // Common timezones with friendly names
-    const TIMEZONES = [
-      { id: 'Pacific/Honolulu', name: 'Hawaii' },
-      { id: 'America/Anchorage', name: 'Alaska' },
-      { id: 'America/Los_Angeles', name: 'Pacific Time (US & Canada)' },
-      { id: 'America/Denver', name: 'Mountain Time (US & Canada)' },
-      { id: 'America/Chicago', name: 'Central Time (US & Canada)' },
-      { id: 'America/New_York', name: 'Eastern Time (US & Canada)' },
-      { id: 'America/Sao_Paulo', name: 'Sao Paulo' },
-      { id: 'America/Argentina/Buenos_Aires', name: 'Buenos Aires' },
-      { id: 'Atlantic/Cape_Verde', name: 'Cape Verde' },
-      { id: 'UTC', name: 'UTC' },
-      { id: 'Europe/London', name: 'London, Dublin, Lisbon' },
-      { id: 'Europe/Paris', name: 'Paris, Berlin, Amsterdam' },
-      { id: 'Europe/Helsinki', name: 'Helsinki, Kyiv, Riga' },
-      { id: 'Europe/Moscow', name: 'Moscow, St. Petersburg' },
-      { id: 'Asia/Dubai', name: 'Dubai, Abu Dhabi' },
-      { id: 'Asia/Karachi', name: 'Karachi, Islamabad' },
-      { id: 'Asia/Kolkata', name: 'Mumbai, New Delhi' },
-      { id: 'Asia/Dhaka', name: 'Dhaka' },
-      { id: 'Asia/Bangkok', name: 'Bangkok, Hanoi, Jakarta' },
-      { id: 'Asia/Singapore', name: 'Singapore, Kuala Lumpur' },
-      { id: 'Asia/Hong_Kong', name: 'Hong Kong' },
-      { id: 'Asia/Shanghai', name: 'Beijing, Shanghai' },
-      { id: 'Asia/Tokyo', name: 'Tokyo, Osaka' },
-      { id: 'Asia/Seoul', name: 'Seoul' },
-      { id: 'Australia/Sydney', name: 'Sydney, Melbourne' },
-      { id: 'Pacific/Auckland', name: 'Auckland, Wellington' }
-    ];
-
-    function getTimezoneOffset(tzId) {
-      try {
-        const now = new Date();
-        const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
-        const tzDate = new Date(now.toLocaleString('en-US', { timeZone: tzId }));
-        const offsetMinutes = (tzDate - utcDate) / 60000;
-        const hours = Math.floor(Math.abs(offsetMinutes) / 60);
-        const minutes = Math.abs(offsetMinutes) % 60;
-        const sign = offsetMinutes >= 0 ? '+' : '-';
-        return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
-      } catch (e) {
-        return 'GMT+00:00';
-      }
-    }
-
-    function initBuilder() {
-      if (builderInitialized) {
-        updatePreview();
-        return;
-      }
-      builderInitialized = true;
-
-      // Populate timezone dropdown
-      const tzSelect = document.getElementById('b-timezone');
-      const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      // Check if user's timezone is in the list
-      const userTzInList = TIMEZONES.find(tz => tz.id === userTz);
-
-      // Build timezone list, adding user's timezone if not present
-      let allTimezones = [...TIMEZONES];
-      if (!userTzInList) {
-        allTimezones.unshift({ id: userTz, name: userTz.replace(/_/g, ' ').split('/').pop() });
-      }
-
-      allTimezones.forEach(tz => {
-        const option = document.createElement('option');
-        option.value = tz.id;
-        const offset = getTimezoneOffset(tz.id);
-        option.textContent = `(${offset}) ${tz.name}`;
-        if (tz.id === userTz) option.selected = true;
-        tzSelect.appendChild(option);
-      });
-
-      // Set default date to tomorrow noon in local time
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      tomorrow.setHours(12, 0, 0, 0);
-      // Format as local datetime string
-      const localDateStr = tomorrow.getFullYear() + '-' +
-        String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' +
-        String(tomorrow.getDate()).padStart(2, '0') + 'T' +
-        String(tomorrow.getHours()).padStart(2, '0') + ':' +
-        String(tomorrow.getMinutes()).padStart(2, '0');
-      document.getElementById('b-date').value = localDateStr;
-
-      tzSelect.addEventListener('change', updatePreview);
-
-      // Quick time buttons
-      document.querySelectorAll('.quick-time-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const dateInput = document.getElementById('b-date');
-          const currentVal = dateInput.value;
-          if (currentVal) {
-            const datePart = currentVal.split('T')[0];
-            dateInput.value = datePart + 'T' + btn.dataset.time;
-          } else {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const datePart = tomorrow.toISOString().slice(0, 10);
-            dateInput.value = datePart + 'T' + btn.dataset.time;
-          }
-          updatePreview();
-        });
-      });
-
-      // Sync color pickers with text inputs
-      const bgPicker = document.getElementById('b-bg-picker');
-      const bgText = document.getElementById('b-bg');
-      const fgPicker = document.getElementById('b-fg-picker');
-      const fgText = document.getElementById('b-fg');
-
-      bgPicker.addEventListener('input', () => {
-        bgText.value = bgPicker.value.slice(1);
-        updatePreview();
-      });
-      bgText.addEventListener('input', () => {
-        if (/^[0-9a-fA-F]{6}$/.test(bgText.value)) {
-          bgPicker.value = '#' + bgText.value;
-        }
-        updatePreview();
-      });
-      fgPicker.addEventListener('input', () => {
-        fgText.value = fgPicker.value.slice(1);
-        updatePreview();
-      });
-      fgText.addEventListener('input', () => {
-        if (/^[0-9a-fA-F]{6}$/.test(fgText.value)) {
-          fgPicker.value = '#' + fgText.value;
-        }
-        updatePreview();
-      });
-
-      // Add listeners to all inputs
-      const inputs = ['b-date', 'b-title', 'b-subtitle', 'b-end'];
-      inputs.forEach(id => {
-        document.getElementById(id).addEventListener('input', updatePreview);
-      });
-
-      // Unit checkboxes
-      document.querySelectorAll('.units-grid input').forEach(cb => {
-        cb.addEventListener('change', updatePreview);
-      });
-
-      // Copy functionality
-      const copyUrl = () => {
-        const url = document.getElementById('url-output').textContent;
-        navigator.clipboard.writeText(url).then(() => {
-          const btn = document.getElementById('copy-btn');
-          const originalText = btn.innerHTML;
-          btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
-          setTimeout(() => btn.innerHTML = originalText, 1500);
-        });
-      };
-
-      document.getElementById('url-output').addEventListener('click', copyUrl);
-      document.getElementById('copy-btn').addEventListener('click', copyUrl);
-
-      // Share functionality
-      document.getElementById('share-btn').addEventListener('click', () => {
-        const url = document.getElementById('url-output').textContent;
-        const title = document.getElementById('b-title').value || 'Countdown Timer';
-
-        if (navigator.share) {
-          navigator.share({
-            title: title,
-            text: 'Check out this countdown!',
-            url: url
-          }).catch(() => {});
-        } else {
-          copyUrl();
-        }
-      });
-
-      // Open in new tab
-      document.getElementById('open-btn').addEventListener('click', () => {
-        const url = document.getElementById('url-output').textContent;
-        window.open(url, '_blank');
-      });
-
-      updatePreview();
-    }
-
-    function localToUTC(dateStr, timezone) {
-      if (!dateStr) return '';
-      try {
-        // Parse the input datetime string (e.g., "2026-01-27T12:00")
-        const [datePart, timePart] = dateStr.split('T');
-        const [year, month, day] = datePart.split('-').map(Number);
-        const [hour, minute] = timePart.split(':').map(Number);
-
-        // Create a reference UTC date with these values
-        const utcRef = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-        // Find what time it shows in the target timezone
-        const tzParts = new Intl.DateTimeFormat('en-US', {
-          timeZone: timezone,
-          year: 'numeric', month: 'numeric', day: 'numeric',
-          hour: 'numeric', minute: 'numeric', hour12: false
-        }).formatToParts(utcRef);
-
-        const tzValues = {};
-        tzParts.forEach(p => tzValues[p.type] = parseInt(p.value) || 0);
-
-        // Calculate offset: how much the timezone differs from UTC
-        const tzTime = Date.UTC(tzValues.year, tzValues.month - 1, tzValues.day, tzValues.hour, tzValues.minute);
-        const offset = tzTime - utcRef.getTime();
-
-        // User's intended UTC time = their local time - offset
-        const targetUTC = new Date(utcRef.getTime() - offset);
-        return targetUTC.toISOString().slice(0, 19);
-      } catch (e) {
-        return dateStr;
-      }
-    }
-
-    function getBuilderConfig() {
-      const dateInput = document.getElementById('b-date').value;
-      const timezone = document.getElementById('b-timezone').value;
-      const dateUTC = localToUTC(dateInput, timezone);
-
-      const units = [];
-      document.querySelectorAll('.units-grid input:checked').forEach(cb => {
-        units.push(cb.value);
-      });
-
-      return {
-        date: dateUTC,
-        title: document.getElementById('b-title').value,
-        subtitle: document.getElementById('b-subtitle').value,
-        bg: document.getElementById('b-bg').value,
-        fg: document.getElementById('b-fg').value,
-        units: units.join(','),
-        end: document.getElementById('b-end').value
-      };
-    }
-
-    function buildUrl(config) {
-      const base = window.location.origin + window.location.pathname;
-      const parts = [];
-
-      if (config.date) parts.push('date=' + encodeURIComponent(config.date));
-      if (config.title) parts.push('title=' + encodeURIComponent(config.title));
-      if (config.subtitle) parts.push('subtitle=' + encodeURIComponent(config.subtitle));
-      if (config.bg && config.bg !== '1a1a2e') parts.push('bg=' + config.bg);
-      if (config.fg && config.fg !== 'ffffff') parts.push('fg=' + config.fg);
-      if (config.units && config.units !== 'd,h,m,s') parts.push('units=' + config.units);
-      if (config.end) parts.push('end=' + encodeURIComponent(config.end));
-
-      return base + '#' + parts.join('&');
-    }
-
-    function updatePreview() {
-      previewSession++;
-      const session = previewSession;
-      const config = getBuilderConfig();
-
-      // Update URL
-      document.getElementById('url-output').textContent = buildUrl(config);
-
-      // Update preview frame colors
-      const frame = document.getElementById('preview-frame');
-      const endFrame = document.getElementById('preview-end-frame');
-      const bg = '#' + (config.bg || '1a1a2e');
-      const fg = '#' + (config.fg || 'ffffff');
-      frame.style.backgroundColor = bg;
-      frame.style.color = fg;
-      endFrame.style.backgroundColor = bg;
-      endFrame.style.color = fg;
-
-      // Update end message preview
-      document.getElementById('preview-end-message').innerHTML = linkifyText(config.end || DEFAULTS.end);
-
-      // Update preview title/subtitle
-      const titleEl = document.getElementById('preview-title');
-      const subtitleEl = document.getElementById('preview-subtitle');
-      titleEl.innerHTML = linkifyText(config.title);
-      subtitleEl.innerHTML = linkifyText(config.subtitle);
-      titleEl.style.display = config.title ? 'block' : 'none';
-      subtitleEl.style.display = config.subtitle ? 'block' : 'none';
-
-      // Update preview countdown
-      const previewCountdown = document.getElementById('preview-countdown');
-      const targetDate = parseDate(config.date);
-      const units = parseUnits(config.units);
-
-      if (!targetDate) {
-        previewCountdown.innerHTML = '<div style="opacity:0.5">Set a date above</div>';
-        return;
-      }
-
-      function updatePreviewCountdown() {
-        if (session !== previewSession) return;
-
-        if (targetDate.getTime() <= Date.now()) {
-          previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
-          return;
-        }
-
-        const values = calculateTimeUnits(targetDate, units);
-        previewCountdown.innerHTML = '';
-        previewCountdown.className = 'countdown';
-
-        units.forEach((unit, index) => {
-          const unitEl = document.createElement('div');
-          unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
-
-          const valueEl = document.createElement('span');
-          valueEl.className = 'value';
-          valueEl.textContent = padValue(values[unit], unit);
-
-          const labelEl = document.createElement('span');
-          labelEl.className = 'label';
-          labelEl.textContent = UNIT_CONFIG[unit].label;
-
-          unitEl.appendChild(valueEl);
-          unitEl.appendChild(labelEl);
-          previewCountdown.appendChild(unitEl);
-
-          const timeUnits = ['hours', 'minutes', 'seconds'];
-          const nextUnit = units[index + 1];
-          if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
-            const sep = document.createElement('span');
-            sep.className = 'separator';
-            sep.textContent = ':';
-            previewCountdown.appendChild(sep);
-          }
-        });
-
-        const interval = units.includes('milliseconds') ? 50 : 250;
-        setTimeout(updatePreviewCountdown, interval);
-      }
-
-      updatePreviewCountdown();
-    }
-
-    // Initialize on load and hash change
-    window.addEventListener('DOMContentLoaded', init);
-    window.addEventListener('hashchange', init);
-
-    // Recheck layout on resize
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        lastVerticalState = false; // Reset to recheck
-        const countdown = document.getElementById('countdown');
-        if (countdown && countdown.children.length > 0) {
-          countdown.classList.remove('vertical');
-          requestAnimationFrame(() => {
-            const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-            lastVerticalState = needsVertical;
-            countdown.classList.toggle('vertical', needsVertical);
-          });
-        }
-      }, 100);
-    });
-
-    // Countdown page share button
-    document.getElementById('countdown-share').addEventListener('click', async () => {
-      const url = window.location.href;
-      const title = document.getElementById('title').textContent || 'Countdown';
-
-      if (navigator.share) {
-        try {
-          await navigator.share({ title, url });
-        } catch (e) {
-          // User cancelled or error
-        }
-      } else {
-        await navigator.clipboard.writeText(url);
-        const btn = document.getElementById('countdown-share');
-        btn.style.color = 'rgba(255,255,255,0.8)';
-        setTimeout(() => btn.style.color = '', 1500);
-      }
-    });
-
-    // Accordion functionality
-    document.querySelectorAll('.accordion-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const item = header.parentElement;
-        item.classList.toggle('open');
-      });
-    });
-  </script>
+  <!-- Embed Modal -->
+  <div class="modal-overlay" id="embed-modal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeModal('embed-modal')">&times;</button>
+      <h3>Embed Code</h3>
+      <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Copy this code to embed the countdown on your website:</p>
+      <textarea id="embed-code" readonly></textarea>
+      <div style="margin-top:0.75rem;">
+        <label style="font-size:0.75rem;opacity:0.7;">Dimensions</label>
+        <div style="display:flex;gap:0.5rem;margin-top:0.25rem;">
+          <input type="number" id="embed-width" value="400" style="width:80px;padding:0.4rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:inherit;">
+          <span style="opacity:0.5;">×</span>
+          <input type="number" id="embed-height" value="200" style="width:80px;padding:0.4rem;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:inherit;">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn primary" onclick="copyEmbedCode()">Copy Code</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div class="modal-overlay" id="qr-modal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeModal('qr-modal')">&times;</button>
+      <h3>QR Code</h3>
+      <div class="qr-container">
+        <canvas id="qr-canvas"></canvas>
+        <button class="modal-btn primary" onclick="downloadQR()">Download QR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar Modal -->
+  <div class="modal-overlay" id="calendar-modal">
+    <div class="modal" style="position:relative;">
+      <button class="modal-close" onclick="closeModal('calendar-modal')">&times;</button>
+      <h3>Add to Calendar</h3>
+      <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Download the event file to add to your calendar:</p>
+      <div class="modal-actions" style="justify-content:center;">
+        <button class="modal-btn primary" onclick="downloadICS()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:0.5rem;vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Download .ics
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
