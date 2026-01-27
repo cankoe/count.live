@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Countdown</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 2rem;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    body.builder-mode {
+      justify-content: flex-start;
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .title {
+      font-size: clamp(1.5rem, 5vw, 3rem);
+      font-weight: 300;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-weight: 300;
+      opacity: 0.8;
+      margin-bottom: 2rem;
+    }
+
+    .countdown {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: clamp(0.25rem, 2vw, 1rem);
+      width: 100%;
+    }
+
+    .countdown.vertical {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .countdown.large .unit {
+      padding: clamp(0.5rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 2rem);
+    }
+
+    .countdown.large .value {
+      font-size: clamp(2rem, 12vw, 8rem);
+    }
+
+    .countdown.large .label {
+      font-size: clamp(0.6rem, 1.5vw, 1.1rem);
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(0.25rem, 1vw, 1rem) clamp(0.25rem, 1.5vw, 1.5rem);
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .value {
+      font-size: clamp(1.5rem, 8vw, 5rem);
+      font-weight: 200;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .label {
+      font-size: clamp(0.5rem, 1.2vw, 0.9rem);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 0.25rem;
+      opacity: 0.7;
+      white-space: nowrap;
+    }
+
+    .separator {
+      font-size: clamp(1rem, 6vw, 4rem);
+      font-weight: 200;
+      opacity: 0.5;
+      align-self: flex-start;
+      padding-top: clamp(0.25rem, 1vw, 1rem);
+      flex-shrink: 0;
+    }
+
+    .countdown.large .separator {
+      font-size: clamp(1.5rem, 10vw, 6rem);
+      padding-top: clamp(0.5rem, 2vw, 1.5rem);
+    }
+
+    .countdown.vertical .separator {
+      display: none;
+    }
+
+    .end-message {
+      font-size: clamp(2rem, 8vw, 4rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .end-message.large {
+      font-size: clamp(3rem, 12vw, 6rem);
+    }
+
+    .milliseconds .value {
+      font-size: clamp(1.5rem, 6vw, 3rem);
+    }
+
+    .countdown.large .milliseconds .value {
+      font-size: clamp(2.5rem, 10vw, 5rem);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+
+      .countdown:not(.vertical) {
+        gap: 0.25rem;
+      }
+
+      .countdown:not(.vertical) .unit {
+        padding: 0.25rem 0.35rem;
+      }
+
+      .countdown:not(.vertical) .value {
+        font-size: clamp(1rem, 5vw, 2rem);
+      }
+
+      .countdown:not(.vertical) .label {
+        font-size: 0.45rem;
+        letter-spacing: 0.05em;
+      }
+
+      .countdown:not(.vertical) .separator {
+        font-size: clamp(0.75rem, 4vw, 1.5rem);
+        padding-top: 0.15rem;
+      }
+
+      .countdown.vertical .unit {
+        padding: 0.5rem 1rem;
+      }
+
+      .countdown.vertical .value {
+        font-size: clamp(2rem, 10vw, 3rem);
+      }
+
+      .countdown.vertical .label {
+        font-size: 0.7rem;
+      }
+    }
+
+    /* Builder styles */
+    .builder {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .builder h1 {
+      font-size: 1.5rem;
+      font-weight: 300;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .builder-row {
+      margin-bottom: 1rem;
+    }
+
+    .builder-row label {
+      display: block;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      margin-bottom: 0.25rem;
+    }
+
+    .builder-row input[type="text"],
+    .builder-row input[type="datetime-local"] {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 1rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+      color: inherit;
+      font-family: inherit;
+    }
+
+    .builder-row input:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.5);
+    }
+
+    .color-row {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .color-row > div {
+      flex: 1;
+    }
+
+    .color-input {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .color-input input[type="color"] {
+      width: 40px;
+      height: 34px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-input input[type="text"] {
+      flex: 1;
+    }
+
+    .units-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+    }
+
+    .unit-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.85rem;
+    }
+
+    .unit-checkbox input {
+      cursor: pointer;
+    }
+
+    .preview-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .preview-section h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .preview-frame {
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .preview-frame .title {
+      font-size: 1.25rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .preview-frame .subtitle {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .preview-frame .countdown {
+      gap: 0.5rem;
+    }
+
+    .preview-frame .unit {
+      padding: 0.5rem;
+      min-width: 50px;
+    }
+
+    .preview-frame .value {
+      font-size: 1.5rem;
+    }
+
+    .preview-frame .label {
+      font-size: 0.6rem;
+    }
+
+    .preview-frame .separator {
+      font-size: 1.25rem;
+      padding-top: 0.5rem;
+    }
+
+    .preview-frame .end-message {
+      font-size: 1.25rem;
+    }
+
+    #preview-end-frame {
+      min-height: 60px;
+      margin-bottom: 1rem;
+    }
+
+    .url-output {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      font-family: monospace;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 4px;
+      background: rgba(0,0,0,0.2);
+      color: inherit;
+      word-break: break-all;
+      cursor: pointer;
+    }
+
+    .url-output:hover {
+      background: rgba(0,0,0,0.3);
+    }
+
+    .copy-hint {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    /* Accordion styles */
+    .accordion {
+      margin-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 1rem;
+    }
+
+    .accordion-item {
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .accordion-header {
+      width: 100%;
+      padding: 0.75rem 0;
+      background: none;
+      border: none;
+      color: inherit;
+      font-family: inherit;
+      font-size: 0.9rem;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      opacity: 0.8;
+    }
+
+    .accordion-header:hover {
+      opacity: 1;
+    }
+
+    .accordion-header::after {
+      content: '+';
+      font-size: 1.2rem;
+      font-weight: 300;
+    }
+
+    .accordion-item.open .accordion-header::after {
+      content: '−';
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+    }
+
+    .accordion-item.open .accordion-content {
+      max-height: 2000px;
+    }
+
+    .accordion-body {
+      padding: 0 0 1rem 0;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      opacity: 0.7;
+    }
+
+    .accordion-body h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin: 1rem 0 0.5rem 0;
+    }
+
+    .accordion-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .accordion-body p {
+      margin: 0.5rem 0;
+    }
+
+    .accordion-body ul {
+      margin: 0.5rem 0;
+      padding-left: 1.25rem;
+    }
+
+    .accordion-body li {
+      margin: 0.25rem 0;
+    }
+
+    .accordion-body code {
+      background: rgba(255,255,255,0.1);
+      padding: 0.1rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.75rem;
+    }
+
+    .accordion-body table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0;
+      font-size: 0.75rem;
+    }
+
+    .accordion-body th,
+    .accordion-body td {
+      text-align: left;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .accordion-body th {
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Mobile styles for builder */
+    @media (max-width: 500px) {
+      body.builder-mode {
+        padding-top: 1rem;
+      }
+
+      .builder {
+        padding: 0 0.5rem;
+      }
+
+      .builder h1 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .builder-row {
+        margin-bottom: 0.75rem;
+      }
+
+      .builder-row input[type="text"],
+      .builder-row input[type="datetime-local"] {
+        padding: 0.6rem 0.5rem;
+        font-size: 16px; /* Prevents zoom on iOS */
+      }
+
+      .color-row {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .units-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.4rem;
+      }
+
+      .unit-checkbox {
+        font-size: 0.8rem;
+      }
+
+      .preview-section {
+        margin-top: 1.5rem;
+        padding-top: 1rem;
+      }
+
+      .preview-section h2 {
+        font-size: 0.7rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .preview-frame {
+        padding: 1rem;
+        min-height: 100px;
+      }
+
+      .preview-frame .title {
+        font-size: 1rem;
+      }
+
+      .preview-frame .subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .preview-frame .value {
+        font-size: 1.2rem;
+      }
+
+      .preview-frame .label {
+        font-size: 0.5rem;
+      }
+
+      .preview-frame .unit {
+        padding: 0.3rem;
+        min-width: 40px;
+      }
+
+      .preview-frame .separator {
+        font-size: 1rem;
+        padding-top: 0.3rem;
+      }
+
+      .preview-frame .end-message {
+        font-size: 1rem;
+      }
+
+      #preview-end-frame {
+        min-height: 50px;
+      }
+
+      .url-output {
+        font-size: 0.7rem;
+        padding: 0.6rem;
+      }
+
+      .accordion {
+        margin-top: 1.5rem;
+        padding-top: 0.75rem;
+      }
+
+      .accordion-header {
+        font-size: 0.85rem;
+        padding: 0.6rem 0;
+      }
+
+      .accordion-body {
+        font-size: 0.75rem;
+      }
+
+      .accordion-body h3 {
+        font-size: 0.8rem;
+      }
+
+      .accordion-body table {
+        font-size: 0.65rem;
+      }
+
+      .accordion-body th,
+      .accordion-body td {
+        padding: 0.25rem 0.3rem;
+      }
+
+      .accordion-body code {
+        font-size: 0.65rem;
+        padding: 0.05rem 0.2rem;
+      }
+
+      .accordion-body ul {
+        padding-left: 1rem;
+      }
+    }
+
+    /* Extra small screens */
+    @media (max-width: 350px) {
+      body {
+        padding: 0.75rem;
+      }
+
+      .units-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .preview-frame .countdown {
+        gap: 0.25rem;
+      }
+
+      .preview-frame .unit {
+        min-width: 35px;
+      }
+    }
+
+    /* Touch-friendly improvements */
+    @media (hover: none) and (pointer: coarse) {
+      .accordion-header {
+        padding: 1rem 0;
+      }
+
+      .unit-checkbox {
+        padding: 0.25rem 0;
+      }
+
+      .unit-checkbox input {
+        width: 18px;
+        height: 18px;
+      }
+
+      .url-output {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="countdown-view">
+    <h1 class="title" id="title"></h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="countdown" id="countdown"></div>
+  </div>
+
+  <div class="builder" id="builder-view" style="display: none;">
+    <h1>Countdown Builder</h1>
+
+    <div class="builder-row">
+      <label>Date & Time (UTC)</label>
+      <input type="datetime-local" id="b-date">
+    </div>
+
+    <div class="builder-row">
+      <label>Title (optional)</label>
+      <input type="text" id="b-title" maxlength="50" placeholder="My Event">
+    </div>
+
+    <div class="builder-row">
+      <label>Subtitle (optional)</label>
+      <input type="text" id="b-subtitle" maxlength="100" placeholder="The countdown begins...">
+    </div>
+
+    <div class="builder-row color-row">
+      <div>
+        <label>Background</label>
+        <div class="color-input">
+          <input type="color" id="b-bg-picker" value="#1a1a2e">
+          <input type="text" id="b-bg" value="1a1a2e" maxlength="8">
+        </div>
+      </div>
+      <div>
+        <label>Foreground</label>
+        <div class="color-input">
+          <input type="color" id="b-fg-picker" value="#ffffff">
+          <input type="text" id="b-fg" value="ffffff" maxlength="8">
+        </div>
+      </div>
+    </div>
+
+    <div class="builder-row">
+      <label>Units to display</label>
+      <div class="units-grid">
+        <label class="unit-checkbox"><input type="checkbox" value="y" id="b-u-y"> Years</label>
+        <label class="unit-checkbox"><input type="checkbox" value="mo" id="b-u-mo"> Months</label>
+        <label class="unit-checkbox"><input type="checkbox" value="w" id="b-u-w"> Weeks</label>
+        <label class="unit-checkbox"><input type="checkbox" value="d" id="b-u-d" checked> Days</label>
+        <label class="unit-checkbox"><input type="checkbox" value="h" id="b-u-h" checked> Hours</label>
+        <label class="unit-checkbox"><input type="checkbox" value="m" id="b-u-m" checked> Minutes</label>
+        <label class="unit-checkbox"><input type="checkbox" value="s" id="b-u-s" checked> Seconds</label>
+        <label class="unit-checkbox"><input type="checkbox" value="ms" id="b-u-ms"> MS</label>
+      </div>
+    </div>
+
+    <div class="builder-row">
+      <label>End message</label>
+      <input type="text" id="b-end" maxlength="100" placeholder="Event Started!">
+    </div>
+
+    <div class="preview-section">
+      <h2>Preview</h2>
+      <div class="preview-frame" id="preview-frame">
+        <h1 class="title" id="preview-title"></h1>
+        <p class="subtitle" id="preview-subtitle"></p>
+        <div class="countdown" id="preview-countdown"></div>
+      </div>
+      <h2>End Message Preview</h2>
+      <div class="preview-frame" id="preview-end-frame">
+        <div class="end-message" id="preview-end-message"></div>
+      </div>
+      <div class="url-output" id="url-output" title="Click to copy"></div>
+      <div class="copy-hint">Click URL to copy</div>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-item">
+        <button class="accordion-header">Documentation</button>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <h3>URL Parameters</h3>
+            <p>All configuration is passed via the URL hash. Parameters are separated by <code>&</code>.</p>
+            <table>
+              <tr><th>Parameter</th><th>Description</th><th>Example</th></tr>
+              <tr><td><code>date</code></td><td>Target date/time in UTC (ISO 8601)</td><td><code>2025-12-31T23:59:59</code></td></tr>
+              <tr><td><code>title</code></td><td>Event title (max 50 chars)</td><td><code>New Year</code></td></tr>
+              <tr><td><code>subtitle</code></td><td>Subtitle text (max 100 chars)</td><td><code>The countdown begins</code></td></tr>
+              <tr><td><code>bg</code></td><td>Background color (hex without #)</td><td><code>1a1a2e</code></td></tr>
+              <tr><td><code>fg</code></td><td>Foreground/text color (hex without #)</td><td><code>ffffff</code></td></tr>
+              <tr><td><code>units</code></td><td>Comma-separated time units</td><td><code>d,h,m,s</code></td></tr>
+              <tr><td><code>end</code></td><td>Message when countdown ends (max 100 chars)</td><td><code>Happy New Year!</code></td></tr>
+            </table>
+
+            <h3>Available Units</h3>
+            <table>
+              <tr><th>Unit</th><th>Abbreviations</th></tr>
+              <tr><td>Years</td><td><code>y</code>, <code>yr</code>, <code>yrs</code>, <code>years</code></td></tr>
+              <tr><td>Months</td><td><code>mo</code>, <code>mon</code>, <code>months</code></td></tr>
+              <tr><td>Weeks</td><td><code>w</code>, <code>wk</code>, <code>wks</code>, <code>weeks</code></td></tr>
+              <tr><td>Days</td><td><code>d</code>, <code>day</code>, <code>days</code></td></tr>
+              <tr><td>Hours</td><td><code>h</code>, <code>hr</code>, <code>hrs</code>, <code>hours</code></td></tr>
+              <tr><td>Minutes</td><td><code>m</code>, <code>min</code>, <code>mins</code>, <code>minutes</code></td></tr>
+              <tr><td>Seconds</td><td><code>s</code>, <code>sec</code>, <code>secs</code>, <code>seconds</code></td></tr>
+              <tr><td>Milliseconds</td><td><code>ms</code>, <code>milliseconds</code></td></tr>
+            </table>
+
+            <h3>Date Formats</h3>
+            <p>The following date formats are supported (all interpreted as UTC):</p>
+            <ul>
+              <li><code>2025-12-31T23:59:59</code> - Full date and time</li>
+              <li><code>2025-12-31T23:59</code> - Date and time without seconds</li>
+              <li><code>2025-12-31</code> - Date only (midnight UTC)</li>
+            </ul>
+
+            <h3>How Units Work</h3>
+            <p>The largest selected unit shows the total value. Smaller units show the remainder after subtracting larger units.</p>
+            <p>Example: If you select <code>weeks</code> and <code>minutes</code> for a 15-day countdown, you'll see "2 Weeks, 1440 Minutes" (not "2 Weeks, 30 Minutes").</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header">Terms of Service</button>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <p><strong>Last updated:</strong> January 2025</p>
+
+            <h3>Acceptance of Terms</h3>
+            <p>By accessing and using this countdown timer service, you accept and agree to be bound by these Terms of Service.</p>
+
+            <h3>Service Description</h3>
+            <p>This is a free, static countdown timer generator. The service is provided "as is" without warranties of any kind.</p>
+
+            <h3>Permitted Use</h3>
+            <p>You may use this service for personal, educational, or commercial purposes. You may embed countdown URLs on your own websites or share them freely.</p>
+
+            <h3>Prohibited Use</h3>
+            <p>You may not use this service for:</p>
+            <ul>
+              <li>Any illegal or harmful activities</li>
+              <li>Spreading misinformation or deceptive content</li>
+              <li>Harassment, threats, or hateful content</li>
+              <li>Any activity that could damage or overload the service</li>
+            </ul>
+
+            <h3>Disclaimer</h3>
+            <p>This service is provided without guarantees of availability, accuracy, or fitness for any particular purpose. We are not responsible for any damages arising from the use of this service.</p>
+
+            <h3>Modifications</h3>
+            <p>We reserve the right to modify or discontinue this service at any time without notice.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header">Privacy Policy</button>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <p><strong>Last updated:</strong> January 2025</p>
+
+            <h3>Data Collection</h3>
+            <p>This is a fully client-side static website. We do not collect, store, or process any personal data.</p>
+
+            <h3>No Cookies</h3>
+            <p>This website does not use cookies or any form of local storage.</p>
+
+            <h3>No Analytics</h3>
+            <p>We do not use any analytics or tracking services.</p>
+
+            <h3>No Server Communication</h3>
+            <p>All countdown calculations happen in your browser. No data is sent to any server. Your countdown configuration exists only in the URL you create.</p>
+
+            <h3>URL Sharing</h3>
+            <p>When you share a countdown URL, the configuration (date, title, colors, etc.) is visible in the URL itself. Be mindful of what information you include if sharing publicly.</p>
+
+            <h3>Third-Party Hosting</h3>
+            <p>This site is hosted on GitLab Pages. Please refer to GitLab's privacy policy for information about their hosting infrastructure.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header">About</button>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <h3>What is this?</h3>
+            <p>A simple, free countdown timer that runs entirely in your browser. Create customizable countdowns for events, deadlines, launches, or any occasion.</p>
+
+            <h3>Features</h3>
+            <ul>
+              <li>No sign-up or account required</li>
+              <li>Fully customizable via URL parameters</li>
+              <li>Works offline once loaded</li>
+              <li>No ads or tracking</li>
+              <li>Mobile-friendly responsive design</li>
+              <li>Shareable URLs that work forever</li>
+            </ul>
+
+            <h3>Technical Details</h3>
+            <ul>
+              <li>Pure HTML, CSS, and JavaScript</li>
+              <li>No external dependencies or frameworks</li>
+              <li>Static hosting on GitLab Pages</li>
+              <li>Open source and free to use</li>
+            </ul>
+
+            <h3>Precise Time Calculations</h3>
+            <p>Years and months are calculated using actual calendar dates:</p>
+            <ul>
+              <li><strong>Years</strong> - Exact calendar years (accounts for leap years)</li>
+              <li><strong>Months</strong> - Exact calendar months (accounts for varying month lengths)</li>
+              <li><strong>Weeks/Days/Hours/etc.</strong> - Calculated from remaining time after years/months</li>
+            </ul>
+            <p>Example: From Jan 15 to Mar 15 is exactly 2 months, regardless of whether February has 28 or 29 days.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULTS = {
+      fg: '#ffffff',
+      bg: '#1a1a2e',
+      units: ['days', 'hours', 'minutes', 'seconds'],
+      end: 'Event Started!'
+    };
+
+    const MAX_LENGTHS = {
+      title: 50,
+      subtitle: 100,
+      end: 100
+    };
+
+    const UNIT_CONFIG = {
+      years: { label: 'Years', divisor: 31536000000 }, // 365 days
+      months: { label: 'Months', divisor: 2592000000, mod: 12 }, // 30 days
+      weeks: { label: 'Weeks', divisor: 604800000, mod: 4 }, // 7 days
+      days: { label: 'Days', divisor: 86400000, mod: 7 },
+      hours: { label: 'Hours', divisor: 3600000, mod: 24 },
+      minutes: { label: 'Minutes', divisor: 60000, mod: 60 },
+      seconds: { label: 'Seconds', divisor: 1000, mod: 60 },
+      milliseconds: { label: 'MS', divisor: 1, mod: 1000 }
+    };
+
+    // Abbreviation mappings
+    const UNIT_ALIASES = {
+      y: 'years', yr: 'years', yrs: 'years', years: 'years',
+      mo: 'months', mon: 'months', months: 'months',
+      w: 'weeks', wk: 'weeks', wks: 'weeks', weeks: 'weeks',
+      d: 'days', day: 'days', days: 'days',
+      h: 'hours', hr: 'hours', hrs: 'hours', hours: 'hours',
+      m: 'minutes', min: 'minutes', mins: 'minutes', minutes: 'minutes',
+      s: 'seconds', sec: 'seconds', secs: 'seconds', seconds: 'seconds',
+      ms: 'milliseconds', milliseconds: 'milliseconds'
+    };
+
+    function parseHash() {
+      const hash = window.location.hash.slice(1);
+      const params = {};
+
+      hash.split('&').forEach(pair => {
+        const [key, value] = pair.split('=').map(decodeURIComponent);
+        if (key && value !== undefined) {
+          params[key] = value;
+        }
+      });
+
+      return params;
+    }
+
+    function truncate(str, max) {
+      if (!str) return '';
+      return str.length > max ? str.slice(0, max) : str;
+    }
+
+    function parseColor(color) {
+      if (!color) return null;
+      if (color.match(/^[0-9a-fA-F]{3,8}$/)) {
+        return '#' + color;
+      }
+      return color;
+    }
+
+    function parseDate(dateStr) {
+      if (!dateStr) return null;
+
+      // Support formats:
+      // 2025-12-31T23:59:59 (ISO without timezone, treated as UTC)
+      // 2025-12-31T23:59 (without seconds)
+      // 2025-12-31 (date only, midnight UTC)
+
+      let normalized = dateStr.trim();
+
+      // If no time component, add midnight
+      if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+        normalized += 'T00:00:00';
+      }
+
+      // If no seconds, add them
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(normalized)) {
+        normalized += ':00';
+      }
+
+      // Ensure UTC interpretation by adding Z if no timezone
+      if (!normalized.endsWith('Z') && !normalized.match(/[+-]\d{2}:\d{2}$/)) {
+        normalized += 'Z';
+      }
+
+      const date = new Date(normalized);
+      return isNaN(date.getTime()) ? null : date;
+    }
+
+    function parseUnits(unitsStr) {
+      if (!unitsStr) return DEFAULTS.units;
+
+      const validUnits = Object.keys(UNIT_CONFIG);
+      const requested = unitsStr.split(',').map(u => {
+        const trimmed = u.trim().toLowerCase();
+        return UNIT_ALIASES[trimmed] || trimmed;
+      });
+      const filtered = [...new Set(requested.filter(u => validUnits.includes(u)))];
+
+      // Sort by granularity (largest to smallest)
+      const order = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'];
+      filtered.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
+      return filtered.length > 0 ? filtered : DEFAULTS.units;
+    }
+
+    // Helper: add years to a date, handling leap year edge cases
+    function addYears(date, years) {
+      const result = new Date(date);
+      const originalMonth = result.getMonth();
+      const originalDay = result.getDate();
+      result.setFullYear(result.getFullYear() + years);
+      // Handle Feb 29 -> Feb 28 when going from leap to non-leap year
+      if (result.getMonth() !== originalMonth || result.getDate() !== originalDay) {
+        result.setDate(0); // Last day of previous month
+      }
+      return result;
+    }
+
+    // Helper: add months to a date, handling variable month lengths
+    function addMonths(date, months) {
+      const result = new Date(date);
+      const originalDay = result.getDate();
+      result.setMonth(result.getMonth() + months);
+      // Handle day overflow (e.g., Jan 31 + 1 month -> Feb 28)
+      if (result.getDate() !== originalDay) {
+        result.setDate(0); // Last day of previous month
+      }
+      return result;
+    }
+
+    function calculateTimeUnits(targetDate, units) {
+      const result = {};
+      let current = new Date();
+      const target = new Date(targetDate);
+
+      // If target is in the past, return zeros
+      if (target <= current) {
+        return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
+      }
+
+      // Handle calendar-based units precisely
+      if (units.includes('years')) {
+        let years = 0;
+        let next = addYears(current, 1);
+        while (next <= target) {
+          years++;
+          current = next;
+          next = addYears(current, 1);
+        }
+        result.years = years;
+      }
+
+      if (units.includes('months')) {
+        let months = 0;
+        let next = addMonths(current, 1);
+        while (next <= target) {
+          months++;
+          current = next;
+          next = addMonths(current, 1);
+        }
+        result.months = months;
+      }
+
+      // Handle fixed-duration units using remaining milliseconds
+      let remainingMs = target - current;
+
+      const fixedUnits = [
+        { name: 'weeks', ms: 7 * 24 * 60 * 60 * 1000 },
+        { name: 'days', ms: 24 * 60 * 60 * 1000 },
+        { name: 'hours', ms: 60 * 60 * 1000 },
+        { name: 'minutes', ms: 60 * 1000 },
+        { name: 'seconds', ms: 1000 },
+        { name: 'milliseconds', ms: 1 }
+      ];
+
+      for (const { name, ms } of fixedUnits) {
+        if (units.includes(name)) {
+          result[name] = Math.floor(remainingMs / ms);
+          remainingMs = remainingMs % ms;
+        }
+      }
+
+      return result;
+    }
+
+    function padValue(value, unit) {
+      if (unit === 'milliseconds') return String(value).padStart(3, '0');
+      if (['years', 'months', 'weeks', 'days'].includes(unit)) return String(value);
+      return String(value).padStart(2, '0');
+    }
+
+    const UNIT_SHORT = {
+      years: 'y', months: 'mo', weeks: 'w', days: 'd',
+      hours: 'h', minutes: 'm', seconds: 's', milliseconds: 'ms'
+    };
+
+    function formatTitleCountdown(values, units) {
+      return units
+        .filter(u => u !== 'milliseconds')
+        .map(u => values[u] + UNIT_SHORT[u])
+        .join(' ');
+    }
+
+    let lastVerticalState = false;
+
+    function renderCountdown(values, units, isLarge) {
+      const countdown = document.getElementById('countdown');
+      countdown.innerHTML = '';
+      countdown.className = 'countdown' + (isLarge ? ' large' : '') + (lastVerticalState ? ' vertical' : '');
+
+      units.forEach((unit, index) => {
+        const unitEl = document.createElement('div');
+        unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
+
+        const valueEl = document.createElement('span');
+        valueEl.className = 'value';
+        valueEl.textContent = padValue(values[unit], unit);
+
+        const labelEl = document.createElement('span');
+        labelEl.className = 'label';
+        labelEl.textContent = UNIT_CONFIG[unit].label;
+
+        unitEl.appendChild(valueEl);
+        unitEl.appendChild(labelEl);
+        countdown.appendChild(unitEl);
+
+        // Add colon separator only between time units (h:m:s)
+        const timeUnits = ['hours', 'minutes', 'seconds'];
+        const nextUnit = units[index + 1];
+        if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
+          const sep = document.createElement('span');
+          sep.className = 'separator';
+          sep.textContent = ':';
+          countdown.appendChild(sep);
+        }
+      });
+
+      // Check for overflow and switch to vertical if needed
+      requestAnimationFrame(() => {
+        const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
+        if (needsVertical !== lastVerticalState) {
+          lastVerticalState = needsVertical;
+          countdown.classList.toggle('vertical', needsVertical);
+        }
+      });
+    }
+
+    function renderEndMessage(message, isLarge) {
+      const countdown = document.getElementById('countdown');
+      countdown.innerHTML = '';
+      countdown.className = 'countdown';
+
+      const msgEl = document.createElement('div');
+      msgEl.className = 'end-message' + (isLarge ? ' large' : '');
+      msgEl.textContent = message;
+      countdown.appendChild(msgEl);
+    }
+
+    let currentSession = 0;
+
+    function showCountdown() {
+      document.getElementById('countdown-view').style.display = '';
+      document.getElementById('builder-view').style.display = 'none';
+      document.body.classList.remove('builder-mode');
+    }
+
+    function showBuilder() {
+      document.getElementById('countdown-view').style.display = 'none';
+      document.getElementById('builder-view').style.display = '';
+      document.body.classList.add('builder-mode');
+      document.body.style.color = DEFAULTS.fg;
+      document.body.style.backgroundColor = DEFAULTS.bg;
+      document.title = 'Countdown Builder';
+      initBuilder();
+    }
+
+    function init() {
+      currentSession++;
+      const session = currentSession;
+      const params = parseHash();
+
+      // Show builder if no date
+      if (!params.date) {
+        showBuilder();
+        return;
+      }
+
+      showCountdown();
+
+      // Apply colors
+      const fg = parseColor(params.fg) || DEFAULTS.fg;
+      const bg = parseColor(params.bg) || DEFAULTS.bg;
+      document.body.style.color = fg;
+      document.body.style.backgroundColor = bg;
+
+      // Apply title and subtitle
+      const title = truncate(params.title, MAX_LENGTHS.title);
+      const subtitle = truncate(params.subtitle, MAX_LENGTHS.subtitle);
+      const titleEl = document.getElementById('title');
+      const subtitleEl = document.getElementById('subtitle');
+
+      titleEl.textContent = title;
+      subtitleEl.textContent = subtitle;
+      titleEl.style.display = title ? 'block' : 'none';
+      subtitleEl.style.display = subtitle ? 'block' : 'none';
+
+      // Update page title
+      document.title = title || 'Countdown';
+
+      // Determine if countdown should be large (no title/subtitle)
+      const isLarge = !title && !subtitle;
+
+      // Parse configuration
+      const targetDate = parseDate(params.date);
+      const units = parseUnits(params.units);
+      const endMessage = truncate(params.end, MAX_LENGTHS.end) || DEFAULTS.end;
+
+      if (!targetDate) {
+        renderEndMessage('Invalid or missing date', isLarge);
+        return;
+      }
+
+      // Update function
+      function update() {
+        if (session !== currentSession) return; // Stop if config changed
+
+        if (targetDate.getTime() <= Date.now()) {
+          renderEndMessage(endMessage, isLarge);
+          document.title = (title ? title + ' - ' : '') + endMessage;
+          return;
+        }
+
+        const values = calculateTimeUnits(targetDate, units);
+        renderCountdown(values, units, isLarge);
+
+        // Update page title with countdown
+        const countdownStr = formatTitleCountdown(values, units);
+        document.title = title ? `${countdownStr} - ${title}` : countdownStr;
+
+        // Schedule next update based on smallest unit
+        const interval = units.includes('milliseconds') ? 16 : 100;
+        requestAnimationFrame(() => setTimeout(update, interval));
+      }
+
+      update();
+    }
+
+    // Builder functionality
+    let builderInitialized = false;
+    let previewSession = 0;
+
+    function initBuilder() {
+      if (builderInitialized) {
+        updatePreview();
+        return;
+      }
+      builderInitialized = true;
+
+      // Set default date to tomorrow
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(12, 0, 0, 0);
+      document.getElementById('b-date').value = tomorrow.toISOString().slice(0, 16);
+
+      // Sync color pickers with text inputs
+      const bgPicker = document.getElementById('b-bg-picker');
+      const bgText = document.getElementById('b-bg');
+      const fgPicker = document.getElementById('b-fg-picker');
+      const fgText = document.getElementById('b-fg');
+
+      bgPicker.addEventListener('input', () => {
+        bgText.value = bgPicker.value.slice(1);
+        updatePreview();
+      });
+      bgText.addEventListener('input', () => {
+        if (/^[0-9a-fA-F]{6}$/.test(bgText.value)) {
+          bgPicker.value = '#' + bgText.value;
+        }
+        updatePreview();
+      });
+      fgPicker.addEventListener('input', () => {
+        fgText.value = fgPicker.value.slice(1);
+        updatePreview();
+      });
+      fgText.addEventListener('input', () => {
+        if (/^[0-9a-fA-F]{6}$/.test(fgText.value)) {
+          fgPicker.value = '#' + fgText.value;
+        }
+        updatePreview();
+      });
+
+      // Add listeners to all inputs
+      const inputs = ['b-date', 'b-title', 'b-subtitle', 'b-end'];
+      inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+      });
+
+      // Unit checkboxes
+      document.querySelectorAll('.units-grid input').forEach(cb => {
+        cb.addEventListener('change', updatePreview);
+      });
+
+      // Copy URL on click
+      document.getElementById('url-output').addEventListener('click', () => {
+        const url = document.getElementById('url-output').textContent;
+        navigator.clipboard.writeText(url).then(() => {
+          const hint = document.querySelector('.copy-hint');
+          hint.textContent = 'Copied!';
+          setTimeout(() => hint.textContent = 'Click URL to copy', 1500);
+        });
+      });
+
+      updatePreview();
+    }
+
+    function getBuilderConfig() {
+      const dateInput = document.getElementById('b-date').value;
+      const date = dateInput ? dateInput.replace('T', 'T') : '';
+
+      const units = [];
+      document.querySelectorAll('.units-grid input:checked').forEach(cb => {
+        units.push(cb.value);
+      });
+
+      return {
+        date,
+        title: document.getElementById('b-title').value,
+        subtitle: document.getElementById('b-subtitle').value,
+        bg: document.getElementById('b-bg').value,
+        fg: document.getElementById('b-fg').value,
+        units: units.join(','),
+        end: document.getElementById('b-end').value
+      };
+    }
+
+    function buildUrl(config) {
+      const base = window.location.origin + window.location.pathname;
+      const parts = [];
+
+      if (config.date) parts.push('date=' + encodeURIComponent(config.date));
+      if (config.title) parts.push('title=' + encodeURIComponent(config.title));
+      if (config.subtitle) parts.push('subtitle=' + encodeURIComponent(config.subtitle));
+      if (config.bg && config.bg !== '1a1a2e') parts.push('bg=' + config.bg);
+      if (config.fg && config.fg !== 'ffffff') parts.push('fg=' + config.fg);
+      if (config.units && config.units !== 'd,h,m,s') parts.push('units=' + config.units);
+      if (config.end) parts.push('end=' + encodeURIComponent(config.end));
+
+      return base + '#' + parts.join('&');
+    }
+
+    function updatePreview() {
+      previewSession++;
+      const session = previewSession;
+      const config = getBuilderConfig();
+
+      // Update URL
+      document.getElementById('url-output').textContent = buildUrl(config);
+
+      // Update preview frame colors
+      const frame = document.getElementById('preview-frame');
+      const endFrame = document.getElementById('preview-end-frame');
+      const bg = '#' + (config.bg || '1a1a2e');
+      const fg = '#' + (config.fg || 'ffffff');
+      frame.style.backgroundColor = bg;
+      frame.style.color = fg;
+      endFrame.style.backgroundColor = bg;
+      endFrame.style.color = fg;
+
+      // Update end message preview
+      document.getElementById('preview-end-message').textContent = config.end || DEFAULTS.end;
+
+      // Update preview title/subtitle
+      const titleEl = document.getElementById('preview-title');
+      const subtitleEl = document.getElementById('preview-subtitle');
+      titleEl.textContent = config.title;
+      subtitleEl.textContent = config.subtitle;
+      titleEl.style.display = config.title ? 'block' : 'none';
+      subtitleEl.style.display = config.subtitle ? 'block' : 'none';
+
+      // Update preview countdown
+      const previewCountdown = document.getElementById('preview-countdown');
+      const targetDate = parseDate(config.date);
+      const units = parseUnits(config.units);
+
+      if (!targetDate) {
+        previewCountdown.innerHTML = '<div style="opacity:0.5">Set a date above</div>';
+        return;
+      }
+
+      function updatePreviewCountdown() {
+        if (session !== previewSession) return;
+
+        if (targetDate.getTime() <= Date.now()) {
+          previewCountdown.innerHTML = '<div class="end-message">' + (config.end || DEFAULTS.end) + '</div>';
+          return;
+        }
+
+        const values = calculateTimeUnits(targetDate, units);
+        previewCountdown.innerHTML = '';
+        previewCountdown.className = 'countdown';
+
+        units.forEach((unit, index) => {
+          const unitEl = document.createElement('div');
+          unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
+
+          const valueEl = document.createElement('span');
+          valueEl.className = 'value';
+          valueEl.textContent = padValue(values[unit], unit);
+
+          const labelEl = document.createElement('span');
+          labelEl.className = 'label';
+          labelEl.textContent = UNIT_CONFIG[unit].label;
+
+          unitEl.appendChild(valueEl);
+          unitEl.appendChild(labelEl);
+          previewCountdown.appendChild(unitEl);
+
+          const timeUnits = ['hours', 'minutes', 'seconds'];
+          const nextUnit = units[index + 1];
+          if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
+            const sep = document.createElement('span');
+            sep.className = 'separator';
+            sep.textContent = ':';
+            previewCountdown.appendChild(sep);
+          }
+        });
+
+        const interval = units.includes('milliseconds') ? 50 : 250;
+        setTimeout(updatePreviewCountdown, interval);
+      }
+
+      updatePreviewCountdown();
+    }
+
+    // Initialize on load and hash change
+    window.addEventListener('DOMContentLoaded', init);
+    window.addEventListener('hashchange', init);
+
+    // Recheck layout on resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        lastVerticalState = false; // Reset to recheck
+        const countdown = document.getElementById('countdown');
+        if (countdown && countdown.children.length > 0) {
+          countdown.classList.remove('vertical');
+          requestAnimationFrame(() => {
+            const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
+            lastVerticalState = needsVertical;
+            countdown.classList.toggle('vertical', needsVertical);
+          });
+        }
+      }, 100);
+    });
+
+    // Accordion functionality
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('open');
+      });
+    });
+  </script>
+</body>
+</html>
