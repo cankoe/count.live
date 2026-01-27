@@ -273,6 +273,13 @@
       margin-bottom: 0.25rem;
     }
 
+    .input-hint {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 0.25rem;
+    }
+
     .builder-row input[type="text"],
     .builder-row input[type="datetime-local"],
     .builder-row select {
@@ -949,6 +956,7 @@
     <div class="builder-row">
       <label>End message</label>
       <input type="text" id="b-end" maxlength="100" placeholder="Event Started!">
+      <small class="input-hint">URLs will become clickable links</small>
     </div>
 
     <div class="preview-section">
@@ -1038,6 +1046,9 @@
             <h3>How Units Work</h3>
             <p>The largest selected unit shows the total value. Smaller units show the remainder after subtracting larger units.</p>
             <p>Example: If you select <code>weeks</code> and <code>minutes</code> for a 15-day countdown, you'll see "2 Weeks, 1440 Minutes" (not "2 Weeks, 30 Minutes").</p>
+
+            <h3>Clickable Links</h3>
+            <p>URLs in the title, subtitle, and end message are automatically converted to clickable links. Just paste a full URL (starting with <code>http://</code> or <code>https://</code>) and it will be linked.</p>
 
             <h3>When Does the Countdown End?</h3>
             <p>The countdown ends at the exact target time. Hidden smaller units are accounted for using ceiling logic.</p>
