@@ -60,6 +60,20 @@
       margin-bottom: 2rem;
     }
 
+    .title a,
+    .subtitle a,
+    .end-message a {
+      color: inherit;
+      text-decoration: underline;
+      text-underline-offset: 0.15em;
+    }
+
+    .title a:hover,
+    .subtitle a:hover,
+    .end-message a:hover {
+      opacity: 0.8;
+    }
+
     .countdown {
       display: flex;
       justify-content: center;
@@ -1179,6 +1193,21 @@
       return str.length > max ? str.slice(0, max) : str;
     }
 
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function linkifyText(str) {
+      if (!str) return '';
+      // First escape HTML to prevent XSS
+      const escaped = escapeHtml(str);
+      // Then convert URLs to links
+      const urlPattern = /(https?:\/\/[^\s<]+)/g;
+      return escaped.replace(urlPattern, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    }
+
     function parseColor(color) {
       if (!color) return null;
       if (color.match(/^[0-9a-fA-F]{3,8}$/)) {
@@ -1395,7 +1424,7 @@
 
       const msgEl = document.createElement('div');
       msgEl.className = 'end-message' + (isLarge ? ' large' : '');
-      msgEl.textContent = message;
+      msgEl.innerHTML = linkifyText(message);
       countdown.appendChild(msgEl);
     }
 
@@ -1450,8 +1479,8 @@
       const titleEl = document.getElementById('title');
       const subtitleEl = document.getElementById('subtitle');
 
-      titleEl.textContent = title;
-      subtitleEl.textContent = subtitle;
+      titleEl.innerHTML = linkifyText(title);
+      subtitleEl.innerHTML = linkifyText(subtitle);
       titleEl.style.display = title ? 'block' : 'none';
       subtitleEl.style.display = subtitle ? 'block' : 'none';
 
@@ -1805,13 +1834,13 @@
       endFrame.style.color = fg;
 
       // Update end message preview
-      document.getElementById('preview-end-message').textContent = config.end || DEFAULTS.end;
+      document.getElementById('preview-end-message').innerHTML = linkifyText(config.end || DEFAULTS.end);
 
       // Update preview title/subtitle
       const titleEl = document.getElementById('preview-title');
       const subtitleEl = document.getElementById('preview-subtitle');
-      titleEl.textContent = config.title;
-      subtitleEl.textContent = config.subtitle;
+      titleEl.innerHTML = linkifyText(config.title);
+      subtitleEl.innerHTML = linkifyText(config.subtitle);
       titleEl.style.display = config.title ? 'block' : 'none';
       subtitleEl.style.display = config.subtitle ? 'block' : 'none';
 
@@ -1829,7 +1858,7 @@
         if (session !== previewSession) return;
 
         if (targetDate.getTime() <= Date.now()) {
-          previewCountdown.innerHTML = '<div class="end-message">' + (config.end || DEFAULTS.end) + '</div>';
+          previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
           return;
         }
 
