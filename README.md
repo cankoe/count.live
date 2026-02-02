@@ -29,8 +29,6 @@ A minimal, privacy-focused countdown timer that runs entirely in your browser.
 - **Embed mode** - Minimal UI for embedding in websites
 - **QR code generator** - Share countdowns via QR code
 - **Calendar export** - Download .ics file to add to calendar
-- **Date calculator** - Calculate the difference between two dates
-
 ## Usage
 
 Configure everything via URL hash parameters:
@@ -77,7 +75,6 @@ Or use the visual builder at [count.live](https://count.live) to create your cou
 | `start` | Start date for progress calculation (ISO 8601) | `2025-01-01T00:00:00` |
 | `embed` | Embed mode - minimal UI (`1` to enable) | `1` |
 | `multi` | Multiple countdowns mode (`1` to enable) | `1` |
-| `calc` | Date calculator mode (`1` to enable) | `1` |
 
 ### Theme Presets
 
@@ -128,14 +125,6 @@ Get iframe code using the Embed button, or add `embed=1` to any countdown URL fo
 
 ```html
 <iframe src="https://count.live/#date=2025-12-31&embed=1" width="400" height="200" frameborder="0"></iframe>
-```
-
-### Date Calculator
-
-Access the date calculator to find the difference between two dates:
-
-```
-https://count.live/#calc=1
 ```
 
 ## Date Formats

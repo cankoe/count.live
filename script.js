@@ -668,15 +668,8 @@ function init() {
   // Hide all views first
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = 'none';
-  document.getElementById('calc-view').style.display = 'none';
   document.getElementById('multi-view').style.display = 'none';
   document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image');
-
-  // Calculator mode
-  if (params.calc === '1') {
-    showCalculator();
-    return;
-  }
 
   // Show builder if no date
   if (!params.date) {
@@ -900,76 +893,6 @@ function init() {
   }
 
   update();
-}
-
-// Calculator view
-function showCalculator() {
-  document.getElementById('countdown-view').style.display = 'none';
-  document.getElementById('builder-view').style.display = 'none';
-  document.getElementById('multi-view').style.display = 'none';
-  document.getElementById('calc-view').style.display = '';
-  document.body.classList.remove('builder-mode');
-  document.body.style.color = DEFAULTS.fg;
-  document.body.style.backgroundColor = DEFAULTS.bg;
-  document.body.style.fontFamily = FONT_STACKS.sans;
-  document.title = 'Date Calculator - count.live';
-  initCalculator();
-}
-
-let calcInitialized = false;
-function initCalculator() {
-  if (calcInitialized) return;
-  calcInitialized = true;
-
-  const startInput = document.getElementById('calc-start');
-  const endInput = document.getElementById('calc-end');
-
-  // Set defaults
-  const today = new Date();
-  const nextYear = new Date(today);
-  nextYear.setFullYear(nextYear.getFullYear() + 1);
-
-  startInput.value = today.toISOString().slice(0, 10);
-  endInput.value = nextYear.toISOString().slice(0, 10);
-
-  function updateCalcResults() {
-    const start = new Date(startInput.value + 'T00:00:00');
-    const end = new Date(endInput.value + 'T00:00:00');
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
-
-    const diff = Math.abs(end - start);
-    const years = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000));
-    const months = Math.floor(diff / (30.44 * 24 * 60 * 60 * 1000));
-    const weeks = Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
-    const days = Math.floor(diff / (24 * 60 * 60 * 1000));
-    const hours = Math.floor(diff / (60 * 60 * 1000));
-    const minutes = Math.floor(diff / (60 * 1000));
-
-    const grid = document.getElementById('calc-result-grid');
-    grid.innerHTML = `
-      <div class="calc-result-item"><span class="calc-result-value">${years}</span><div class="calc-result-label">Years</div></div>
-      <div class="calc-result-item"><span class="calc-result-value">${months}</span><div class="calc-result-label">Months</div></div>
-      <div class="calc-result-item"><span class="calc-result-value">${weeks}</span><div class="calc-result-label">Weeks</div></div>
-      <div class="calc-result-item"><span class="calc-result-value">${days.toLocaleString()}</span><div class="calc-result-label">Days</div></div>
-      <div class="calc-result-item"><span class="calc-result-value">${hours.toLocaleString()}</span><div class="calc-result-label">Hours</div></div>
-      <div class="calc-result-item"><span class="calc-result-value">${minutes.toLocaleString()}</span><div class="calc-result-label">Minutes</div></div>
-    `;
-  }
-
-  startInput.addEventListener('change', updateCalcResults);
-  endInput.addEventListener('change', updateCalcResults);
-  updateCalcResults();
-
-  document.getElementById('calc-create').addEventListener('click', () => {
-    const end = new Date(endInput.value + 'T00:00:00');
-    const url = window.location.origin + window.location.pathname + '#date=' + encodeURIComponent(end.toISOString().slice(0, 19));
-    window.location.href = url;
-  });
-
-  document.getElementById('calc-back').addEventListener('click', () => {
-    window.location.hash = '';
-  });
 }
 
 // Multi-countdown view

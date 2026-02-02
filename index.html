@@ -33,43 +33,6 @@
   <!-- Multi-countdown container -->
   <div class="multi-container" id="multi-view" style="display:none;"></div>
 
-  <!-- Calculator view -->
-  <div class="calculator-view" id="calc-view" style="display:none;">
-    <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
-    <h2 style="font-weight:300;margin-bottom:1.5rem;opacity:0.8;">Date Calculator</h2>
-    <div class="calc-inputs">
-      <div>
-        <label>Start Date</label>
-        <input type="date" id="calc-start">
-      </div>
-      <div>
-        <label>End Date</label>
-        <input type="date" id="calc-end">
-      </div>
-    </div>
-    <div class="calc-results" id="calc-results">
-      <h2>Difference</h2>
-      <div class="calc-result-grid" id="calc-result-grid">
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Years</div></div>
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Months</div></div>
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Weeks</div></div>
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Days</div></div>
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Hours</div></div>
-        <div class="calc-result-item"><span class="calc-result-value">-</span><div class="calc-result-label">Minutes</div></div>
-      </div>
-    </div>
-    <div class="calc-actions">
-      <button type="button" class="url-action-btn" id="calc-create">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Create Countdown
-      </button>
-      <button type="button" class="url-action-btn" id="calc-back">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Back to Builder
-      </button>
-    </div>
-  </div>
-
   <div class="corner-actions">
     <button class="corner-btn share-btn" id="countdown-share" title="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -345,7 +308,6 @@
               <tr><td><code>start</code></td><td>Start date for progress calculation (ISO 8601)</td><td><code>2025-01-01T00:00:00</code></td></tr>
               <tr><td><code>embed</code></td><td>Embed mode - minimal UI (<code>1</code> to enable)</td><td><code>1</code></td></tr>
               <tr><td><code>multi</code></td><td>Multiple countdowns mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
-              <tr><td><code>calc</code></td><td>Date calculator mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
             </table>
 
             <h3>Theme Presets</h3>
