@@ -17,7 +17,6 @@ A minimal, privacy-focused countdown timer that runs entirely in your browser.
 ### New Features
 
 - **Recurring countdowns** - Auto-reset for daily, weekly, monthly, or yearly events
-- **Multiple countdowns** - Display up to 5 countdowns on one page
 - **Theme presets** - Quick color schemes (dark, light, neon, pastel, ocean, sunset, forest)
 - **Custom fonts** - Sans-serif, serif, monospace, or display fonts
 - **Background images** - Add custom background images via URL
@@ -74,7 +73,6 @@ Or use the visual builder at [count.live](https://count.live) to create your cou
 | `percent` | Show percentage text (`1` to enable) | `1` |
 | `start` | Start date for progress calculation (ISO 8601) | `2025-01-01T00:00:00` |
 | `embed` | Embed mode - minimal UI (`1` to enable) | `1` |
-| `multi` | Multiple countdowns mode (`1` to enable) | `1` |
 
 ### Theme Presets
 
@@ -101,14 +99,6 @@ Use `recur` to create auto-resetting countdowns. When the countdown reaches zero
 
 ```
 https://count.live/#date=2025-01-06T09:00:00&recur=weekly&title=Weekly Standup
-```
-
-### Multiple Countdowns
-
-Use `multi=1` with numbered parameters to display multiple countdowns on one page:
-
-```
-https://count.live/#multi=1&date1=2025-12-25&title1=Christmas&date2=2025-12-31&title2=New Year
 ```
 
 ### Progress Tracking
