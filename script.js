@@ -633,7 +633,7 @@ function showCountdown() {
   document.body.classList.remove('builder-mode');
 }
 
-function showBuilder() {
+function showBuilder(prefillParams = null) {
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = '';
   document.body.classList.add('builder-mode');
@@ -649,6 +649,7 @@ function showBuilder() {
   document.body.style.color = DEFAULTS.fg;
   document.body.style.backgroundColor = DEFAULTS.bg;
   document.title = 'count.live - Free Online Countdown Timer | Create & Share';
+  window._builderPrefill = prefillParams;
   initBuilder();
 }
 
@@ -671,9 +672,9 @@ function init() {
   document.getElementById('multi-view').style.display = 'none';
   document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image');
 
-  // Show builder if no date
-  if (!params.date) {
-    showBuilder();
+  // Show builder if no date or in edit mode
+  if (!params.date || params.edit === '1') {
+    showBuilder(params.edit === '1' ? params : null);
     return;
   }
 
@@ -1102,6 +1103,71 @@ function initBuilder() {
     String(tomorrow.getHours()).padStart(2, '0') + ':' +
     String(tomorrow.getMinutes()).padStart(2, '0');
   document.getElementById('b-date').value = localDateStr;
+
+  // Pre-fill from countdown params if editing
+  const prefill = window._builderPrefill;
+  if (prefill) {
+    window._builderPrefill = null; // Clear after use
+
+    // Date
+    if (prefill.date) {
+      const d = parseDate(prefill.date);
+      if (d) document.getElementById('b-date').value = d.toISOString().slice(0, 16);
+    }
+
+    // Text fields
+    if (prefill.title) document.getElementById('b-title').value = decodeURIComponent(prefill.title);
+    if (prefill.subtitle) document.getElementById('b-subtitle').value = decodeURIComponent(prefill.subtitle);
+    if (prefill.end) document.getElementById('b-end').value = decodeURIComponent(prefill.end);
+
+    // Colors
+    if (prefill.bg) {
+      document.getElementById('b-bg').value = prefill.bg;
+      document.getElementById('b-bg-picker').value = '#' + prefill.bg;
+    }
+    if (prefill.fg) {
+      document.getElementById('b-fg').value = prefill.fg;
+      document.getElementById('b-fg-picker').value = '#' + prefill.fg;
+    }
+
+    // Font
+    if (prefill.font) document.getElementById('b-font').value = prefill.font;
+
+    // Units (uncheck all first, then check specified)
+    ['y','mo','w','d','h','m','s','ms'].forEach(u => {
+      document.getElementById('b-u-' + u).checked = false;
+    });
+    if (prefill.units) {
+      parseUnits(prefill.units).forEach(u => {
+        const shortUnit = { years: 'y', months: 'mo', weeks: 'w', days: 'd', hours: 'h', minutes: 'm', seconds: 's', milliseconds: 'ms' }[u];
+        const checkbox = document.getElementById('b-u-' + shortUnit);
+        if (checkbox) checkbox.checked = true;
+      });
+    }
+
+    // Advanced options
+    if (prefill.recur) document.getElementById('b-recur').value = prefill.recur;
+    if (prefill.bgimg) document.getElementById('b-bgimg').value = decodeURIComponent(prefill.bgimg);
+    if (prefill.sound) document.getElementById('b-sound').value = prefill.sound;
+    if (prefill.celebrate) document.getElementById('b-celebrate').value = prefill.celebrate;
+    document.getElementById('b-showtz').checked = prefill.showtz === '1';
+    document.getElementById('b-progress').checked = prefill.progress === '1';
+    document.getElementById('b-percent').checked = prefill.percent === '1';
+    document.getElementById('b-notify').checked = prefill.notify === '1';
+
+    if (prefill.start) {
+      const s = parseDate(prefill.start);
+      if (s) document.getElementById('b-start').value = s.toISOString().slice(0, 16);
+    }
+
+    // Show start date row if progress/percent is enabled
+    if (prefill.progress === '1' || prefill.percent === '1') {
+      document.getElementById('start-date-row').style.display = '';
+    }
+
+    // Clear URL hash to avoid confusion
+    history.replaceState(null, '', window.location.pathname);
+  }
 
   tzSelect.addEventListener('change', updatePreview);
 
@@ -1673,6 +1739,13 @@ document.getElementById('countdown-fullscreen').addEventListener('click', () => 
       document.webkitExitFullscreen();
     }
   }
+});
+
+// Edit button - navigate to builder with current params pre-filled
+document.getElementById('countdown-edit').addEventListener('click', () => {
+  // Navigate to builder - hash change triggers init() which shows builder
+  // The params stay in the hash, builder will read and pre-fill
+  window.location.hash = 'edit=1&' + window.location.hash.slice(1);
 });
 
 // Accordion functionality
