@@ -109,6 +109,10 @@ export default {
         .on('meta[property="og:image"]', new AttributeRewriter('content', ogImageUrl.toString()))
         .on('meta[property="og:url"]', new AttributeRewriter('content', fullUrl))
         .on('meta[name="description"]', new AttributeRewriter('content', description))
+        .on('meta[name="twitter:card"]', new AttributeRewriter('content', 'summary_large_image'))
+        .on('meta[name="twitter:title"]', new AttributeRewriter('content', ogTitle))
+        .on('meta[name="twitter:description"]', new AttributeRewriter('content', description))
+        .on('meta[name="twitter:image"]', new AttributeRewriter('content', ogImageUrl.toString()))
         .on('link[rel="canonical"]', new AttributeRewriter('href', fullUrl))
         .transform(response);
     }
