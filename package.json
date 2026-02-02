@@ -1,0 +1,16 @@
+{
+  "name": "count-live",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "workers-og": "^0.0.21"
+  },
+  "devDependencies": {
+    "wrangler": "^3"
+  }
+}
