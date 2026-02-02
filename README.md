@@ -16,7 +16,6 @@ A minimal, privacy-focused countdown timer that runs entirely in your browser.
 
 ### New Features
 
-- **Count-up mode** - Track time elapsed since a past date
 - **Recurring countdowns** - Auto-reset for daily, weekly, monthly, or yearly events
 - **Multiple countdowns** - Display up to 5 countdowns on one page
 - **Theme presets** - Quick color schemes (dark, light, neon, pastel, ocean, sunset, forest)
@@ -49,7 +48,6 @@ Or use the visual builder at [count.live](https://count.live) to create your cou
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | `date` | Target date/time (ISO 8601) | `2025-12-31T23:59:59` |
-| `mode` | Count direction: `down` (default) or `up` | `up` |
 | `title` | Event title (max 50 chars) | `New Year` |
 | `subtitle` | Subtitle text (max 200 chars) | `The countdown begins` |
 | `units` | Comma-separated time units | `d,h,m,s` |
@@ -99,14 +97,6 @@ Available themes: `dark`, `light`, `neon`, `pastel`, `ocean`, `sunset`, `forest`
 | Milliseconds | `ms`, `milliseconds` |
 
 ## Feature Details
-
-### Count-Up Mode
-
-Use `mode=up` to count up from a past date instead of counting down. Perfect for tracking "Days since..." events like sobriety, quitting smoking, or project anniversaries.
-
-```
-https://count.live/#date=2024-01-01&mode=up&title=Days Sober
-```
 
 ### Recurring Countdowns
 

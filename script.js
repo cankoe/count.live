@@ -775,7 +775,7 @@ function init() {
   // Show timezone display
   const tzDisplay = document.getElementById('timezone-display');
   if (showTz) {
-    tzDisplay.textContent = `Event: ${formatLocalTime(targetDate)} (your time)`;
+    tzDisplay.textContent = `Event: ${formatLocalTime(targetDate)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
     tzDisplay.style.display = 'block';
   } else {
     tzDisplay.style.display = 'none';
@@ -1605,7 +1605,7 @@ function updatePreview() {
   const previewTz = document.getElementById('preview-tz');
   const targetDateForTz = parseDate(config.date);
   if (config.showtz && targetDateForTz) {
-    previewTz.textContent = `Event: ${formatLocalTime(targetDateForTz)} (your time)`;
+    previewTz.textContent = `Event: ${formatLocalTime(targetDateForTz)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
     previewTz.style.display = 'block';
   } else {
     previewTz.style.display = 'none';
