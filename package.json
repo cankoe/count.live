@@ -8,9 +8,9 @@
     "deploy": "wrangler deploy"
   },
   "dependencies": {
-    "workers-og": "^0.0.21"
+    "workers-og": "^0.0.27"
   },
   "devDependencies": {
-    "wrangler": "^3"
+    "wrangler": "^4"
   }
 }
