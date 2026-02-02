@@ -168,6 +168,15 @@ function parseHash() {
   return params;
 }
 
+function parseParams() {
+  // Check query params first (for SEO/social sharing), fall back to hash
+  const query = new URLSearchParams(window.location.search);
+  if (query.has('date')) {
+    return Object.fromEntries(query);
+  }
+  return parseHash();
+}
+
 function truncate(str, max) {
   if (!str) return '';
   return str.length > max ? str.slice(0, max) : str;
@@ -656,7 +665,7 @@ function showBuilder(prefillParams = null) {
 function init() {
   currentSession++;
   const session = currentSession;
-  const params = parseHash();
+  const params = parseParams();
 
   // SEO: Only index the homepage, not individual countdown pages
   const robotsMeta = document.getElementById('robots-meta');
@@ -1165,22 +1174,13 @@ function initBuilder() {
       document.getElementById('start-date-row').style.display = '';
     }
 
-    // Clear URL hash to avoid confusion
+    // Clear URL params to avoid confusion (works for both query and hash)
     history.replaceState(null, '', window.location.pathname);
   }
 
   tzSelect.addEventListener('change', updatePreview);
 
-  // Mode change handler
-  document.getElementById('b-mode').addEventListener('change', function() {
-    const recurRow = document.getElementById('recur-row');
-    if (this.value === 'up') {
-      recurRow.style.display = 'none';
-    } else {
-      recurRow.style.display = '';
-    }
-    updatePreview();
-  });
+  // Mode is always 'down' (count-up mode removed from UI)
 
   // Recurrence change
   document.getElementById('b-recur').addEventListener('change', updatePreview);
@@ -1512,7 +1512,7 @@ function getBuilderConfig() {
     fg: document.getElementById('b-fg').value,
     units: units.join(','),
     end: document.getElementById('b-end').value,
-    mode: document.getElementById('b-mode').value,
+    mode: 'down', // Count-up mode removed from UI
     recur: document.getElementById('b-recur').value,
     font: document.getElementById('b-font').value,
     bgimg: document.getElementById('b-bgimg').value,
@@ -1551,7 +1551,8 @@ function buildUrl(config) {
   }
   if (config.notify) parts.push('notify=1');
 
-  return base + '#' + parts.join('&');
+  // Use query params instead of hash for better SEO/social sharing
+  return base + '?' + parts.join('&');
 }
 
 function updatePreview() {
@@ -1680,9 +1681,10 @@ function updatePreview() {
   updatePreviewCountdown();
 }
 
-// Initialize on load and hash change
+// Initialize on load and URL changes
 window.addEventListener('DOMContentLoaded', init);
-window.addEventListener('hashchange', init);
+window.addEventListener('hashchange', init); // For backwards compatibility with hash URLs
+window.addEventListener('popstate', init); // For browser back/forward with query params
 
 // Recheck layout on resize
 let resizeTimeout;
@@ -1743,9 +1745,15 @@ document.getElementById('countdown-fullscreen').addEventListener('click', () => 
 
 // Edit button - navigate to builder with current params pre-filled
 document.getElementById('countdown-edit').addEventListener('click', () => {
-  // Navigate to builder - hash change triggers init() which shows builder
-  // The params stay in the hash, builder will read and pre-fill
-  window.location.hash = 'edit=1&' + window.location.hash.slice(1);
+  // Navigate to builder with edit param
+  const currentParams = new URLSearchParams(window.location.search);
+  if (!currentParams.has('date')) {
+    // Fall back to hash params if using old-style URL
+    const hashParams = parseHash();
+    Object.entries(hashParams).forEach(([k, v]) => currentParams.set(k, v));
+  }
+  currentParams.set('edit', '1');
+  window.location.search = currentParams.toString();
 });
 
 // Accordion functionality
