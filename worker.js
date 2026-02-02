@@ -1,13 +1,11 @@
 // Cloudflare Worker for dynamic OG meta tags and image generation
 // This intercepts requests and modifies the HTML to include proper social sharing metadata
 
-import { ImageResponse } from 'workers-og';
-
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
 
-    // Handle OG image generation
+    // Handle OG image generation (SVG)
     if (url.pathname === '/og-image') {
       return generateOgImage(url);
     }
@@ -122,14 +120,24 @@ export default {
   }
 };
 
-// Generate OG image showing the countdown time with styling
-async function generateOgImage(url) {
+// Generate OG image as SVG showing the countdown time with styling
+function generateOgImage(url) {
   const dateParam = url.searchParams.get('date') || '';
   const unitsParam = url.searchParams.get('units') || 'd,h,m,s';
   const bg = url.searchParams.get('bg') || '1a1a2e';
   const fg = url.searchParams.get('fg') || 'ffffff';
   const bgimg = url.searchParams.get('bgimg') || '';
   const title = url.searchParams.get('title') || '';
+  const font = url.searchParams.get('font') || 'sans';
+
+  // Font family mapping
+  const fontFamilies = {
+    sans: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
+    serif: "Georgia, 'Times New Roman', serif",
+    mono: "'SF Mono', 'Courier New', monospace",
+    display: "'Impact', 'Arial Black', sans-serif"
+  };
+  const fontFamily = fontFamilies[font] || fontFamilies.sans;
 
   // Parse the target date
   let targetDate = null;
@@ -145,44 +153,62 @@ async function generateOgImage(url) {
   // Calculate remaining time units for display
   const timeUnits = targetDate ? calculateTimeUnits(targetDate, unitsParam) : [];
 
-  // Build the countdown display - just the numbers and labels
-  const countdownHtml = timeUnits.map(({ value, label }, index) => {
-    // Add colon separator between time units (h:m:s)
-    const timeUnitNames = ['hours', 'minutes', 'seconds'];
-    const currentUnit = unitsParam.split(',')[index]?.trim().toLowerCase();
-    const nextUnit = unitsParam.split(',')[index + 1]?.trim().toLowerCase();
-    const showColon = timeUnitNames.includes(currentUnit) && timeUnitNames.includes(nextUnit);
+  // Build SVG countdown units
+  const unitWidth = 140;
+  const colonWidth = 40;
+  const timeUnitNames = ['hours', 'minutes', 'seconds'];
 
-    return `
-      <div style="display: flex; align-items: center;">
-        <div style="display: flex; flex-direction: column; align-items: center; margin: 0 20px;">
-          <span style="font-size: 120px; font-weight: bold; line-height: 1;">${value}</span>
-          <span style="font-size: 24px; opacity: 0.7; text-transform: uppercase; margin-top: 12px; letter-spacing: 2px;">${label}</span>
-        </div>
-        ${showColon ? '<span style="font-size: 100px; font-weight: bold; opacity: 0.5; margin: 0 -10px;">:</span>' : ''}
-      </div>
+  let totalWidth = 0;
+  const unitData = timeUnits.map(({ value, label, unitName }, index) => {
+    const nextUnit = timeUnits[index + 1];
+    const showColon = timeUnitNames.includes(unitName) && nextUnit && timeUnitNames.includes(nextUnit.unitName);
+    const width = unitWidth + (showColon ? colonWidth : 0);
+    const x = totalWidth;
+    totalWidth += width;
+    return { value, label, x, showColon };
+  });
+
+  // Center the countdown
+  const startX = (1200 - totalWidth) / 2;
+  const countdownY = title ? 380 : 315;
+
+  // Build countdown SVG elements
+  const countdownSvg = unitData.map(({ value, label, x, showColon }) => `
+    <g transform="translate(${startX + x}, ${countdownY})">
+      <text x="${unitWidth/2}" y="0" text-anchor="middle" font-size="100" font-weight="bold" fill="#${fg}" font-family="${fontFamily}">${value}</text>
+      <text x="${unitWidth/2}" y="40" text-anchor="middle" font-size="20" fill="#${fg}" opacity="0.7" font-family="${fontFamily}" text-transform="uppercase" letter-spacing="2">${label}</text>
+      ${showColon ? `<text x="${unitWidth + 20}" y="-10" text-anchor="middle" font-size="80" font-weight="bold" fill="#${fg}" opacity="0.5" font-family="${fontFamily}">:</text>` : ''}
+    </g>
+  `).join('');
+
+  // Title SVG
+  const titleSvg = title
+    ? `<text x="600" y="180" text-anchor="middle" font-size="52" font-weight="600" fill="#${fg}" font-family="${fontFamily}">${escapeHtml(title)}</text>`
+    : '';
+
+  // Background - either solid color or image
+  let backgroundSvg;
+  if (bgimg) {
+    backgroundSvg = `
+      <image href="${bgimg}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
+      <rect width="1200" height="630" fill="rgba(0,0,0,0.5)"/>
     `;
-  }).join('');
+  } else {
+    backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
+  }
 
-  // Background styles - support background image with overlay
-  const bgStyle = bgimg
-    ? `background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${bgimg}); background-size: cover; background-position: center;`
-    : `background-color: #${bg};`;
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  ${backgroundSvg}
+  ${titleSvg}
+  ${countdownSvg}
+</svg>`;
 
-  const html = `
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;
-                height: 100%; width: 100%; ${bgStyle} color: #${fg};
-                font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;">
-      ${title ? `<h1 style="font-size: 56px; font-weight: 600; margin: 0 0 30px 0; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">${escapeHtml(title)}</h1>` : ''}
-      <div style="display: flex; align-items: flex-start; justify-content: center; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
-        ${countdownHtml || '<span style="font-size: 80px; font-weight: bold;">Countdown</span>'}
-      </div>
-    </div>
-  `;
-
-  return new ImageResponse(html, {
-    width: 1200,
-    height: 630,
+  return new Response(svg, {
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': 'public, max-age=60',
+    },
   });
 }
 
@@ -191,7 +217,7 @@ function calculateTimeUnits(targetDate, unitsParam) {
   const now = new Date();
   let diff = targetDate.getTime() - now.getTime();
 
-  if (diff <= 0) return [{ value: '0', label: 'seconds' }];
+  if (diff <= 0) return [{ value: '0', label: 'Seconds', unitName: 'seconds' }];
 
   const unitAliases = {
     y: 'years', yr: 'years', yrs: 'years', years: 'years',
@@ -229,7 +255,8 @@ function calculateTimeUnits(targetDate, unitsParam) {
       diff = diff % unitValues[unit];
       results.push({
         value: unit === 'milliseconds' ? String(value).padStart(3, '0') : String(value).padStart(2, '0'),
-        label: unitLabels[unit] || unit
+        label: unitLabels[unit] || unit,
+        unitName: unit
       });
     }
   }
