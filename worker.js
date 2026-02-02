@@ -120,14 +120,13 @@ export default {
   }
 };
 
-// Generate OG image as SVG showing the countdown time with styling
+// Generate OG image as SVG with title/subtitle and user styling
 function generateOgImage(url) {
-  const dateParam = url.searchParams.get('date') || '';
-  const unitsParam = url.searchParams.get('units') || 'd,h,m,s';
   const bg = url.searchParams.get('bg') || '1a1a2e';
   const fg = url.searchParams.get('fg') || 'ffffff';
   const bgimg = url.searchParams.get('bgimg') || '';
-  const title = url.searchParams.get('title') || '';
+  const title = url.searchParams.get('title') || 'Countdown';
+  const subtitle = url.searchParams.get('subtitle') || '';
   const font = url.searchParams.get('font') || 'sans';
 
   // Font family mapping
@@ -138,53 +137,6 @@ function generateOgImage(url) {
     display: "'Impact', 'Arial Black', sans-serif"
   };
   const fontFamily = fontFamilies[font] || fontFamilies.sans;
-
-  // Parse the target date
-  let targetDate = null;
-  if (dateParam) {
-    try {
-      targetDate = new Date(dateParam.includes('Z') || dateParam.includes('+') ? dateParam : dateParam + 'Z');
-      if (isNaN(targetDate.getTime())) targetDate = null;
-    } catch (e) {
-      targetDate = null;
-    }
-  }
-
-  // Calculate remaining time units for display
-  const timeUnits = targetDate ? calculateTimeUnits(targetDate, unitsParam) : [];
-
-  // Build SVG countdown units
-  const unitWidth = 140;
-  const colonWidth = 40;
-  const timeUnitNames = ['hours', 'minutes', 'seconds'];
-
-  let totalWidth = 0;
-  const unitData = timeUnits.map(({ value, label, unitName }, index) => {
-    const nextUnit = timeUnits[index + 1];
-    const showColon = timeUnitNames.includes(unitName) && nextUnit && timeUnitNames.includes(nextUnit.unitName);
-    const width = unitWidth + (showColon ? colonWidth : 0);
-    const x = totalWidth;
-    totalWidth += width;
-    return { value, label, x, showColon };
-  });
-
-  // Center the countdown
-  const startX = (1200 - totalWidth) / 2;
-  const countdownY = title ? 380 : 315;
-
-  // Build countdown SVG elements
-  const countdownSvg = unitData.map(({ value, label, x, showColon }) => `
-    <g transform="translate(${startX + x}, ${countdownY})">
-      <text x="${unitWidth/2}" y="0" text-anchor="middle" font-size="100" font-weight="bold" fill="#${fg}" font-family="${fontFamily}">${value}</text>
-      <text x="${unitWidth/2}" y="40" text-anchor="middle" font-size="20" fill="#${fg}" opacity="0.7" font-family="${fontFamily}" text-transform="uppercase" letter-spacing="2">${label}</text>
-      ${showColon ? `<text x="${unitWidth + 20}" y="-10" text-anchor="middle" font-size="80" font-weight="bold" fill="#${fg}" opacity="0.5" font-family="${fontFamily}">:</text>` : ''}
-    </g>
-  `).join('');
-
-  // Title SVG
-  const titleSvg = title
-    ? `<text x="600" y="180" text-anchor="middle" font-size="52" font-weight="600" fill="#${fg}" font-family="${fontFamily}">${escapeHtml(title)}</text>`
-    : '';
 
   // Background - either solid color or image
   let backgroundSvg;
@@ -197,71 +149,23 @@ function generateOgImage(url) {
     backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
   }
 
+  // Position text based on whether we have subtitle
+  const titleY = subtitle ? 280 : 330;
+  const subtitleY = 360;
+
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   ${backgroundSvg}
-  ${titleSvg}
-  ${countdownSvg}
+  <text x="600" y="${titleY}" text-anchor="middle" font-size="72" font-weight="bold" fill="#${fg}" font-family="${fontFamily}">${escapeHtml(title)}</text>
+  ${subtitle ? `<text x="600" y="${subtitleY}" text-anchor="middle" font-size="32" fill="#${fg}" opacity="0.8" font-family="${fontFamily}">${escapeHtml(subtitle)}</text>` : ''}
 </svg>`;
 
   return new Response(svg, {
     headers: {
       'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=60',
+      'Cache-Control': 'public, max-age=300',
     },
   });
-}
-
-// Calculate time units for OG image display
-function calculateTimeUnits(targetDate, unitsParam) {
-  const now = new Date();
-  let diff = targetDate.getTime() - now.getTime();
-
-  if (diff <= 0) return [{ value: '0', label: 'Seconds', unitName: 'seconds' }];
-
-  const unitAliases = {
-    y: 'years', yr: 'years', yrs: 'years', years: 'years',
-    mo: 'months', mon: 'months', months: 'months',
-    w: 'weeks', wk: 'weeks', wks: 'weeks', weeks: 'weeks',
-    d: 'days', day: 'days', days: 'days',
-    h: 'hours', hr: 'hours', hrs: 'hours', hours: 'hours',
-    m: 'minutes', min: 'minutes', mins: 'minutes', minutes: 'minutes',
-    s: 'seconds', sec: 'seconds', secs: 'seconds', seconds: 'seconds',
-    ms: 'milliseconds', milliseconds: 'milliseconds'
-  };
-
-  const units = unitsParam.split(',').map(u => unitAliases[u.trim().toLowerCase()] || u.trim().toLowerCase());
-
-  const unitValues = {
-    years: 365 * 24 * 60 * 60 * 1000,
-    months: 30 * 24 * 60 * 60 * 1000,
-    weeks: 7 * 24 * 60 * 60 * 1000,
-    days: 24 * 60 * 60 * 1000,
-    hours: 60 * 60 * 1000,
-    minutes: 60 * 1000,
-    seconds: 1000,
-    milliseconds: 1
-  };
-
-  const unitLabels = {
-    years: 'Years', months: 'Months', weeks: 'Weeks', days: 'Days',
-    hours: 'Hours', minutes: 'Minutes', seconds: 'Seconds', milliseconds: 'MS'
-  };
-
-  const results = [];
-  for (const unit of units) {
-    if (unitValues[unit]) {
-      const value = Math.floor(diff / unitValues[unit]);
-      diff = diff % unitValues[unit];
-      results.push({
-        value: unit === 'milliseconds' ? String(value).padStart(3, '0') : String(value).padStart(2, '0'),
-        label: unitLabels[unit] || unit,
-        unitName: unit
-      });
-    }
-  }
-
-  return results;
 }
 
 // Escape HTML for safe rendering
