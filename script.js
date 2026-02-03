@@ -129,8 +129,6 @@ const SOUNDS = (function() {
   };
 })();
 
-// QR Code - uses free external API service (goqr.me / api.qrserver.com)
-
 const UNIT_CONFIG = {
   years: { label: 'Years', divisor: 31536000000 }, // 365 days
   months: { label: 'Months', divisor: 2592000000, mod: 12 }, // 30 days
@@ -1350,13 +1348,6 @@ function initBuilder() {
     updateEmbedCode(url);
   });
 
-  // QR button
-  document.getElementById('qr-btn').addEventListener('click', () => {
-    const url = document.getElementById('url-output').textContent;
-    generateQRCode(url);
-    document.getElementById('qr-modal').classList.add('open');
-  });
-
   // Calendar button
   document.getElementById('calendar-btn').addEventListener('click', () => {
     document.getElementById('calendar-modal').classList.add('open');
@@ -1415,47 +1406,6 @@ function copyEmbedCode() {
   navigator.clipboard.writeText(code).then(() => {
     closeModal('embed-modal');
   });
-}
-
-function generateQRCode(url) {
-  const canvas = document.getElementById('qr-canvas');
-  const size = 200;
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  // Show loading state
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = '#666666';
-  ctx.font = '14px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('Loading...', size / 2, size / 2);
-
-  // Use free QR code API service
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = function() {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    ctx.drawImage(img, 0, 0, size, size);
-  };
-  img.onerror = function() {
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#cc0000';
-    ctx.fillText('Failed to load QR', size / 2, size / 2);
-  };
-  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
-}
-
-function downloadQR() {
-  const canvas = document.getElementById('qr-canvas');
-  const link = document.createElement('a');
-  link.download = 'countdown-qr.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-  closeModal('qr-modal');
 }
 
 function downloadICS() {
