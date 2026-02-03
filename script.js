@@ -296,26 +296,14 @@ function addMonths(date, months) {
   return result;
 }
 
-function calculateTimeUnits(targetDate, units, mode = 'down') {
+function calculateTimeUnits(targetDate, units) {
   const result = {};
   let current = new Date();
   const target = new Date(targetDate);
 
-  // For count-up mode, swap current and target
-  if (mode === 'up') {
-    if (target > current) {
-      // Count-up hasn't started yet
-      return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
-    }
-    // Swap for calculation
-    const temp = current;
-    current = new Date(target);
-    target.setTime(temp.getTime());
-  } else {
-    // Count-down mode: if target is in the past, return zeros
-    if (target <= current) {
-      return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
-    }
+  // If target is in the past, return zeros
+  if (target <= current) {
+    return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
   }
 
   // Handle calendar-based units precisely
@@ -709,9 +697,6 @@ function init() {
     document.body.classList.add('embed-mode');
   }
 
-  // Parse mode (count up or down)
-  const mode = params.mode === 'up' ? 'up' : 'down';
-
   // Apply theme if specified
   let fg, bg;
   if (params.theme && THEME_PRESETS[params.theme]) {
@@ -759,7 +744,7 @@ function init() {
   // Parse configuration
   let targetDate = parseDate(params.date);
   const units = parseUnits(params.units);
-  const endMessage = truncate(params.end, MAX_LENGTHS.end) || (mode === 'up' ? 'Started!' : DEFAULTS.end);
+  const endMessage = truncate(params.end, MAX_LENGTHS.end) || DEFAULTS.end;
   const recur = params.recur;
   const sound = params.sound;
   const celebrate = params.celebrate;
@@ -775,7 +760,7 @@ function init() {
   }
 
   // Handle recurring countdown
-  if (recur && mode === 'down') {
+  if (recur) {
     targetDate = getNextOccurrence(targetDate, recur);
   }
 
@@ -827,7 +812,7 @@ function init() {
     const now = Date.now();
 
     // Update progress bar if enabled
-    if ((showProgress || showPercent) && startDate && mode === 'down') {
+    if ((showProgress || showPercent) && startDate) {
       const progress = calculateProgress(startDate, targetDate);
       if (showProgress) {
         progressFill.style.width = progress.toFixed(1) + '%';
@@ -839,18 +824,6 @@ function init() {
       }
     }
 
-    // Count-up mode runs indefinitely
-    if (mode === 'up') {
-      const values = calculateTimeUnits(targetDate, units, 'up');
-      renderCountdown(values, units, isLarge);
-      const countdownStr = formatTitleCountdown(values, units);
-      document.title = title ? `${countdownStr} - ${title}` : countdownStr;
-      const interval = units.includes('milliseconds') ? 16 : 100;
-      requestAnimationFrame(() => setTimeout(update, interval));
-      return;
-    }
-
-    // Count-down mode
     if (now >= effectiveEndTime && !showingZero) {
       showingZero = true;
       const zeroValues = {};
@@ -1188,8 +1161,6 @@ function initBuilder() {
 
   tzSelect.addEventListener('change', updatePreview);
 
-  // Mode is always 'down' (count-up mode removed from UI)
-
   // Recurrence change
   document.getElementById('b-recur').addEventListener('change', updatePreview);
 
@@ -1472,7 +1443,6 @@ function getBuilderConfig() {
     fg: document.getElementById('b-fg').value,
     units: units.join(','),
     end: document.getElementById('b-end').value,
-    mode: 'down', // Count-up mode removed from UI
     recur: document.getElementById('b-recur').value,
     font: document.getElementById('b-font').value,
     bgimg: document.getElementById('b-bgimg').value,
@@ -1491,7 +1461,6 @@ function buildUrl(config) {
   const parts = [];
 
   if (config.date) parts.push('date=' + encodeURIComponent(config.date));
-  if (config.mode && config.mode !== 'down') parts.push('mode=' + config.mode);
   if (config.title) parts.push('title=' + encodeURIComponent(config.title));
   if (config.subtitle) parts.push('subtitle=' + encodeURIComponent(config.subtitle));
   if (config.bg && config.bg !== '1a1a2e') parts.push('bg=' + config.bg);
