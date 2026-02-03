@@ -120,14 +120,38 @@ export default {
   }
 };
 
+// Validate hex color (6 characters, 0-9 and a-f only)
+function isValidHexColor(color) {
+  return /^[0-9a-fA-F]{6}$/.test(color);
+}
+
+// Validate URL for background image (must be https, no data: or javascript:)
+function isValidImageUrl(urlStr) {
+  if (!urlStr) return false;
+  try {
+    const parsed = new URL(urlStr);
+    // Only allow https URLs, block data:, javascript:, etc.
+    return parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 // Generate OG image as SVG with title/subtitle and user styling
 function generateOgImage(url) {
-  const bg = url.searchParams.get('bg') || '1a1a2e';
-  const fg = url.searchParams.get('fg') || 'ffffff';
-  const bgimg = url.searchParams.get('bgimg') || '';
+  const bgParam = url.searchParams.get('bg') || '';
+  const fgParam = url.searchParams.get('fg') || '';
+  const bgimgParam = url.searchParams.get('bgimg') || '';
   const title = url.searchParams.get('title') || 'Countdown';
   const subtitle = url.searchParams.get('subtitle') || '';
   const font = url.searchParams.get('font') || 'sans';
+
+  // Validate and sanitize color inputs
+  const bg = isValidHexColor(bgParam) ? bgParam : '1a1a2e';
+  const fg = isValidHexColor(fgParam) ? fgParam : 'ffffff';
+
+  // Validate background image URL (must be https, escape for SVG attribute)
+  const bgimg = isValidImageUrl(bgimgParam) ? escapeHtml(bgimgParam) : '';
 
   // Font family mapping
   const fontFamilies = {
