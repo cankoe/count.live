@@ -353,23 +353,18 @@ function calculateTimeUnits(targetDate, units, mode = 'down') {
     { name: 'milliseconds', ms: 1 }
   ];
 
+  // Find the smallest selected fixed unit and round up remainingMs to that boundary
+  // This ensures we show "1" until the moment truly arrives, without overflow bugs
+  const selectedFixedUnits = fixedUnits.filter(u => units.includes(u.name));
+  if (selectedFixedUnits.length > 0) {
+    const smallestUnit = selectedFixedUnits[selectedFixedUnits.length - 1];
+    remainingMs = Math.ceil(remainingMs / smallestUnit.ms) * smallestUnit.ms;
+  }
+
   for (const { name, ms } of fixedUnits) {
     if (units.includes(name)) {
       result[name] = Math.floor(remainingMs / ms);
       remainingMs = remainingMs % ms;
-    }
-  }
-
-  // Ceiling logic: if there's any remainder below smallest displayed unit,
-  // increment that unit by 1 (so countdown shows 1 until fully complete)
-  if (remainingMs > 0) {
-    const allUnitsInOrder = ['years', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds', 'milliseconds'];
-    for (let i = allUnitsInOrder.length - 1; i >= 0; i--) {
-      const unit = allUnitsInOrder[i];
-      if (result[unit] !== undefined) {
-        result[unit]++;
-        break;
-      }
     }
   }
 
