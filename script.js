@@ -182,6 +182,22 @@ function truncate(str, max) {
   return str.length > max ? str.slice(0, max) : str;
 }
 
+// Validate and sanitize URL for safe use in CSS url()
+// Returns null if URL is invalid or potentially dangerous
+function sanitizeUrlForCss(urlStr) {
+  if (!urlStr) return null;
+  try {
+    const parsed = new URL(urlStr);
+    // Only allow https URLs (block data:, javascript:, http:, etc.)
+    if (parsed.protocol !== 'https:') return null;
+    // Return the sanitized href (URL constructor normalizes the URL)
+    // Escape characters that could break out of CSS url() context
+    return parsed.href.replace(/['"()\\]/g, encodeURIComponent);
+  } catch {
+    return null;
+  }
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
@@ -719,11 +735,11 @@ function init() {
   const font = params.font && FONT_STACKS[params.font] ? params.font : 'sans';
   document.body.style.fontFamily = FONT_STACKS[font];
 
-  // Apply background image
+  // Apply background image (validated and sanitized for CSS injection prevention)
   if (params.bgimg) {
     try {
-      const bgUrl = decodeURIComponent(params.bgimg);
-      if (bgUrl.match(/^https?:\/\//i)) {
+      const bgUrl = sanitizeUrlForCss(decodeURIComponent(params.bgimg));
+      if (bgUrl) {
         document.body.style.backgroundImage = `url('${bgUrl}')`;
         document.body.classList.add('has-bg-image');
       }
@@ -1574,9 +1590,10 @@ function updatePreview() {
   const fontFamily = FONT_STACKS[config.font] || FONT_STACKS.sans;
   frame.style.fontFamily = fontFamily;
 
-  // Background image preview
-  if (config.bgimg && config.bgimg.match(/^https?:\/\//i)) {
-    frame.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${config.bgimg}')`;
+  // Background image preview (validated and sanitized)
+  const safeBgimg = config.bgimg ? sanitizeUrlForCss(config.bgimg) : null;
+  if (safeBgimg) {
+    frame.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('${safeBgimg}')`;
     frame.style.backgroundSize = 'cover';
     frame.style.backgroundPosition = 'center';
   } else {
