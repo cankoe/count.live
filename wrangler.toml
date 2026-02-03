@@ -8,13 +8,15 @@ directory = "./"
 binding = "ASSETS"  # Required for env.ASSETS.fetch() in worker
 run_worker_first = true  # Run worker BEFORE serving static assets (for OG tag injection)
 
-# Observability (logging)
+# Observability (logging) - PRIVACY NOTE:
+# Logs may contain countdown URLs with user event titles/dates.
+# Keep persist=false to avoid storing personal event data.
+# Enable temporarily for debugging, then disable.
 [observability]
 enabled = false
-head_sampling_rate = 1
 
 [observability.logs]
-enabled = true
-head_sampling_rate = 1
-persist = true
-invocation_logs = true
+enabled = false  # Disabled for privacy - URLs contain event info
+head_sampling_rate = 0
+persist = false  # IMPORTANT: Don't persist logs containing user data
+invocation_logs = false
