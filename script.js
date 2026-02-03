@@ -1526,8 +1526,16 @@ function updatePreview() {
   const session = previewSession;
   const config = getBuilderConfig();
 
-  // Update URL
-  document.getElementById('url-output').textContent = buildUrl(config);
+  // Update URL display
+  const generatedUrl = buildUrl(config);
+  document.getElementById('url-output').textContent = generatedUrl;
+
+  // Update browser URL in real-time (so refresh preserves work)
+  // Only update if we have a date set to avoid cluttering URL with defaults
+  if (config.date) {
+    const urlObj = new URL(generatedUrl);
+    history.replaceState(null, '', urlObj.pathname + urlObj.search);
+  }
 
   // Update preview frame colors
   const frame = document.getElementById('preview-frame');
