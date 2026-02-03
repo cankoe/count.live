@@ -1188,8 +1188,7 @@ function initBuilder() {
       document.getElementById('start-date-row').style.display = '';
     }
 
-    // Clear URL params to avoid confusion (works for both query and hash)
-    history.replaceState(null, '', window.location.pathname);
+    // Don't clear URL - updatePreview will set it with current config + edit=1
   }
 
   tzSelect.addEventListener('change', updatePreview);
@@ -1530,10 +1529,12 @@ function updatePreview() {
   const generatedUrl = buildUrl(config);
   document.getElementById('url-output').textContent = generatedUrl;
 
-  // Update browser URL in real-time (so refresh preserves work)
+  // Update browser URL in real-time (so refresh preserves work and stays in builder)
   // Only update if we have a date set to avoid cluttering URL with defaults
   if (config.date) {
     const urlObj = new URL(generatedUrl);
+    // Add edit=1 so refreshing stays in builder mode
+    urlObj.searchParams.set('edit', '1');
     history.replaceState(null, '', urlObj.pathname + urlObj.search);
   }
 
