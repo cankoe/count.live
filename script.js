@@ -3,7 +3,6 @@ const DEFAULTS = {
   bg: '#1a1a2e',
   units: ['days', 'hours', 'minutes', 'seconds'],
   end: 'Event Started!',
-  mode: 'down',
   font: 'sans'
 };
 
@@ -783,7 +782,7 @@ function init() {
   const progressFill = document.getElementById('progress-fill');
   const progressText = document.getElementById('progress-text');
 
-  if ((showProgress || showPercent) && startDate && mode === 'down') {
+  if ((showProgress || showPercent) && startDate) {
     progressContainer.style.display = 'block';
   } else {
     progressContainer.style.display = 'none';
@@ -874,7 +873,7 @@ function init() {
 
     if (showingZero) return;
 
-    const values = calculateTimeUnits(targetDate, units, mode);
+    const values = calculateTimeUnits(targetDate, units);
     renderCountdown(values, units, isLarge);
 
     const countdownStr = formatTitleCountdown(values, units);
