@@ -1382,8 +1382,8 @@ body.has-bg-image::before {
   z-index: 1000;
 }
 
-/* Examples section */
-.examples-section {
+/* Examples carousel */
+.examples-carousel {
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255,255,255,0.1);
@@ -1398,37 +1398,39 @@ body.has-bg-image::before {
   letter-spacing: 0.05em;
 }
 
-.examples-accordion-header {
-  display: none;
-}
-
-.examples-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.6rem;
+.carousel-viewport {
+  position: relative;
 }
 
 a.example-card {
-  display: block;
+  display: none;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 8px;
   overflow: hidden;
   background: rgba(255,255,255,0.03);
-  transition: border-color 0.2s, transform 0.2s;
   text-decoration: none;
   color: inherit;
   cursor: pointer;
+  animation: carouselFadeIn 0.4s ease;
+}
+
+a.example-card.active {
+  display: block;
+}
+
+@keyframes carouselFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 a.example-card:hover {
   border-color: rgba(255,255,255,0.25);
-  transform: translateY(-1px);
 }
 
 .example-iframe-wrap {
   position: relative;
   width: 100%;
-  padding-top: 45%;
+  padding-top: 55%;
   overflow: hidden;
 }
 
@@ -1461,13 +1463,38 @@ a.example-card:hover {
   opacity: 0.6;
 }
 
-/* Examples light theme */
-body.builder-light .examples-section {
-  border-top-color: rgba(0,0,0,0.1);
+.carousel-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-body.builder-light .examples-title {
-  color: inherit;
+.carousel-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.7);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-arrow:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.35);
+  color: rgba(255,255,255,0.95);
+}
+
+/* Carousel light theme */
+body.builder-light .examples-carousel {
+  border-top-color: rgba(0,0,0,0.1);
 }
 
 body.builder-light a.example-card {
@@ -1485,50 +1512,16 @@ body.builder-light .example-info {
   border-top-color: rgba(0,0,0,0.1);
 }
 
-body.builder-light .examples-accordion-header {
-  color: inherit;
+body.builder-light .carousel-arrow {
+  border-color: rgba(0,0,0,0.15);
+  background: rgba(0,0,0,0.04);
+  color: rgba(0,0,0,0.5);
 }
 
-/* Examples mobile accordion */
-@media (max-width: 767px) {
-  .examples-title {
-    display: none;
-  }
-
-  .examples-accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-size: 0.85rem;
-    font-weight: 500;
-    opacity: 0.8;
-    padding: 0.5rem 0;
-  }
-
-  .examples-accordion-header:hover {
-    opacity: 1;
-  }
-
-  .examples-accordion-icon {
-    font-size: 1.2rem;
-    font-weight: 300;
-    transition: transform 0.3s;
-  }
-
-  .examples-section.open .examples-accordion-icon {
-    transform: rotate(45deg);
-  }
-
-  .examples-grid {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out;
-  }
-
-  .examples-section.open .examples-grid {
-    max-height: 3000px;
-  }
+body.builder-light .carousel-arrow:hover {
+  background: rgba(0,0,0,0.08);
+  border-color: rgba(0,0,0,0.3);
+  color: rgba(0,0,0,0.8);
 }
 
 /* Modal styles */

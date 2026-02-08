@@ -127,15 +127,11 @@
           </a>
         </div>
 
-        <!-- EXAMPLES SECTION -->
-        <div class="examples-section">
+        <!-- EXAMPLES CAROUSEL -->
+        <div class="examples-carousel" id="examples-carousel">
           <h3 class="examples-title">Examples</h3>
-          <div class="examples-accordion-header" id="examples-toggle">
-            <span>Examples</span>
-            <span class="examples-accordion-icon">+</span>
-          </div>
-          <div class="examples-grid" id="examples-grid">
-            <a class="example-card" href="/?date=2027-01-01T08:00:00&title=New%20Year%20(Pacific)&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg&tz=America%2FLos_Angeles" target="_blank" rel="noopener">
+          <div class="carousel-viewport">
+            <a class="example-card active" href="/?date=2027-01-01T08:00:00&title=New%20Year%20(Pacific)&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg&tz=America%2FLos_Angeles" target="_blank" rel="noopener">
               <div class="example-iframe-wrap">
                 <iframe src="/?date=2027-01-01T08:00:00&title=New%20Year%20(Pacific)&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg&tz=America%2FLos_Angeles&embed=1" loading="lazy" title="New Year's Countdown (Pacific)" tabindex="-1"></iframe>
               </div>
@@ -150,7 +146,7 @@
               </div>
               <div class="example-info">
                 <strong>Valentine's Day</strong>
-                <span>Recurring yearly, sunset theme, serif, roses</span>
+                <span>Recurring yearly, sunset theme, serif</span>
               </div>
             </a>
             <a class="example-card" href="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T05:00:00&tz=America%2FChicago" target="_blank" rel="noopener">
@@ -189,7 +185,10 @@
                 <span>Fireworks, progress bar, percentage, balloons</span>
               </div>
             </a>
-
+          </div>
+          <div class="carousel-nav">
+            <button class="carousel-arrow carousel-prev" id="carousel-prev" aria-label="Previous example">&lsaquo;</button>
+            <button class="carousel-arrow carousel-next" id="carousel-next" aria-label="Next example">&rsaquo;</button>
           </div>
         </div>
       </div>

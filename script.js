@@ -1728,10 +1728,38 @@ document.querySelectorAll('.accordion-header').forEach(header => {
   });
 });
 
-// Examples accordion (mobile)
-const examplesToggle = document.getElementById('examples-toggle');
-if (examplesToggle) {
-  examplesToggle.addEventListener('click', () => {
-    examplesToggle.closest('.examples-section').classList.toggle('open');
-  });
-}
+// Examples carousel
+(function() {
+  const carousel = document.getElementById('examples-carousel');
+  if (!carousel) return;
+  const cards = carousel.querySelectorAll('.example-card');
+  const prevBtn = document.getElementById('carousel-prev');
+  const nextBtn = document.getElementById('carousel-next');
+  if (cards.length === 0) return;
+
+  let current = 0;
+  let timer = setInterval(advance, 4000);
+
+  function goTo(index) {
+    cards[current].classList.remove('active');
+    current = ((index % cards.length) + cards.length) % cards.length;
+    cards[current].classList.add('active');
+    resetTimer();
+  }
+
+  function advance() {
+    goTo(current + 1);
+  }
+
+  function resetTimer() {
+    clearInterval(timer);
+    timer = setInterval(advance, 4000);
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  // Pause on hover
+  carousel.addEventListener('mouseenter', () => clearInterval(timer));
+  carousel.addEventListener('mouseleave', () => { timer = setInterval(advance, 4000); });
+})();
