@@ -144,6 +144,53 @@ export default {
       return addSecurityHeaders(transformedResponse, true);
     }
 
+    // Apple App Site Association for Universal Links
+    if (url.pathname === '/.well-known/apple-app-site-association') {
+      const aasa = {
+        applinks: {
+          apps: [],
+          details: [
+            {
+              appID: 'TEAM_ID.live.count.app', // TODO: Replace TEAM_ID with Apple Team ID
+              paths: ['/*'],
+            },
+          ],
+        },
+      };
+      return new Response(JSON.stringify(aasa), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=3600',
+          ...SECURITY_HEADERS,
+        },
+      });
+    }
+
+    // Android App Links - Digital Asset Links
+    if (url.pathname === '/.well-known/assetlinks.json') {
+      const assetlinks = [
+        {
+          relation: ['delegate_permission/common.handle_all_urls'],
+          target: {
+            namespace: 'android_app',
+            package_name: 'live.count.app',
+            sha256_cert_fingerprints: [
+              // TODO: Replace with actual signing certificate fingerprint
+              // Get with: keytool -list -v -keystore your-keystore.jks | grep SHA256
+              'SHA256_FINGERPRINT_HERE',
+            ],
+          },
+        },
+      ];
+      return new Response(JSON.stringify(assetlinks), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=3600',
+          ...SECURITY_HEADERS,
+        },
+      });
+    }
+
     // For all other requests, serve static assets with security headers
     const assetResponse = await env.ASSETS.fetch(request);
     const contentType = assetResponse.headers.get('content-type') || '';

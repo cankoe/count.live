@@ -1028,9 +1028,9 @@ function initBuilder() {
   // Builder theme toggle (light/dark mode for the builder UI itself)
   const builderThemeToggle = document.getElementById('builder-theme-toggle');
   if (builderThemeToggle) {
-    // Check for saved preference
+    // Check for saved preference (default to light)
     const savedBuilderTheme = localStorage.getItem('builderTheme');
-    if (savedBuilderTheme === 'light') {
+    if (savedBuilderTheme !== 'dark') {
       document.body.classList.add('builder-light');
     }
 
@@ -1099,10 +1099,15 @@ function initBuilder() {
   if (prefill) {
     window._builderPrefill = null; // Clear after use
 
-    // Date
+    // Timezone (set before date so conversion uses correct tz)
+    if (prefill.tz) {
+      document.getElementById('b-timezone').value = prefill.tz;
+    }
+
+    // Date - convert UTC back to the selected timezone's local time
     if (prefill.date) {
-      const d = parseDate(prefill.date);
-      if (d) document.getElementById('b-date').value = d.toISOString().slice(0, 16);
+      const tz = prefill.tz || 'UTC';
+      document.getElementById('b-date').value = utcToLocal(prefill.date, tz);
     }
 
     // Text fields
@@ -1146,8 +1151,8 @@ function initBuilder() {
     document.getElementById('b-notify').checked = prefill.notify === '1';
 
     if (prefill.start) {
-      const s = parseDate(prefill.start);
-      if (s) document.getElementById('b-start').value = s.toISOString().slice(0, 16);
+      const tz = prefill.tz || 'UTC';
+      document.getElementById('b-start').value = utcToLocal(prefill.start, tz);
     }
 
     // Show start date row if progress/percent is enabled
@@ -1388,6 +1393,24 @@ function downloadICS() {
   closeModal('calendar-modal');
 }
 
+function utcToLocal(dateStr, timezone) {
+  if (!dateStr) return '';
+  try {
+    const d = parseDate(dateStr);
+    if (!d) return dateStr;
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: timezone,
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).formatToParts(d);
+    const vals = {};
+    parts.forEach(p => vals[p.type] = p.value);
+    return `${vals.year}-${vals.month}-${vals.day}T${vals.hour}:${vals.minute}`;
+  } catch {
+    return dateStr;
+  }
+}
+
 function localToUTC(dateStr, timezone) {
   if (!dateStr) return '';
   try {
@@ -1451,7 +1474,8 @@ function getBuilderConfig() {
     progress: document.getElementById('b-progress').checked,
     percent: document.getElementById('b-percent').checked,
     notify: document.getElementById('b-notify').checked,
-    start: startUTC
+    start: startUTC,
+    tz: timezone
   };
 }
 
@@ -1478,6 +1502,7 @@ function buildUrl(config) {
     parts.push('start=' + encodeURIComponent(config.start));
   }
   if (config.notify) parts.push('notify=1');
+  if (config.tz) parts.push('tz=' + encodeURIComponent(config.tz));
 
   // Use query params instead of hash for better SEO/social sharing
   return base + '?' + parts.join('&');
@@ -1702,3 +1727,11 @@ document.querySelectorAll('.accordion-header').forEach(header => {
     item.classList.toggle('open');
   });
 });
+
+// Examples accordion (mobile)
+const examplesToggle = document.getElementById('examples-toggle');
+if (examplesToggle) {
+  examplesToggle.addEventListener('click', () => {
+    examplesToggle.closest('.examples-section').classList.toggle('open');
+  });
+}
