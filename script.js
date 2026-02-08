@@ -1738,28 +1738,27 @@ document.querySelectorAll('.accordion-header').forEach(header => {
   if (cards.length === 0) return;
 
   let current = 0;
-  let timer = setInterval(advance, 4000);
+  let timer = null;
+  let paused = false;
 
   function goTo(index) {
     cards[current].classList.remove('active');
     current = ((index % cards.length) + cards.length) % cards.length;
     cards[current].classList.add('active');
-    resetTimer();
   }
 
-  function advance() {
-    goTo(current + 1);
+  function startTimer() {
+    if (timer) clearInterval(timer);
+    timer = setInterval(function() {
+      if (!paused) goTo(current + 1);
+    }, 4000);
   }
 
-  function resetTimer() {
-    clearInterval(timer);
-    timer = setInterval(advance, 4000);
-  }
+  prevBtn.addEventListener('click', function() { goTo(current - 1); startTimer(); });
+  nextBtn.addEventListener('click', function() { goTo(current + 1); startTimer(); });
 
-  prevBtn.addEventListener('click', () => goTo(current - 1));
-  nextBtn.addEventListener('click', () => goTo(current + 1));
+  carousel.addEventListener('mouseenter', function() { paused = true; });
+  carousel.addEventListener('mouseleave', function() { paused = false; });
 
-  // Pause on hover
-  carousel.addEventListener('mouseenter', () => clearInterval(timer));
-  carousel.addEventListener('mouseleave', () => { timer = setInterval(advance, 4000); });
+  startTimer();
 })();
