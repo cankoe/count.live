@@ -1585,8 +1585,13 @@ function updatePreview() {
 
   // Update preview countdown
   const previewCountdown = document.getElementById('preview-countdown');
-  const targetDate = parseDate(config.date);
+  let targetDate = parseDate(config.date);
   const units = parseUnits(config.units);
+
+  // Advance to next occurrence for recurring countdowns
+  if (targetDate && config.recur) {
+    targetDate = getNextOccurrence(targetDate, config.recur);
+  }
 
   if (!targetDate) {
     previewCountdown.innerHTML = '<div style="opacity:0.5">Set a date above</div>';
