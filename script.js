@@ -1762,3 +1762,7 @@ document.querySelectorAll('.accordion-header').forEach(header => {
 
   startTimer();
 })();
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js');
+}

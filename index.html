@@ -16,10 +16,41 @@
   <meta name="twitter:image" content="https://count.live/logo.png">
   <meta name="robots" id="robots-meta" content="index, follow">
   <link rel="canonical" id="canonical-link" href="https://count.live">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="apple-touch-icon" href="logo.png">
-  <title>Countdown</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>count.live - Free Online Countdown Timer | Create & Share</title>
   <link rel="stylesheet" href="styles.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "count.live",
+    "url": "https://count.live",
+    "description": "Free online countdown timer — create, customize, and share countdowns for any event in seconds. No sign-up, no tracking.",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "Customizable colors, fonts, and themes",
+      "Shareable via URL",
+      "Embeddable via iframe",
+      "Recurring countdowns",
+      "Progress bars",
+      "No sign-up required",
+      "No tracking",
+      "Works offline"
+    ],
+    "screenshot": "https://count.live/logo.png",
+    "browserRequirements": "Requires a modern web browser"
+  }
+  </script>
 </head>
 <body>
   <div class="container" id="countdown-view">
@@ -138,7 +169,7 @@
               </div>
               <div class="example-info">
                 <strong>New Year's Countdown (Pacific)</strong>
-                <span>Recurring yearly, confetti, chime, timezone</span>
+                <span>Recurring yearly countdown timer with confetti, chime, and timezone</span>
               </div>
             </a>
             <a class="example-card" href="/#date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg" target="_blank" rel="noopener">
@@ -146,8 +177,8 @@
                 <iframe src="/#date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg&embed=1" loading="lazy" title="Valentine's Day" tabindex="-1"></iframe>
               </div>
               <div class="example-info">
-                <strong>Valentine's Day</strong>
-                <span>Recurring yearly, sunset theme, serif</span>
+                <strong>Valentine's Day Countdown</strong>
+                <span>Recurring yearly event countdown with sunset theme</span>
               </div>
             </a>
             <a class="example-card" href="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T05:00:00&tz=America%2FChicago" target="_blank" rel="noopener">
@@ -155,8 +186,8 @@
                 <iframe src="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T05:00:00&tz=America%2FChicago&embed=1" loading="lazy" title="Race Day" tabindex="-1"></iframe>
               </div>
               <div class="example-info">
-                <strong>Race Day</strong>
-                <span>Display font, milliseconds, progress bar, timezone</span>
+                <strong>Race Day Countdown</strong>
+                <span>Event countdown timer with milliseconds and progress bar</span>
               </div>
             </a>
             <a class="example-card" href="/#date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg" target="_blank" rel="noopener">
@@ -164,8 +195,8 @@
                 <iframe src="/#date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg&embed=1" loading="lazy" title="Product Launch" tabindex="-1"></iframe>
               </div>
               <div class="example-info">
-                <strong>Product Launch</strong>
-                <span>Neon theme, monospace, weeks, tech background</span>
+                <strong>Product Launch Countdown</strong>
+                <span>Launch countdown timer with neon theme and custom units</span>
               </div>
             </a>
             <a class="example-card" href="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg&tz=America%2FNew_York" target="_blank" rel="noopener">
@@ -173,8 +204,8 @@
                 <iframe src="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg&tz=America%2FNew_York&embed=1" loading="lazy" title="Daily Standup" tabindex="-1"></iframe>
               </div>
               <div class="example-info">
-                <strong>Daily Standup</strong>
-                <span>Recurring daily, ocean theme, timezone</span>
+                <strong>Daily Standup Timer</strong>
+                <span>Recurring daily countdown with ocean theme and timezone</span>
               </div>
             </a>
             <a class="example-card" href="/#date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg" target="_blank" rel="noopener">
@@ -182,8 +213,8 @@
                 <iframe src="/#date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg&embed=1" loading="lazy" title="Birthday Countdown" tabindex="-1"></iframe>
               </div>
               <div class="example-info">
-                <strong>Birthday Countdown</strong>
-                <span>Fireworks, progress bar, percentage, balloons</span>
+                <strong>Birthday Countdown Timer</strong>
+                <span>Birthday countdown with fireworks, progress bar, and balloons</span>
               </div>
             </a>
           </div>
