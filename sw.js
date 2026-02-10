@@ -1,4 +1,4 @@
-const STATIC_CACHE = 'static-v1';
+const STATIC_CACHE = 'static-v2';
 const IMAGES_CACHE = 'images-v1';
 
 const APP_SHELL = [
@@ -43,15 +43,35 @@ self.addEventListener('fetch', (event) => {
   // Skip /og-image endpoint (server-only for social crawlers)
   if (url.pathname.startsWith('/og-image')) return;
 
-  // Navigation requests: serve cached index.html (SPA)
+  // Navigation requests: network-first, fall back to cached index.html
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/').then((cached) => cached || fetch(event.request))
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put('/', clone));
+          return response;
+        })
+        .catch(() => caches.match('/'))
     );
     return;
   }
 
-  // Same-origin static assets: cache-first
+  // Same-origin code assets (HTML, CSS, JS): network-first so updates load immediately
+  if (url.origin === self.location.origin && /\.(css|js|html)$/.test(url.pathname)) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => cache.put(event.request, clone));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Same-origin images: cache-first (rarely change)
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(event.request).then((cached) => cached || fetch(event.request))
