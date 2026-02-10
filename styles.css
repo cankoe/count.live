@@ -224,7 +224,6 @@ body.builder-mode {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0;
 }
 
 .builder-subtitle {
@@ -306,7 +305,7 @@ body.builder-light .theme-toggle .icon-moon {
 .builder h1 {
   font-size: 2rem;
   font-weight: 300;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   text-align: center;
 }
 
