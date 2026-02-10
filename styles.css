@@ -980,8 +980,18 @@ body.builder-light .github-button-small {
 /* Mobile styles for builder */
 @media (max-width: 767px) {
   .preview-sticky {
-    position: static;
-    margin-bottom: 1rem;
+    display: contents;
+  }
+
+  .preview-frame {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-radius: 0;
+    margin: 0 -1rem;
+    padding: 1rem;
+    border-left: none;
+    border-right: none;
   }
 
   .builder-controls {
@@ -1062,6 +1072,8 @@ body.builder-light .github-button-small {
   .preview-frame {
     padding: 1rem;
     min-height: 100px;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
   }
 
   .preview-frame .title {
