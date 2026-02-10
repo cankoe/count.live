@@ -224,7 +224,15 @@ body.builder-mode {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
+}
+
+.builder-subtitle {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  opacity: 0.55;
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 .builder-header h1 {
