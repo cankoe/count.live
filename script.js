@@ -1018,12 +1018,64 @@ function getTimezoneOffset(tzId) {
   }
 }
 
+// Localize example card URLs to use the user's timezone
+function localizeExamples() {
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const cards = document.querySelectorAll('.example-card');
+
+  cards.forEach(card => {
+    const elements = [card, card.querySelector('iframe')].filter(Boolean);
+
+    elements.forEach(el => {
+      const attr = el.tagName === 'IFRAME' ? 'src' : 'href';
+      const rawUrl = el.getAttribute(attr);
+      if (!rawUrl) return;
+
+      try {
+        const url = new URL(rawUrl, window.location.origin);
+        const isHash = rawUrl.includes('#') && !rawUrl.includes('?');
+        const params = isHash
+          ? new URLSearchParams(url.hash.slice(1))
+          : url.searchParams;
+
+        // Convert date to user's timezone (dates are stored as intended local times)
+        const dateStr = params.get('date');
+        if (dateStr) {
+          const utcDate = localToUTC(dateStr, userTz);
+          params.set('date', utcDate);
+        }
+
+        // Convert start date if present
+        const startStr = params.get('start');
+        if (startStr) {
+          const utcStart = localToUTC(startStr, userTz);
+          params.set('start', utcStart);
+        }
+
+        // Set user's timezone
+        params.set('tz', userTz);
+
+        if (isHash) {
+          el.setAttribute(attr, url.pathname + '#' + params.toString());
+        } else {
+          el.setAttribute(attr, url.pathname + '?' + params.toString());
+        }
+      } catch (e) {
+        // Skip if URL parsing fails
+      }
+    });
+  });
+}
+
 function initBuilder() {
   if (builderInitialized) {
     updatePreview();
     return;
   }
   builderInitialized = true;
+
+  // Localize example cards to user's timezone
+  localizeExamples();
 
   // Builder theme toggle (light/dark mode for the builder UI itself)
   const builderThemeToggle = document.getElementById('builder-theme-toggle');
