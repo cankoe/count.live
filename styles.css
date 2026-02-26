@@ -666,7 +666,8 @@ body.builder-light .accordion-item {
 }
 
 .coffee-button-small,
-.github-button-small {
+.github-button-small,
+.email-button-small {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -679,13 +680,15 @@ body.builder-light .accordion-item {
 }
 
 .coffee-button-small:hover,
-.github-button-small:hover {
+.github-button-small:hover,
+.email-button-small:hover {
   transform: translateY(-1px);
   opacity: 0.9;
 }
 
 .coffee-button-small svg,
-.github-button-small svg {
+.github-button-small svg,
+.email-button-small svg {
   width: 14px;
   height: 14px;
 }
@@ -695,7 +698,8 @@ body.builder-light .accordion-item {
   color: #000000;
 }
 
-.github-button-small {
+.github-button-small,
+.email-button-small {
   background: rgba(255,255,255,0.15);
   color: inherit;
 }
@@ -704,7 +708,8 @@ body.builder-light .preview-support {
   border-top-color: rgba(0,0,0,0.1);
 }
 
-body.builder-light .github-button-small {
+body.builder-light .github-button-small,
+body.builder-light .email-button-small {
   background: rgba(0,0,0,0.08);
 }
 
