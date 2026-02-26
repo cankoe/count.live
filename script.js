@@ -915,7 +915,11 @@ function init() {
     document.title = title ? `${countdownStr} - ${title}` : countdownStr;
 
     const interval = units.includes('milliseconds') ? 16 : 100;
-    requestAnimationFrame(() => setTimeout(update, interval));
+    if (document.hidden) {
+      setTimeout(update, 1000);
+    } else {
+      requestAnimationFrame(() => setTimeout(update, interval));
+    }
   }
 
   update();
@@ -1620,6 +1624,7 @@ function updatePreview() {
   const fg = '#' + (config.fg || 'ffffff');
   frame.style.backgroundColor = bg;
   frame.style.color = fg;
+  updateFavicon(fg, bg);
 
   // Update preview frame font
   const fontFamily = FONT_STACKS[config.font] || FONT_STACKS.sans;
