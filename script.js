@@ -31,6 +31,40 @@ const FONT_STACKS = {
   display: "'Impact', 'Arial Black', sans-serif"
 };
 
+// Update favicon to match countdown theme colors
+function updateFavicon(fg, bg) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="${bg}"/><text x="3" y="24" font-family="'Courier New',monospace" font-weight="700" font-size="22" fill="${fg}">c<tspan fill="${fg}">.</tspan></text></svg>`;
+  const link = document.querySelector('link[rel="icon"]');
+  if (link) link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = bg;
+}
+
+// Show a brief toast notification
+function showToast(message) {
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.remove('show');
+  void toast.offsetWidth;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// Mailto fallback — also copy email to clipboard
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href^="mailto:"]');
+  if (!link) return;
+  const email = link.href.replace('mailto:', '').split('?')[0];
+  navigator.clipboard.writeText(email).then(() => {
+    showToast(`${email} copied to clipboard`);
+  }).catch(() => {});
+});
+
 // Sound effects - generated at runtime for better quality
 const SOUNDS = (function() {
   function createWav(samples, sampleRate) {
@@ -707,6 +741,7 @@ function init() {
   }
   document.body.style.color = fg;
   document.body.style.backgroundColor = bg;
+  updateFavicon(fg, bg);
 
   // Apply font
   const font = params.font && FONT_STACKS[params.font] ? params.font : 'sans';
@@ -898,6 +933,7 @@ function initMultiCountdown(params) {
   const bg = parseColor(params.bg, 'bg') || DEFAULTS.bg;
   document.body.style.color = fg;
   document.body.style.backgroundColor = bg;
+  updateFavicon(fg, bg);
   document.body.style.fontFamily = FONT_STACKS[params.font] || FONT_STACKS.sans;
 
   // Parse multiple countdowns (max 5)
