@@ -16,8 +16,5 @@
     "vitest": "^3",
     "wait-on": "^8",
     "wrangler": "^4"
-  },
-  "dependencies": {
-    "@resvg/resvg-wasm": "^2.6.2"
   }
 }

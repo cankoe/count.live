@@ -60,7 +60,7 @@ const context = vm.createContext({
   Symbol: globalThis.Symbol,
 });
 
-const exportNames = ['isValidHexColor', 'isValidImageUrl', 'escapeHtml', 'SECURITY_HEADERS', 'workerFormatDate'];
+const exportNames = ['escapeHtml', 'SECURITY_HEADERS', 'workerFormatDate'];
 
 const wrappedScript = `
 ${workerContent}
@@ -71,6 +71,4 @@ ${exportNames.map(name => `try { __exports.${name} = ${name}; } catch(e) {}`).jo
 const script = new vm.Script(wrappedScript, { filename: 'worker.js' });
 script.runInContext(context);
 
-export const isValidHexColor = __exports.isValidHexColor;
-export const isValidImageUrl = __exports.isValidImageUrl;
 export const escapeHtml = __exports.escapeHtml;

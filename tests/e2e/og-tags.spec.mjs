@@ -5,26 +5,15 @@ test.describe('OG Tags and Social Metadata', () => {
     const response = await request.get('/?date=2030-01-01T00:00:00&title=OG+Test');
     const html = await response.text();
 
-    // The worker injects og:title with the title param value
     expect(html).toContain('og:title');
     expect(html).toContain('OG Test');
   });
 
-  test('HTML contains og:image meta tag with image URL', async ({ request }) => {
+  test('HTML contains og:image pointing to favicon-og.png', async ({ request }) => {
     const response = await request.get('/?date=2030-01-01T00:00:00&title=OG+Test');
     const html = await response.text();
 
-    // The worker injects og:image pointing to /og-image endpoint
     expect(html).toContain('og:image');
-    expect(html).toContain('/og-image');
-  });
-
-  test('/og-image endpoint returns PNG image', async ({ request }) => {
-    const response = await request.get('/og-image?title=Test');
-
-    expect(response.status()).toBe(200);
-
-    const contentType = response.headers()['content-type'];
-    expect(contentType).toContain('image/png');
+    expect(html).toContain('favicon-og.png');
   });
 });

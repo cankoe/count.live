@@ -1,9 +1,5 @@
 // Cloudflare Worker for dynamic OG meta tags and image generation
 // This intercepts requests and modifies the HTML to include proper social sharing metadata
-import { Resvg, initWasm } from '@resvg/resvg-wasm';
-import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm';
-
-let wasmInitialized = false;
 
 // Security headers to add to all responses
 const SECURITY_HEADERS = {
@@ -35,11 +31,6 @@ function addSecurityHeaders(response, isHtml = false) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
-
-    // Handle OG image generation (SVG)
-    if (url.pathname === '/og-image') {
-      return generateOgImage(url, request, ctx);
-    }
 
     // Only process root path with query params for OG tag injection
     if (url.pathname === '/' && url.searchParams.has('date')) {
@@ -77,22 +68,20 @@ export default {
 
       const fullUrl = url.toString();
 
-      // Build the OG image URL with the same params
-      const ogImageUrl = new URL('/og-image', url.origin);
-      ogImageUrl.search = url.search;
+      const ogImageUrl = `${url.origin}/favicon-og.png`;
 
       // Use HTMLRewriter to modify meta tags
       const transformedResponse = new HTMLRewriter()
         .on('title', new TextRewriter(ogTitle))
         .on('meta[property="og:title"]', new AttributeRewriter('content', ogTitle))
         .on('meta[property="og:description"]', new AttributeRewriter('content', description))
-        .on('meta[property="og:image"]', new AttributeRewriter('content', ogImageUrl.toString()))
+        .on('meta[property="og:image"]', new AttributeRewriter('content', ogImageUrl))
         .on('meta[property="og:url"]', new AttributeRewriter('content', fullUrl))
         .on('meta[name="description"]', new AttributeRewriter('content', description))
-        .on('meta[name="twitter:card"]', new AttributeRewriter('content', 'summary_large_image'))
+        .on('meta[name="twitter:card"]', new AttributeRewriter('content', 'summary'))
         .on('meta[name="twitter:title"]', new AttributeRewriter('content', ogTitle))
         .on('meta[name="twitter:description"]', new AttributeRewriter('content', description))
-        .on('meta[name="twitter:image"]', new AttributeRewriter('content', ogImageUrl.toString()))
+        .on('meta[name="twitter:image"]', new AttributeRewriter('content', ogImageUrl))
         .on('link[rel="canonical"]', new AttributeRewriter('href', fullUrl))
         .transform(response);
 
@@ -153,11 +142,6 @@ export default {
   }
 };
 
-// Validate hex color (6 characters, 0-9 and a-f only)
-function isValidHexColor(color) {
-  return /^[0-9a-fA-F]{6}$/.test(color);
-}
-
 // Format date following ISO 8601 display rules:
 // - Has tz param: show in that timezone with name
 // - Has offset (±HH:MM): show at that offset, no timezone name
@@ -193,110 +177,6 @@ function workerFormatDate(dateStr, tzParam) {
   } catch {
     return '';
   }
-}
-
-// Validate URL for background image (must be https, no data: or javascript:)
-function isValidImageUrl(urlStr) {
-  if (!urlStr) return false;
-  try {
-    const parsed = new URL(urlStr);
-    // Only allow https URLs, block data:, javascript:, etc.
-    return parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
-// Generate OG image as PNG with caching
-async function generateOgImage(url, request, ctx) {
-  const bgParam = url.searchParams.get('bg') || '';
-  const fgParam = url.searchParams.get('fg') || '';
-  const themeParam = url.searchParams.get('theme') || '';
-  const title = url.searchParams.get('title') || 'Countdown';
-  const subtitle = url.searchParams.get('subtitle') || '';
-  const dateParam = url.searchParams.get('date') || '';
-  const font = url.searchParams.get('font') || 'sans';
-
-  // Theme presets (must match script.js)
-  const themes = {
-    dark: { bg: '1a1a2e', fg: 'ffffff' },
-    light: { bg: 'f5f5f5', fg: '333333' },
-    neon: { bg: '0a0a0a', fg: '00ff88' },
-    pastel: { bg: 'ffeef8', fg: '8b6b8a' },
-    ocean: { bg: '0c2d48', fg: '7ec8e3' },
-    sunset: { bg: '2d1b4e', fg: 'ff6b6b' },
-    forest: { bg: '1a3a1a', fg: '90ee90' },
-  };
-  const theme = themes[themeParam];
-
-  // Resolve colors: explicit params > theme > defaults
-  const bg = isValidHexColor(bgParam) ? bgParam : (theme ? theme.bg : '1a1a2e');
-  const fg = isValidHexColor(fgParam) ? fgParam : (theme ? theme.fg : 'ffffff');
-
-  // Font family mapping
-  const fontFamilies = {
-    sans: "'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    mono: "'SF Mono', 'Courier New', monospace",
-    display: "'Impact', 'Arial Black', sans-serif"
-  };
-  const fontFamily = fontFamilies[font] || fontFamilies.sans;
-
-  const tzParam = url.searchParams.get('tz') || '';
-  const dateDisplay = workerFormatDate(dateParam, tzParam);
-
-  const backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
-
-  // Position text based on what content we have
-  let titleY, subtitleY, dateY;
-  if (subtitle && dateDisplay) {
-    titleY = 240; subtitleY = 310; dateY = 400;
-  } else if (subtitle) {
-    titleY = 280; subtitleY = 360;
-  } else if (dateDisplay) {
-    titleY = 270; dateY = 370;
-  } else {
-    titleY = 315;
-  }
-
-  const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
-  ${backgroundSvg}
-  <text x="600" y="${titleY}" text-anchor="middle" font-size="72" font-weight="bold" fill="#${fg}" font-family="sans-serif">${escapeHtml(title)}</text>
-  ${subtitle ? `<text x="600" y="${subtitleY}" text-anchor="middle" font-size="32" fill="#${fg}" opacity="0.8" font-family="sans-serif">${escapeHtml(subtitle)}</text>` : ''}
-  ${dateDisplay ? `<text x="600" y="${dateY}" text-anchor="middle" font-size="28" fill="#${fg}" opacity="0.5" font-family="sans-serif">${escapeHtml(dateDisplay)}</text>` : ''}
-  <text x="1160" y="605" text-anchor="end" font-size="20" fill="#${fg}" opacity="0.3" font-family="sans-serif">count.live</text>
-</svg>`;
-
-  // Check cache first
-  const cache = caches.default;
-  const cacheKey = new Request(url.toString(), { method: 'GET' });
-  const cached = await cache.match(cacheKey);
-  if (cached) return cached;
-
-  // Initialize WASM once
-  if (!wasmInitialized) {
-    await initWasm(resvgWasm);
-    wasmInitialized = true;
-  }
-
-  // Render SVG to PNG
-  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
-  const pngData = resvg.render();
-  const pngBuffer = pngData.asPng();
-
-  const response = new Response(pngBuffer, {
-    headers: {
-      'Content-Type': 'image/png',
-      'Cache-Control': 'public, max-age=86400',
-      ...SECURITY_HEADERS,
-    },
-  });
-
-  // Cache in background
-  if (ctx) ctx.waitUntil(cache.put(cacheKey, response.clone()));
-
-  return response;
 }
 
 // Escape HTML for safe rendering

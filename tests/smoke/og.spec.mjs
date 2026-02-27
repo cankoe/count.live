@@ -1,18 +1,15 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Open Graph', () => {
-  test('countdown URL returns HTML with og:title meta tag', async ({ page }) => {
+  test('countdown URL has og:title meta tag', async ({ page }) => {
     await page.goto('/?date=2030-01-01&title=SmokeTest');
-
     const ogTitle = page.locator('meta[property="og:title"]');
     await expect(ogTitle).toHaveCount(1);
   });
 
-  test('/og-image returns PNG image', async ({ page }) => {
-    const response = await page.goto('/og-image?title=SmokeTest');
+  test('favicon-og.png is loadable', async ({ page }) => {
+    const response = await page.goto('/favicon-og.png');
     expect(response.status()).toBe(200);
-
-    const contentType = response.headers()['content-type'] || '';
-    expect(contentType).toContain('image/png');
+    expect(response.headers()['content-type']).toContain('image/png');
   });
 });
