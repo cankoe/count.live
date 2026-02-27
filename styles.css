@@ -1630,32 +1630,37 @@ body.builder-light .carousel-arrow:hover {
 
 .history-card > .history-delete {
   position: absolute;
-  top: 0.3rem;
-  right: 0.3rem;
+  top: 0.35rem;
+  right: 0.35rem;
   z-index: 1;
 }
 
 .history-delete {
-  background: none;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
   border: none;
-  color: inherit;
+  color: #fff;
   opacity: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 0.1rem 0.3rem;
-  border-radius: 4px;
-  transition: opacity 0.15s, background 0.15s;
-  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  transition: opacity 0.15s, background 0.15s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
 }
 
 .history-card:hover .history-delete {
-  opacity: 0.4;
+  opacity: 0.8;
 }
 
 .history-delete:hover {
-  opacity: 0.9 !important;
-  background: rgba(255,80,80,0.15);
+  opacity: 1 !important;
+  background: rgba(255,60,60,0.85);
+  transform: scale(1.1);
 }
 
 /* History light theme */
