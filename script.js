@@ -1115,7 +1115,7 @@ function saveToHistory(params) {
   };
   const history = getHistory().filter(h => h.url !== url);
   history.unshift(entry);
-  localStorage.setItem('countdownHistory', JSON.stringify(history));
+  localStorage.setItem('countdownHistory', JSON.stringify(history.slice(0, 10)));
 }
 
 function deleteFromHistory(url) {
