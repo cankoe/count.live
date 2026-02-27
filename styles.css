@@ -1592,8 +1592,6 @@ body.builder-light .carousel-arrow:hover {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  max-height: 300px;
-  overflow-y: auto;
 }
 
 .history-item {
@@ -1618,10 +1616,8 @@ body.builder-light .carousel-arrow:hover {
 .history-swatch {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 4px;
   flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.15);
-  background: linear-gradient(135deg, var(--swatch-bg) 50%, var(--swatch-fg) 50%);
 }
 
 .history-info {
@@ -1682,10 +1678,6 @@ body.builder-light .history-item {
 body.builder-light .history-item:hover {
   border-color: rgba(0,0,0,0.25);
   background: rgba(0,0,0,0.02);
-}
-
-body.builder-light .history-swatch {
-  border-color: rgba(0,0,0,0.15);
 }
 
 /* Modal styles */

@@ -1065,10 +1065,13 @@ function renderHistory() {
     item.className = 'history-item';
     item.href = entry.url;
 
-    const swatch = document.createElement('div');
+    const bg = '#' + (entry.bg || '1a1a2e');
+    const fg = '#' + (entry.fg || 'ffffff');
+    const swatch = document.createElement('img');
     swatch.className = 'history-swatch';
-    swatch.style.setProperty('--swatch-bg', '#' + (entry.bg || '1a1a2e'));
-    swatch.style.setProperty('--swatch-fg', '#' + (entry.fg || 'ffffff'));
+    const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="${bg}"/><text x="3" y="24" font-family="'Courier New',monospace" font-weight="700" font-size="22" fill="${fg}">c<tspan fill="${fg}">.</tspan></text></svg>`;
+    swatch.src = 'data:image/svg+xml,' + encodeURIComponent(svgIcon);
+    swatch.alt = '';
 
     const info = document.createElement('div');
     info.className = 'history-info';
