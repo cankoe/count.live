@@ -1315,8 +1315,8 @@ function initBuilder() {
   selectTimezone(defaultTz);
 
   tzInput.addEventListener('focus', () => {
-    tzInput.select();
-    renderTzDropdown(tzInput.value);
+    tzInput.value = '';
+    renderTzDropdown('');
     tzDropdown.classList.add('open');
   });
 
