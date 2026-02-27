@@ -10,7 +10,7 @@ const SECURITY_HEADERS = {
 };
 
 // CSP for HTML pages (allows inline styles for dynamic theming, images from https)
-const HTML_CSP = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self'; frame-ancestors *";
+const HTML_CSP = "default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; connect-src 'self' https://cloudflareinsights.com; frame-ancestors *; worker-src 'self'";
 
 // Helper to add security headers to a response
 function addSecurityHeaders(response, isHtml = false) {
