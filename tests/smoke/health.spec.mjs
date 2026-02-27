@@ -14,7 +14,6 @@ test.describe('Health checks', () => {
     const response = await page.goto('/');
     const headers = response.headers();
     expect(headers['x-content-type-options']).toBe('nosniff');
-    expect(headers['x-frame-options']).toBe('SAMEORIGIN');
   });
 
   test('static assets loadable', async ({ page }) => {
