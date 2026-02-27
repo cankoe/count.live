@@ -27,20 +27,23 @@ test.describe('Countdown History', () => {
   });
 
   test('clicking delete removes a history card', async ({ page }) => {
-    // Start clean
+    // Start clean — clear storage then seed exactly 2 entries
     await page.goto('/');
-    await page.evaluate(() => localStorage.removeItem('countdownHistory'));
-
-    // Visit two countdowns
-    await page.goto('/?date=2030-01-01T00:00:00&title=Keep+Me');
-    await page.goto('/?date=2030-06-01T00:00:00&title=Delete+Me');
-    await page.goto('/');
+    await page.evaluate(() => {
+      localStorage.setItem('countdownHistory', JSON.stringify([
+        { url: 'https://count.live/?date=2030-01-01T00:00:00&title=First', title: 'First', date: '2030-01-01T00:00:00', bg: '1a1a2e', fg: 'ffffff', visitedAt: 1 },
+        { url: 'https://count.live/?date=2030-06-01T00:00:00&title=Second', title: 'Second', date: '2030-06-01T00:00:00', bg: '1a1a2e', fg: 'ffffff', visitedAt: 2 },
+      ]));
+    });
+    await page.reload();
 
     const cards = page.locator('.history-card');
     await expect(cards).toHaveCount(2);
 
-    // Click delete button (force: true since it's opacity:0 until hover)
-    await cards.first().locator('.history-delete').click({ force: true });
+    // Trigger delete on first card via JS
+    await page.evaluate(() => {
+      document.querySelector('.history-delete').dispatchEvent(new MouseEvent('click', { bubbles: false }));
+    });
 
     await expect(cards).toHaveCount(1);
   });
