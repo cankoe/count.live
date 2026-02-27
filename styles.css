@@ -327,7 +327,8 @@ body.builder-light .theme-toggle:hover {
 body.builder-light .builder-row input[type="text"],
 body.builder-light .builder-row input[type="datetime-local"],
 body.builder-light .builder-row select,
-body.builder-light .builder-row textarea {
+body.builder-light .builder-row textarea,
+body.builder-light .tz-input {
   border-color: rgba(0,0,0,0.15);
   background: rgba(255,255,255,0.8);
 }
@@ -471,7 +472,8 @@ body.builder-light .accordion-item {
 .builder-row input[type="text"],
 .builder-row input[type="datetime-local"],
 .builder-row select,
-.builder-row textarea {
+.builder-row textarea,
+.tz-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 1rem;
@@ -529,35 +531,9 @@ body.builder-light .accordion-item {
 }
 
 .tz-combobox {
-  flex: 1.2;
+  flex: 1;
   min-width: 0;
   position: relative;
-}
-
-.tz-input {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 4px;
-  background: rgba(255,255,255,0.1);
-  color: inherit;
-  font-family: inherit;
-  box-sizing: border-box;
-}
-
-.tz-input:focus {
-  outline: none;
-  border-color: rgba(255,255,255,0.4);
-}
-
-body.builder-light .tz-input {
-  border-color: rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.8);
-}
-
-body.builder-light .tz-input:focus {
-  border-color: rgba(0,0,0,0.4);
 }
 
 .tz-dropdown {
