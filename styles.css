@@ -1592,6 +1592,8 @@ body.builder-light .carousel-arrow:hover {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  max-height: 10rem;
+  overflow-y: auto;
 }
 
 .history-item {
