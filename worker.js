@@ -4,7 +4,8 @@
 // Security headers to add to all responses
 const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'SAMEORIGIN',
+  // X-Frame-Options removed — frame-ancestors in CSP handles this
+  // and we need to allow embedding from chrome-extension:// origins
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
 };
