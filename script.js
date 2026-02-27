@@ -655,46 +655,63 @@ function formatTitleCountdown(values, units) {
 
 let lastVerticalState = false;
 
+let countdownBuiltForUnits = null;
+
 function renderCountdown(values, units, isLarge) {
   const countdown = document.getElementById('countdown');
-  countdown.innerHTML = '';
-  countdown.className = 'countdown' + (isLarge ? ' large' : '') + (lastVerticalState ? ' vertical' : '');
+  const unitsKey = units.join(',') + (isLarge ? ':L' : '');
 
-  units.forEach((unit, index) => {
-    const unitEl = document.createElement('div');
-    unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
+  // Only rebuild DOM if units changed; otherwise just update values
+  if (countdownBuiltForUnits !== unitsKey) {
+    countdownBuiltForUnits = unitsKey;
+    countdown.innerHTML = '';
+    countdown.className = 'countdown' + (isLarge ? ' large' : '') + (lastVerticalState ? ' vertical' : '');
 
-    const valueEl = document.createElement('span');
-    valueEl.className = 'value';
-    valueEl.textContent = padValue(values[unit], unit);
+    units.forEach((unit, index) => {
+      const unitEl = document.createElement('div');
+      unitEl.className = 'unit' + (unit === 'milliseconds' ? ' milliseconds' : '');
 
-    const labelEl = document.createElement('span');
-    labelEl.className = 'label';
-    labelEl.textContent = UNIT_CONFIG[unit].label;
+      const valueEl = document.createElement('span');
+      valueEl.className = 'value';
+      valueEl.id = 'val-' + unit;
+      valueEl.textContent = padValue(values[unit], unit);
 
-    unitEl.appendChild(valueEl);
-    unitEl.appendChild(labelEl);
-    countdown.appendChild(unitEl);
+      const labelEl = document.createElement('span');
+      labelEl.className = 'label';
+      labelEl.textContent = UNIT_CONFIG[unit].label;
 
-    // Add colon separator only between time units (h:m:s)
-    const timeUnits = ['hours', 'minutes', 'seconds'];
-    const nextUnit = units[index + 1];
-    if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
-      const sep = document.createElement('span');
-      sep.className = 'separator';
-      sep.textContent = ':';
-      countdown.appendChild(sep);
-    }
-  });
+      unitEl.appendChild(valueEl);
+      unitEl.appendChild(labelEl);
+      countdown.appendChild(unitEl);
 
-  // Check for overflow and switch to vertical if needed
-  requestAnimationFrame(() => {
-    const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-    if (needsVertical !== lastVerticalState) {
-      lastVerticalState = needsVertical;
-      countdown.classList.toggle('vertical', needsVertical);
-    }
-  });
+      const timeUnits = ['hours', 'minutes', 'seconds'];
+      const nextUnit = units[index + 1];
+      if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
+        const sep = document.createElement('span');
+        sep.className = 'separator';
+        sep.textContent = ':';
+        countdown.appendChild(sep);
+      }
+    });
+
+    // Check for overflow once after build
+    requestAnimationFrame(() => {
+      const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
+      if (needsVertical !== lastVerticalState) {
+        lastVerticalState = needsVertical;
+        countdown.classList.toggle('vertical', needsVertical);
+      }
+    });
+  } else {
+    // Fast path: just update the text content of existing value elements
+    units.forEach((unit) => {
+      const el = document.getElementById('val-' + unit);
+      if (el) {
+        const newVal = padValue(values[unit], unit);
+        if (el.textContent !== newVal) el.textContent = newVal;
+      }
+    });
+  }
 }
 
 function renderEndMessage(message, isLarge) {
@@ -961,7 +978,7 @@ function init() {
     const countdownStr = formatTitleCountdown(values, units);
     document.title = title ? `${countdownStr} - ${title}` : countdownStr;
 
-    const interval = units.includes('milliseconds') ? 16 : 100;
+    const interval = units.includes('milliseconds') ? 16 : 1000;
     if (document.hidden) {
       setTimeout(update, 1000);
     } else {
