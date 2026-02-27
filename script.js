@@ -1156,34 +1156,14 @@ let previewSession = 0;
 let previewEndMode = false;
 
 // Common timezones with friendly names
-const TIMEZONES = [
-  { id: 'Pacific/Honolulu', name: 'Hawaii' },
-  { id: 'America/Anchorage', name: 'Alaska' },
-  { id: 'America/Los_Angeles', name: 'Pacific Time (US & Canada)' },
-  { id: 'America/Denver', name: 'Mountain Time (US & Canada)' },
-  { id: 'America/Chicago', name: 'Central Time (US & Canada)' },
-  { id: 'America/New_York', name: 'Eastern Time (US & Canada)' },
-  { id: 'America/Sao_Paulo', name: 'Sao Paulo' },
-  { id: 'America/Argentina/Buenos_Aires', name: 'Buenos Aires' },
-  { id: 'Atlantic/Cape_Verde', name: 'Cape Verde' },
-  { id: 'UTC', name: 'UTC' },
-  { id: 'Europe/London', name: 'London, Dublin, Lisbon' },
-  { id: 'Europe/Paris', name: 'Paris, Berlin, Amsterdam' },
-  { id: 'Europe/Helsinki', name: 'Helsinki, Kyiv, Riga' },
-  { id: 'Europe/Moscow', name: 'Moscow, St. Petersburg' },
-  { id: 'Asia/Dubai', name: 'Dubai, Abu Dhabi' },
-  { id: 'Asia/Karachi', name: 'Karachi, Islamabad' },
-  { id: 'Asia/Kolkata', name: 'Mumbai, New Delhi' },
-  { id: 'Asia/Dhaka', name: 'Dhaka' },
-  { id: 'Asia/Bangkok', name: 'Bangkok, Hanoi, Jakarta' },
-  { id: 'Asia/Singapore', name: 'Singapore, Kuala Lumpur' },
-  { id: 'Asia/Hong_Kong', name: 'Hong Kong' },
-  { id: 'Asia/Shanghai', name: 'Beijing, Shanghai' },
-  { id: 'Asia/Tokyo', name: 'Tokyo, Osaka' },
-  { id: 'Asia/Seoul', name: 'Seoul' },
-  { id: 'Australia/Sydney', name: 'Sydney, Melbourne' },
-  { id: 'Pacific/Auckland', name: 'Auckland, Wellington' }
-];
+// Get all IANA timezones from the browser (400+)
+const TIMEZONES = (typeof Intl !== 'undefined' && Intl.supportedValuesOf
+  ? Intl.supportedValuesOf('timeZone')
+  : ['UTC']
+).map(id => ({
+  id,
+  name: id.replace(/_/g, ' ').split('/').pop()
+}));
 
 function getTimezoneOffset(tzId) {
   try {
@@ -1300,14 +1280,8 @@ function initBuilder() {
   const tzDropdown = document.getElementById('tz-dropdown');
   const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  const userTzInList = TIMEZONES.find(tz => tz.id === userTz);
-  let allTimezones = [...TIMEZONES];
-  if (!userTzInList) {
-    allTimezones.unshift({ id: userTz, name: userTz.replace(/_/g, ' ').split('/').pop() });
-  }
-
   // Build timezone data with display labels
-  const tzData = allTimezones.map(tz => ({
+  const tzData = TIMEZONES.map(tz => ({
     id: tz.id,
     label: `(${getTimezoneOffset(tz.id)}) ${tz.name}`,
     search: `${tz.id} ${tz.name} ${getTimezoneOffset(tz.id)}`.toLowerCase()
