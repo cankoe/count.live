@@ -34,7 +34,7 @@ export default {
 
     // Handle OG image generation (SVG)
     if (url.pathname === '/og-image') {
-      return generateOgImage(url);
+      return generateOgImage(url, request);
     }
 
     // Only process root path with query params for OG tag injection
@@ -205,7 +205,7 @@ function isValidImageUrl(urlStr) {
 }
 
 // Generate OG image as SVG with title/subtitle, target date, and branding
-function generateOgImage(url) {
+function generateOgImage(url, request) {
   const bgParam = url.searchParams.get('bg') || '';
   const fgParam = url.searchParams.get('fg') || '';
   const themeParam = url.searchParams.get('theme') || '';
@@ -239,16 +239,25 @@ function generateOgImage(url) {
   };
   const fontFamily = fontFamilies[font] || fontFamilies.sans;
 
-  // Parse and format target date
+  // Parse and format target date with timezone awareness
+  const timezone = url.searchParams.get('tz') || (request && request.cf && request.cf.timezone) || 'UTC';
   let dateDisplay = '';
   if (dateParam) {
     try {
       const d = new Date(dateParam.includes('Z') || dateParam.includes('+') ? dateParam : dateParam + 'Z');
       if (!isNaN(d.getTime())) {
-        dateDisplay = d.toLocaleString('en-US', {
-          year: 'numeric', month: 'long', day: 'numeric',
-          hour: 'numeric', minute: '2-digit', timeZone: 'UTC'
-        });
+        try {
+          dateDisplay = d.toLocaleString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: 'numeric', minute: '2-digit',
+            timeZone: timezone, timeZoneName: 'short'
+          });
+        } catch {
+          dateDisplay = d.toLocaleString('en-US', {
+            year: 'numeric', month: 'long', day: 'numeric',
+            hour: 'numeric', minute: '2-digit', timeZone: 'UTC'
+          });
+        }
       }
     } catch (e) { /* ignore invalid dates */ }
   }
