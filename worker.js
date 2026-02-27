@@ -208,14 +208,27 @@ function isValidImageUrl(urlStr) {
 function generateOgImage(url) {
   const bgParam = url.searchParams.get('bg') || '';
   const fgParam = url.searchParams.get('fg') || '';
+  const themeParam = url.searchParams.get('theme') || '';
   const title = url.searchParams.get('title') || 'Countdown';
   const subtitle = url.searchParams.get('subtitle') || '';
   const dateParam = url.searchParams.get('date') || '';
   const font = url.searchParams.get('font') || 'sans';
 
-  // Validate and sanitize color inputs
-  const bg = isValidHexColor(bgParam) ? bgParam : '1a1a2e';
-  const fg = isValidHexColor(fgParam) ? fgParam : 'ffffff';
+  // Theme presets (must match script.js)
+  const themes = {
+    dark: { bg: '1a1a2e', fg: 'ffffff' },
+    light: { bg: 'f5f5f5', fg: '333333' },
+    neon: { bg: '0a0a0a', fg: '00ff88' },
+    pastel: { bg: 'ffeef8', fg: '8b6b8a' },
+    ocean: { bg: '0c2d48', fg: '7ec8e3' },
+    sunset: { bg: '2d1b4e', fg: 'ff6b6b' },
+    forest: { bg: '1a3a1a', fg: '90ee90' },
+  };
+  const theme = themes[themeParam];
+
+  // Resolve colors: explicit params > theme > defaults
+  const bg = isValidHexColor(bgParam) ? bgParam : (theme ? theme.bg : '1a1a2e');
+  const fg = isValidHexColor(fgParam) ? fgParam : (theme ? theme.fg : 'ffffff');
 
   // Font family mapping
   const fontFamilies = {

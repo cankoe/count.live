@@ -138,6 +138,18 @@ describe('generateOgImage', () => {
     expect(svg).toContain('&lt;script&gt;');
   });
 
+  it('resolves theme param to correct colors', () => {
+    const svg = getSvg('title=Test&theme=neon');
+    expect(svg).toContain('fill="#0a0a0a"');
+    expect(svg).toContain('fill="#00ff88"');
+  });
+
+  it('explicit bg/fg override theme', () => {
+    const svg = getSvg('title=Test&theme=neon&bg=ff0000&fg=00ff00');
+    expect(svg).toContain('fill="#ff0000"');
+    expect(svg).toContain('fill="#00ff00"');
+  });
+
   it('returns correct content type', () => {
     const response = generateOgImage(makeUrl('title=Test'));
     expect(response.headers.get('content-type')).toBe('image/svg+xml');
