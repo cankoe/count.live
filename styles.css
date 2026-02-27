@@ -528,6 +528,79 @@ body.builder-light .accordion-item {
   min-width: 0;
 }
 
+.tz-combobox {
+  flex: 1.2;
+  min-width: 0;
+  position: relative;
+}
+
+.tz-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 5px;
+  background: rgba(255,255,255,0.1);
+  color: inherit;
+  font: inherit;
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+.tz-input:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.4);
+}
+
+body.builder-light .tz-input {
+  border-color: rgba(0,0,0,0.2);
+  background: #fff;
+}
+
+body.builder-light .tz-input:focus {
+  border-color: rgba(0,0,0,0.4);
+}
+
+.tz-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #2a2a3e;
+  border: 1px solid rgba(255,255,255,0.2);
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  z-index: 100;
+}
+
+.tz-dropdown.open {
+  display: block;
+}
+
+body.builder-light .tz-dropdown {
+  background: #fff;
+  border-color: rgba(0,0,0,0.2);
+}
+
+.tz-option {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background 0.1s;
+}
+
+.tz-option:hover,
+.tz-option.highlighted {
+  background: rgba(255,255,255,0.1);
+}
+
+body.builder-light .tz-option:hover,
+body.builder-light .tz-option.highlighted {
+  background: rgba(0,0,0,0.06);
+}
+
 .quick-times {
   display: flex;
   gap: 0.5rem;

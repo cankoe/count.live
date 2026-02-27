@@ -238,7 +238,11 @@
       <label>Date & Time</label>
       <div class="datetime-row">
         <input type="datetime-local" id="b-date">
-        <select id="b-timezone"></select>
+        <div class="tz-combobox" id="tz-combobox">
+          <input type="text" id="b-timezone-input" class="tz-input" placeholder="Timezone..." autocomplete="off">
+          <input type="hidden" id="b-timezone">
+          <div class="tz-dropdown" id="tz-dropdown"></div>
+        </div>
       </div>
       <div class="quick-times">
         <button type="button" class="quick-time-btn" data-time="00:00">Midnight</button>

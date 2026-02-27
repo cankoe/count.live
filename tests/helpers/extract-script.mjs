@@ -165,7 +165,7 @@ const exportNames = [
   'truncate', 'sanitizeUrlForCss', 'escapeHtml', 'linkifyText',
   'addYears', 'addMonths', 'calculateTimeUnits', 'getNextOccurrence',
   'calculateProgress', 'buildUrl', 'formatTitleCountdown', 'padValue',
-  'generateICS', 'utcToLocal', 'localToUTC',
+  'generateICS', 'utcToLocal', 'localToUTC', 'localToISO', 'formatDateForDisplay',
 ];
 
 // Wrap script: run it, then assign desired names to __exports
@@ -208,6 +208,8 @@ export const padValue = __exports.padValue;
 export const generateICS = __exports.generateICS;
 export const utcToLocal = __exports.utcToLocal;
 export const localToUTC = __exports.localToUTC;
+export const localToISO = __exports.localToISO;
+export const formatDateForDisplay = __exports.formatDateForDisplay;
 
 // Expose mocks for tests that need to set location etc.
 export const _mockWindow = mockWindow;

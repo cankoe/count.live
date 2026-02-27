@@ -415,6 +415,50 @@ function formatLocalTime(date) {
   }).format(date);
 }
 
+// Format a date string for display following ISO 8601 display rules:
+// - Has tz param: show in that timezone with timezone name (e.g., "January 1, 2027, 12:00 AM EST")
+// - Has offset (±HH:MM): show time at that offset, no timezone name
+// - Bare (no offset/Z): treat as UTC, show "UTC"
+// - Has Z: treat as UTC, show "UTC"
+function formatDateForDisplay(dateStr, tzParam) {
+  if (!dateStr) return '';
+  try {
+    const d = parseDate(dateStr);
+    if (!d) return dateStr;
+
+    const hasOffset = /[+-]\d{2}:\d{2}$/.test(dateStr);
+    const hasZ = dateStr.endsWith('Z');
+    const opts = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+
+    if (tzParam) {
+      // ISO + tz param: show in named timezone
+      try {
+        return d.toLocaleString('en-US', { ...opts, timeZone: tzParam, timeZoneName: 'short' });
+      } catch {
+        return d.toLocaleString('en-US', { ...opts, timeZone: 'UTC', timeZoneName: 'short' });
+      }
+    } else if (hasOffset) {
+      // ISO with offset: show time at that offset, no timezone name
+      // Extract the offset and compute a fixed-offset display
+      const match = dateStr.match(/([+-])(\d{2}):(\d{2})$/);
+      if (match) {
+        const sign = match[1] === '+' ? 1 : -1;
+        const offH = parseInt(match[2]);
+        const offM = parseInt(match[3]);
+        const offsetMs = sign * (offH * 3600000 + offM * 60000);
+        // Display the time at the given offset
+        const local = new Date(d.getTime() + offsetMs);
+        return local.toLocaleString('en-US', { ...opts, timeZone: 'UTC' });
+      }
+    }
+
+    // Bare or Z: show as UTC
+    return d.toLocaleString('en-US', { ...opts, timeZone: 'UTC', timeZoneName: 'short' });
+  } catch {
+    return dateStr;
+  }
+}
+
 // Calculate progress percentage
 function calculateProgress(startDate, endDate) {
   const now = Date.now();
@@ -1250,26 +1294,68 @@ function initBuilder() {
     themeContainer.appendChild(btn);
   });
 
-  // Populate timezone dropdown
-  const tzSelect = document.getElementById('b-timezone');
+  // Populate searchable timezone combobox
+  const tzHidden = document.getElementById('b-timezone');
+  const tzInput = document.getElementById('b-timezone-input');
+  const tzDropdown = document.getElementById('tz-dropdown');
   const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  // Check if user's timezone is in the list
   const userTzInList = TIMEZONES.find(tz => tz.id === userTz);
-
-  // Build timezone list, adding user's timezone if not present
   let allTimezones = [...TIMEZONES];
   if (!userTzInList) {
     allTimezones.unshift({ id: userTz, name: userTz.replace(/_/g, ' ').split('/').pop() });
   }
 
-  allTimezones.forEach(tz => {
-    const option = document.createElement('option');
-    option.value = tz.id;
-    const offset = getTimezoneOffset(tz.id);
-    option.textContent = `(${offset}) ${tz.name}`;
-    if (tz.id === userTz) option.selected = true;
-    tzSelect.appendChild(option);
+  // Build timezone data with display labels
+  const tzData = allTimezones.map(tz => ({
+    id: tz.id,
+    label: `(${getTimezoneOffset(tz.id)}) ${tz.name}`,
+    search: `${tz.id} ${tz.name} ${getTimezoneOffset(tz.id)}`.toLowerCase()
+  }));
+
+  function renderTzDropdown(filter) {
+    const query = (filter || '').toLowerCase();
+    tzDropdown.innerHTML = '';
+    const matches = query ? tzData.filter(t => t.search.includes(query)) : tzData;
+    matches.slice(0, 50).forEach(tz => {
+      const div = document.createElement('div');
+      div.className = 'tz-option';
+      div.textContent = tz.label;
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectTimezone(tz);
+      });
+      tzDropdown.appendChild(div);
+    });
+  }
+
+  function selectTimezone(tz) {
+    tzHidden.value = tz.id;
+    tzInput.value = tz.label;
+    tzDropdown.classList.remove('open');
+    updatePreview();
+  }
+
+  // Set default timezone
+  const defaultTz = tzData.find(t => t.id === userTz) || tzData[0];
+  selectTimezone(defaultTz);
+
+  tzInput.addEventListener('focus', () => {
+    tzInput.select();
+    renderTzDropdown(tzInput.value);
+    tzDropdown.classList.add('open');
+  });
+
+  tzInput.addEventListener('input', () => {
+    renderTzDropdown(tzInput.value);
+    tzDropdown.classList.add('open');
+  });
+
+  tzInput.addEventListener('blur', () => {
+    tzDropdown.classList.remove('open');
+    // Restore display label if input doesn't match
+    const match = tzData.find(t => t.id === tzHidden.value);
+    if (match) tzInput.value = match.label;
   });
 
   // Set default date to tomorrow noon in local time
@@ -1291,7 +1377,12 @@ function initBuilder() {
 
     // Timezone (set before date so conversion uses correct tz)
     if (prefill.tz) {
-      document.getElementById('b-timezone').value = prefill.tz;
+      const prefillTz = tzData.find(t => t.id === prefill.tz);
+      if (prefillTz) selectTimezone(prefillTz);
+      else {
+        tzHidden.value = prefill.tz;
+        tzInput.value = prefill.tz;
+      }
     }
 
     // Date - convert UTC back to the selected timezone's local time
@@ -1352,8 +1443,6 @@ function initBuilder() {
 
     // Don't clear URL - updatePreview will set it with current config + edit=1
   }
-
-  tzSelect.addEventListener('change', updatePreview);
 
   // Recurrence change
   document.getElementById('b-recur').addEventListener('change', updatePreview);
@@ -1584,9 +1673,18 @@ function downloadICS() {
   closeModal('calendar-modal');
 }
 
+// Converts a date string to the local time in a given timezone.
+// For dates with offsets (e.g., "2027-01-01T00:00:00-05:00"), extracts the local part directly.
+// For bare UTC dates, converts using Intl.
 function utcToLocal(dateStr, timezone) {
   if (!dateStr) return '';
   try {
+    // If the date has an offset, the local time is already embedded in the string
+    const offsetMatch = dateStr.match(/^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2})(:\d{2})?([+-]\d{2}:\d{2})$/);
+    if (offsetMatch) {
+      return offsetMatch[1]; // Return just the date-time part without offset
+    }
+
     const d = parseDate(dateStr);
     if (!d) return dateStr;
     const parts = new Intl.DateTimeFormat('en-CA', {
@@ -1596,24 +1694,25 @@ function utcToLocal(dateStr, timezone) {
     }).formatToParts(d);
     const vals = {};
     parts.forEach(p => vals[p.type] = p.value);
-    return `${vals.year}-${vals.month}-${vals.day}T${vals.hour}:${vals.minute}`;
+    // Intl with hour12:false can return hour=24 for midnight — normalize
+    const hr = vals.hour === '24' ? '00' : vals.hour;
+    return `${vals.year}-${vals.month}-${vals.day}T${hr}:${vals.minute}`;
   } catch {
     return dateStr;
   }
 }
 
-function localToUTC(dateStr, timezone) {
+// Returns ISO 8601 with offset: "2027-01-01T00:00:00-05:00"
+// The date stays as the user typed it, with the timezone's UTC offset appended.
+function localToISO(dateStr, timezone) {
   if (!dateStr) return '';
   try {
-    // Parse the input datetime string (e.g., "2026-01-27T12:00")
     const [datePart, timePart] = dateStr.split('T');
     const [year, month, day] = datePart.split('-').map(Number);
-    const [hour, minute] = timePart.split(':').map(Number);
+    const [hour, minute] = (timePart || '00:00').split(':').map(Number);
 
-    // Create a reference UTC date with these values
+    // Calculate the UTC offset for this timezone at this specific date/time
     const utcRef = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
-
-    // Find what time it shows in the target timezone
     const tzParts = new Intl.DateTimeFormat('en-US', {
       timeZone: timezone,
       year: 'numeric', month: 'numeric', day: 'numeric',
@@ -1622,15 +1721,36 @@ function localToUTC(dateStr, timezone) {
 
     const tzValues = {};
     tzParts.forEach(p => tzValues[p.type] = parseInt(p.value) || 0);
-
-    // Calculate offset: how much the timezone differs from UTC
+    // Intl with hour12:false can return hour=24 for midnight — normalize to 0
+    if (tzValues.hour === 24) tzValues.hour = 0;
     const tzTime = Date.UTC(tzValues.year, tzValues.month - 1, tzValues.day, tzValues.hour, tzValues.minute);
-    const offset = tzTime - utcRef.getTime();
+    const offsetMs = tzTime - utcRef.getTime();
 
-    // User's intended UTC time = their local time - offset
-    const targetUTC = new Date(utcRef.getTime() - offset);
-    return targetUTC.toISOString().slice(0, 19);
+    // Format offset as ±HH:MM
+    const absOffset = Math.abs(offsetMs);
+    const offHours = Math.floor(absOffset / 3600000);
+    const offMins = Math.floor((absOffset % 3600000) / 60000);
+    const sign = offsetMs >= 0 ? '+' : '-';
+    const offsetStr = `${sign}${String(offHours).padStart(2, '0')}:${String(offMins).padStart(2, '0')}`;
+
+    // Return the local time as-is with the offset appended
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00${offsetStr}`;
   } catch (e) {
+    return dateStr;
+  }
+}
+
+// Legacy wrapper for backwards compatibility (used by localizeExamples)
+function localToUTC(dateStr, timezone) {
+  if (!dateStr) return '';
+  try {
+    const iso = localToISO(dateStr, timezone);
+    // Convert the ISO with offset to bare UTC
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toISOString().slice(0, 19);
+  } catch {
     return dateStr;
   }
 }
@@ -1638,10 +1758,10 @@ function localToUTC(dateStr, timezone) {
 function getBuilderConfig() {
   const dateInput = document.getElementById('b-date').value;
   const timezone = document.getElementById('b-timezone').value;
-  const dateUTC = localToUTC(dateInput, timezone);
+  const dateISO = localToISO(dateInput, timezone);
 
   const startInput = document.getElementById('b-start').value;
-  const startUTC = startInput ? localToUTC(startInput, timezone) : '';
+  const startISO = startInput ? localToISO(startInput, timezone) : '';
 
   const units = [];
   document.querySelectorAll('.units-grid input:checked').forEach(cb => {
@@ -1649,7 +1769,7 @@ function getBuilderConfig() {
   });
 
   return {
-    date: dateUTC,
+    date: dateISO,
     title: document.getElementById('b-title').value,
     subtitle: document.getElementById('b-subtitle').value,
     bg: document.getElementById('b-bg').value,
@@ -1665,7 +1785,7 @@ function getBuilderConfig() {
     progress: document.getElementById('b-progress').checked,
     percent: document.getElementById('b-percent').checked,
     notify: document.getElementById('b-notify').checked,
-    start: startUTC,
+    start: startISO,
     tz: timezone
   };
 }

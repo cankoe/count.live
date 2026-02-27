@@ -53,46 +53,8 @@ export default {
       const subtitle = url.searchParams.get('subtitle') || '';
       const dateParam = url.searchParams.get('date') || '';
 
-      // Get timezone from Cloudflare request (based on IP geolocation)
-      const timezone = request.cf?.timezone || 'UTC';
-
-      // Parse the target date
-      let targetDate = null;
-      if (dateParam) {
-        try {
-          targetDate = new Date(dateParam.includes('Z') || dateParam.includes('+') ? dateParam : dateParam + 'Z');
-          if (isNaN(targetDate.getTime())) targetDate = null;
-        } catch (e) {
-          targetDate = null;
-        }
-      }
-
-      // Format the date for display in the viewer's timezone
-      let dateDisplay = '';
-      if (targetDate) {
-        try {
-          dateDisplay = targetDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            timeZone: timezone,
-            timeZoneName: 'short'
-          });
-        } catch (e) {
-          // Fallback to UTC if timezone is invalid
-          dateDisplay = targetDate.toLocaleString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: '2-digit',
-            timeZone: 'UTC',
-            timeZoneName: 'short'
-          });
-        }
-      }
+      const tzParam = url.searchParams.get('tz') || '';
+      const dateDisplay = workerFormatDate(dateParam, tzParam);
 
       // OG title: just the event title (no countdown values, which change constantly)
       const ogTitle = title || 'Countdown';
@@ -192,6 +154,43 @@ function isValidHexColor(color) {
   return /^[0-9a-fA-F]{6}$/.test(color);
 }
 
+// Format date following ISO 8601 display rules:
+// - Has tz param: show in that timezone with name
+// - Has offset (±HH:MM): show at that offset, no timezone name
+// - Bare/Z: show as UTC
+function workerFormatDate(dateStr, tzParam) {
+  if (!dateStr) return '';
+  try {
+    const hasOffset = /[+-]\d{2}:\d{2}$/.test(dateStr);
+    const d = new Date(dateStr.includes('Z') || dateStr.includes('+') || dateStr.includes('-') && dateStr.lastIndexOf('-') > 7 ? dateStr : dateStr + 'Z');
+    if (isNaN(d.getTime())) return '';
+
+    const opts = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
+
+    if (tzParam) {
+      try {
+        return d.toLocaleString('en-US', { ...opts, timeZone: tzParam, timeZoneName: 'short' });
+      } catch {
+        return d.toLocaleString('en-US', { ...opts, timeZone: 'UTC', timeZoneName: 'short' });
+      }
+    } else if (hasOffset) {
+      const match = dateStr.match(/([+-])(\d{2}):(\d{2})$/);
+      if (match) {
+        const sign = match[1] === '+' ? 1 : -1;
+        const offH = parseInt(match[2]);
+        const offM = parseInt(match[3]);
+        const offsetMs = sign * (offH * 3600000 + offM * 60000);
+        const local = new Date(d.getTime() + offsetMs);
+        return local.toLocaleString('en-US', { ...opts, timeZone: 'UTC' });
+      }
+    }
+
+    return d.toLocaleString('en-US', { ...opts, timeZone: 'UTC', timeZoneName: 'short' });
+  } catch {
+    return '';
+  }
+}
+
 // Validate URL for background image (must be https, no data: or javascript:)
 function isValidImageUrl(urlStr) {
   if (!urlStr) return false;
@@ -239,28 +238,8 @@ function generateOgImage(url, request) {
   };
   const fontFamily = fontFamilies[font] || fontFamilies.sans;
 
-  // Parse and format target date with timezone awareness
-  const timezone = url.searchParams.get('tz') || (request && request.cf && request.cf.timezone) || 'UTC';
-  let dateDisplay = '';
-  if (dateParam) {
-    try {
-      const d = new Date(dateParam.includes('Z') || dateParam.includes('+') ? dateParam : dateParam + 'Z');
-      if (!isNaN(d.getTime())) {
-        try {
-          dateDisplay = d.toLocaleString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: 'numeric', minute: '2-digit',
-            timeZone: timezone, timeZoneName: 'short'
-          });
-        } catch {
-          dateDisplay = d.toLocaleString('en-US', {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: 'numeric', minute: '2-digit', timeZone: 'UTC'
-          });
-        }
-      }
-    } catch (e) { /* ignore invalid dates */ }
-  }
+  const tzParam = url.searchParams.get('tz') || '';
+  const dateDisplay = workerFormatDate(dateParam, tzParam);
 
   const backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
 
