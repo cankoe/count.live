@@ -978,9 +978,9 @@ function init() {
     const countdownStr = formatTitleCountdown(values, units);
     document.title = title ? `${countdownStr} - ${title}` : countdownStr;
 
-    if (units.includes('milliseconds')) {
-      // For ms mode: calculate real values at 1s intervals,
-      // animate ms digits at 60fps by interpolating from remaining time
+    const hasLargerUnits = units.some(u => u !== 'milliseconds');
+    if (units.includes('milliseconds') && hasLargerUnits) {
+      // ms alongside other units: interpolate just the fractional ms at 60fps
       const msUpdate = () => {
         if (showingZero) return;
         const remaining = targetDate - new Date();
@@ -991,12 +991,10 @@ function init() {
         requestAnimationFrame(msUpdate);
       };
       requestAnimationFrame(msUpdate);
-      // Recalculate all units every second
-      if (document.hidden) {
-        setTimeout(update, 1000);
-      } else {
-        setTimeout(update, 1000);
-      }
+      setTimeout(update, 1000);
+    } else if (units.includes('milliseconds')) {
+      // ms is the only/primary unit: full recalculate at 60fps
+      requestAnimationFrame(() => setTimeout(update, 16));
     } else {
       if (document.hidden) {
         setTimeout(update, 1000);
