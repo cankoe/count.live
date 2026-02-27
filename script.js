@@ -978,11 +978,31 @@ function init() {
     const countdownStr = formatTitleCountdown(values, units);
     document.title = title ? `${countdownStr} - ${title}` : countdownStr;
 
-    const interval = units.includes('milliseconds') ? 16 : 1000;
-    if (document.hidden) {
-      setTimeout(update, 1000);
+    if (units.includes('milliseconds')) {
+      // For ms mode: calculate real values at 1s intervals,
+      // animate ms digits at 60fps by interpolating from remaining time
+      const msUpdate = () => {
+        if (showingZero) return;
+        const remaining = targetDate - new Date();
+        if (remaining <= 0) { update(); return; }
+        const msVal = remaining % 1000;
+        const el = document.getElementById('val-milliseconds');
+        if (el) el.textContent = padValue(Math.floor(msVal), 'milliseconds');
+        requestAnimationFrame(msUpdate);
+      };
+      requestAnimationFrame(msUpdate);
+      // Recalculate all units every second
+      if (document.hidden) {
+        setTimeout(update, 1000);
+      } else {
+        setTimeout(update, 1000);
+      }
     } else {
-      requestAnimationFrame(() => setTimeout(update, interval));
+      if (document.hidden) {
+        setTimeout(update, 1000);
+      } else {
+        requestAnimationFrame(() => setTimeout(update, 1000));
+      }
     }
   }
 
