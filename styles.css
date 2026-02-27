@@ -536,13 +536,13 @@ body.builder-light .accordion-item {
 
 .tz-input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
   border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 5px;
+  border-radius: 4px;
   background: rgba(255,255,255,0.1);
   color: inherit;
-  font: inherit;
-  font-size: 0.85rem;
+  font-family: inherit;
   box-sizing: border-box;
 }
 
@@ -552,8 +552,8 @@ body.builder-light .accordion-item {
 }
 
 body.builder-light .tz-input {
-  border-color: rgba(0,0,0,0.2);
-  background: #fff;
+  border-color: rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.8);
 }
 
 body.builder-light .tz-input:focus {
@@ -566,12 +566,12 @@ body.builder-light .tz-input:focus {
   top: 100%;
   left: 0;
   right: 0;
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
   background: #2a2a3e;
   border: 1px solid rgba(255,255,255,0.2);
   border-top: none;
-  border-radius: 0 0 5px 5px;
+  border-radius: 0 0 4px 4px;
   z-index: 100;
 }
 
@@ -581,13 +581,13 @@ body.builder-light .tz-input:focus {
 
 body.builder-light .tz-dropdown {
   background: #fff;
-  border-color: rgba(0,0,0,0.2);
+  border-color: rgba(0,0,0,0.15);
 }
 
 .tz-option {
-  padding: 0.4rem 0.6rem;
+  padding: 0.45rem 0.75rem;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   transition: background 0.1s;
 }
 
