@@ -13,10 +13,8 @@ run_worker_first = true  # Run worker BEFORE serving static assets (for OG tag i
 # Keep persist=false to avoid storing personal event data.
 # Enable temporarily for debugging, then disable.
 [observability]
-enabled = false
+enabled = true
 
 [observability.logs]
-enabled = false  # Disabled for privacy - URLs contain event info
-head_sampling_rate = 0
-persist = false  # IMPORTANT: Don't persist logs containing user data
-invocation_logs = false
+enabled = true
+invocation_logs = true
