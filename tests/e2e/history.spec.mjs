@@ -39,10 +39,8 @@ test.describe('Countdown History', () => {
     const items = page.locator('.history-item');
     await expect(items).toHaveCount(2);
 
-    // Delete via JS to avoid navigation from parent <a> tag
-    await page.evaluate(() => {
-      document.querySelector('.history-delete').click();
-    });
+    // Click delete button (force: true since it's opacity:0 until hover)
+    await items.first().locator('.history-delete').click({ force: true });
 
     await expect(items).toHaveCount(1);
   });
