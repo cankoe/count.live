@@ -14,19 +14,19 @@ test.describe('Countdown History', () => {
     const section = page.locator('#history-section');
     await expect(section).toBeVisible();
 
-    const item = page.locator('.history-item').first();
-    await expect(item).toContainText('History Test');
+    const card = page.locator('.history-card').first();
+    await expect(card).toContainText('History Test');
   });
 
-  test('history shows color swatch matching countdown theme', async ({ page }) => {
-    await page.goto('/?date=2030-01-01T00:00:00&title=Color+Test&bg=ff0000&fg=00ff00');
+  test('history cards show iframe previews', async ({ page }) => {
+    await page.goto('/?date=2030-01-01T00:00:00&title=Preview+Test');
     await page.goto('/');
 
-    const swatch = page.locator('.history-swatch').first();
-    await expect(swatch).toBeVisible();
+    const iframe = page.locator('.history-iframe-wrap iframe').first();
+    await expect(iframe).toBeAttached();
   });
 
-  test('clicking delete removes a history item', async ({ page }) => {
+  test('clicking delete removes a history card', async ({ page }) => {
     // Start clean
     await page.goto('/');
     await page.evaluate(() => localStorage.removeItem('countdownHistory'));
@@ -36,13 +36,13 @@ test.describe('Countdown History', () => {
     await page.goto('/?date=2030-06-01T00:00:00&title=Delete+Me');
     await page.goto('/');
 
-    const items = page.locator('.history-item');
-    await expect(items).toHaveCount(2);
+    const cards = page.locator('.history-card');
+    await expect(cards).toHaveCount(2);
 
     // Click delete button (force: true since it's opacity:0 until hover)
-    await items.first().locator('.history-delete').click({ force: true });
+    await cards.first().locator('.history-delete').click({ force: true });
 
-    await expect(items).toHaveCount(1);
+    await expect(cards).toHaveCount(1);
   });
 
   test('clear button removes all history', async ({ page }) => {

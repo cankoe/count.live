@@ -1062,33 +1062,29 @@ function renderHistory() {
 
   history.forEach(entry => {
     const item = document.createElement('div');
-    item.className = 'history-item';
-    item.addEventListener('click', () => { window.location.href = entry.url; });
+    item.className = 'history-card';
+    item.addEventListener('click', (e) => {
+      if (!e.target.closest('.history-delete')) {
+        window.location.href = entry.url;
+      }
+    });
 
-    const bg = '#' + (entry.bg || '1a1a2e');
-    const fg = '#' + (entry.fg || 'ffffff');
-    const swatch = document.createElement('img');
-    swatch.className = 'history-swatch';
-    const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="${bg}"/><text x="3" y="24" font-family="'Courier New',monospace" font-weight="700" font-size="22" fill="${fg}">c<tspan fill="${fg}">.</tspan></text></svg>`;
-    swatch.src = 'data:image/svg+xml,' + encodeURIComponent(svgIcon);
-    swatch.alt = '';
+    // Iframe preview
+    const iframeWrap = document.createElement('div');
+    iframeWrap.className = 'history-iframe-wrap';
+    const iframe = document.createElement('iframe');
+    iframe.src = entry.url + (entry.url.includes('?') ? '&' : '?') + 'embed=1';
+    iframe.loading = 'lazy';
+    iframe.tabIndex = -1;
+    iframe.title = entry.title || 'Countdown';
+    iframeWrap.appendChild(iframe);
 
+    // Info bar
     const info = document.createElement('div');
-    info.className = 'history-info';
+    info.className = 'history-card-info';
 
-    const titleEl = document.createElement('div');
-    titleEl.className = 'history-info-title';
+    const titleEl = document.createElement('strong');
     titleEl.textContent = entry.title || 'Untitled countdown';
-
-    const dateEl = document.createElement('div');
-    dateEl.className = 'history-info-date';
-    try {
-      const d = parseDate(entry.date);
-      dateEl.textContent = d ? formatLocalTime(d) : entry.date;
-    } catch { dateEl.textContent = entry.date; }
-
-    info.appendChild(titleEl);
-    info.appendChild(dateEl);
 
     const del = document.createElement('button');
     del.className = 'history-delete';
@@ -1100,9 +1096,11 @@ function renderHistory() {
       deleteFromHistory(entry.url);
     });
 
-    item.appendChild(swatch);
+    info.appendChild(titleEl);
+    info.appendChild(del);
+
+    item.appendChild(iframeWrap);
     item.appendChild(info);
-    item.appendChild(del);
     list.appendChild(item);
   });
 
