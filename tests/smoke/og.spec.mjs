@@ -8,11 +8,11 @@ test.describe('Open Graph', () => {
     await expect(ogTitle).toHaveCount(1);
   });
 
-  test('/og-image returns SVG image', async ({ page }) => {
+  test('/og-image returns PNG image', async ({ page }) => {
     const response = await page.goto('/og-image?title=SmokeTest');
     expect(response.status()).toBe(200);
 
     const contentType = response.headers()['content-type'] || '';
-    expect(contentType).toContain('image/svg+xml');
+    expect(contentType).toContain('image/png');
   });
 });

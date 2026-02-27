@@ -10,7 +10,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const workerPath = resolve(__dirname, '../../worker.js');
 let workerContent = readFileSync(workerPath, 'utf-8');
 
-// Remove ESM export syntax (not valid in vm.Script)
+// Remove ESM imports and export syntax (not valid in vm.Script)
+workerContent = workerContent.replace(/^import\s+.*$/gm, '');
 workerContent = workerContent.replace(/^export default/m, 'const __workerHandler__ =');
 
 const __exports = {};
@@ -59,7 +60,7 @@ const context = vm.createContext({
   Symbol: globalThis.Symbol,
 });
 
-const exportNames = ['isValidHexColor', 'isValidImageUrl', 'escapeHtml', 'generateOgImage', 'SECURITY_HEADERS'];
+const exportNames = ['isValidHexColor', 'isValidImageUrl', 'escapeHtml', 'SECURITY_HEADERS', 'workerFormatDate'];
 
 const wrappedScript = `
 ${workerContent}
@@ -73,4 +74,3 @@ script.runInContext(context);
 export const isValidHexColor = __exports.isValidHexColor;
 export const isValidImageUrl = __exports.isValidImageUrl;
 export const escapeHtml = __exports.escapeHtml;
-export const generateOgImage = __exports.generateOgImage;

@@ -1,5 +1,9 @@
 // Cloudflare Worker for dynamic OG meta tags and image generation
 // This intercepts requests and modifies the HTML to include proper social sharing metadata
+import { Resvg, initWasm } from '@resvg/resvg-wasm';
+import resvgWasm from '@resvg/resvg-wasm/index_bg.wasm';
+
+let wasmInitialized = false;
 
 // Security headers to add to all responses
 const SECURITY_HEADERS = {
@@ -34,7 +38,7 @@ export default {
 
     // Handle OG image generation (SVG)
     if (url.pathname === '/og-image') {
-      return generateOgImage(url, request);
+      return generateOgImage(url, request, ctx);
     }
 
     // Only process root path with query params for OG tag injection
@@ -203,8 +207,8 @@ function isValidImageUrl(urlStr) {
   }
 }
 
-// Generate OG image as SVG with title/subtitle, target date, and branding
-function generateOgImage(url, request) {
+// Generate OG image as PNG with caching
+async function generateOgImage(url, request, ctx) {
   const bgParam = url.searchParams.get('bg') || '';
   const fgParam = url.searchParams.get('fg') || '';
   const themeParam = url.searchParams.get('theme') || '';
@@ -258,19 +262,41 @@ function generateOgImage(url, request) {
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   ${backgroundSvg}
-  <text x="600" y="${titleY}" text-anchor="middle" font-size="72" font-weight="bold" fill="#${fg}" font-family="${fontFamily}">${escapeHtml(title)}</text>
-  ${subtitle ? `<text x="600" y="${subtitleY}" text-anchor="middle" font-size="32" fill="#${fg}" opacity="0.8" font-family="${fontFamily}">${escapeHtml(subtitle)}</text>` : ''}
-  ${dateDisplay ? `<text x="600" y="${dateY}" text-anchor="middle" font-size="28" fill="#${fg}" opacity="0.5" font-family="${fontFamily}">${escapeHtml(dateDisplay)}</text>` : ''}
-  <text x="1160" y="605" text-anchor="end" font-size="20" fill="#${fg}" opacity="0.3" font-family="${fontFamily}">count.live</text>
+  <text x="600" y="${titleY}" text-anchor="middle" font-size="72" font-weight="bold" fill="#${fg}" font-family="sans-serif">${escapeHtml(title)}</text>
+  ${subtitle ? `<text x="600" y="${subtitleY}" text-anchor="middle" font-size="32" fill="#${fg}" opacity="0.8" font-family="sans-serif">${escapeHtml(subtitle)}</text>` : ''}
+  ${dateDisplay ? `<text x="600" y="${dateY}" text-anchor="middle" font-size="28" fill="#${fg}" opacity="0.5" font-family="sans-serif">${escapeHtml(dateDisplay)}</text>` : ''}
+  <text x="1160" y="605" text-anchor="end" font-size="20" fill="#${fg}" opacity="0.3" font-family="sans-serif">count.live</text>
 </svg>`;
 
-  return new Response(svg, {
+  // Check cache first
+  const cache = caches.default;
+  const cacheKey = new Request(url.toString(), { method: 'GET' });
+  const cached = await cache.match(cacheKey);
+  if (cached) return cached;
+
+  // Initialize WASM once
+  if (!wasmInitialized) {
+    await initWasm(resvgWasm);
+    wasmInitialized = true;
+  }
+
+  // Render SVG to PNG
+  const resvg = new Resvg(svg, { fitTo: { mode: 'width', value: 1200 } });
+  const pngData = resvg.render();
+  const pngBuffer = pngData.asPng();
+
+  const response = new Response(pngBuffer, {
     headers: {
-      'Content-Type': 'image/svg+xml',
-      'Cache-Control': 'public, max-age=300',
+      'Content-Type': 'image/png',
+      'Cache-Control': 'public, max-age=86400',
       ...SECURITY_HEADERS,
     },
   });
+
+  // Cache in background
+  if (ctx) ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+  return response;
 }
 
 // Escape HTML for safe rendering
