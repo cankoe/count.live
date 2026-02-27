@@ -27,22 +27,23 @@ test.describe('Countdown History', () => {
   });
 
   test('clicking delete removes a history item', async ({ page }) => {
+    // Start clean
+    await page.goto('/');
+    await page.evaluate(() => localStorage.removeItem('countdownHistory'));
+
     // Visit two countdowns
     await page.goto('/?date=2030-01-01T00:00:00&title=Keep+Me');
     await page.goto('/?date=2030-06-01T00:00:00&title=Delete+Me');
     await page.goto('/');
 
-    // Should have at least 2 items
     const items = page.locator('.history-item');
-    const countBefore = await items.count();
-    expect(countBefore).toBeGreaterThanOrEqual(2);
+    await expect(items).toHaveCount(2);
 
     // Delete the first one
     await items.first().hover();
     await items.first().locator('.history-delete').click();
 
-    // Should have one fewer
-    await expect(items).toHaveCount(countBefore - 1);
+    await expect(items).toHaveCount(1);
   });
 
   test('clear button removes all history', async ({ page }) => {
