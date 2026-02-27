@@ -32,7 +32,7 @@ test.describe('Builder View', () => {
     await titleInput.fill('My Test Event');
 
     const urlOutput = page.locator('#url-output');
-    await expect(urlOutput).toContainText('My+Test+Event');
+    await expect(urlOutput).toContainText('My%20Test%20Event');
   });
 
   test('theme preset buttons exist and are clickable', async ({ page }) => {
