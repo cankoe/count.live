@@ -1018,9 +1018,13 @@ function getHistory() {
   } catch { return []; }
 }
 
+let lastSavedUrl = '';
 function saveToHistory(params) {
   if (!params.date) return;
+  if (params.embed === '1') return;
   const url = window.location.origin + window.location.pathname + window.location.search;
+  if (url === lastSavedUrl) return;
+  lastSavedUrl = url;
   const entry = {
     url,
     title: params.title || '',
