@@ -725,6 +725,9 @@ function init() {
 
   showCountdown();
 
+  // Save to history
+  saveToHistory(params);
+
   // Embed mode - minimal UI
   if (params.embed === '1') {
     document.body.classList.add('embed-mode');
@@ -1006,6 +1009,106 @@ function initMultiCountdown(params) {
     }
     updateMulti();
   });
+}
+
+// Countdown history
+function getHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('countdownHistory') || '[]');
+  } catch { return []; }
+}
+
+function saveToHistory(params) {
+  if (!params.date) return;
+  const url = window.location.origin + window.location.pathname + window.location.search;
+  const entry = {
+    url,
+    title: params.title || '',
+    subtitle: params.subtitle || '',
+    date: params.date,
+    bg: params.bg || (params.theme && THEME_PRESETS[params.theme] ? THEME_PRESETS[params.theme].bg : '1a1a2e'),
+    fg: params.fg || (params.theme && THEME_PRESETS[params.theme] ? THEME_PRESETS[params.theme].fg : 'ffffff'),
+    visitedAt: Date.now()
+  };
+  const history = getHistory().filter(h => h.url !== url);
+  history.unshift(entry);
+  localStorage.setItem('countdownHistory', JSON.stringify(history));
+}
+
+function deleteFromHistory(url) {
+  const history = getHistory().filter(h => h.url !== url);
+  localStorage.setItem('countdownHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory() {
+  localStorage.removeItem('countdownHistory');
+  renderHistory();
+}
+
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  const list = document.getElementById('history-list');
+  if (!section || !list) return;
+
+  const history = getHistory();
+  if (history.length === 0) {
+    section.style.display = 'none';
+    return;
+  }
+
+  section.style.display = '';
+  list.innerHTML = '';
+
+  history.forEach(entry => {
+    const item = document.createElement('a');
+    item.className = 'history-item';
+    item.href = entry.url;
+
+    const swatch = document.createElement('div');
+    swatch.className = 'history-swatch';
+    swatch.style.setProperty('--swatch-bg', '#' + (entry.bg || '1a1a2e'));
+    swatch.style.setProperty('--swatch-fg', '#' + (entry.fg || 'ffffff'));
+
+    const info = document.createElement('div');
+    info.className = 'history-info';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'history-info-title';
+    titleEl.textContent = entry.title || 'Untitled countdown';
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'history-info-date';
+    try {
+      const d = parseDate(entry.date);
+      dateEl.textContent = d ? formatLocalTime(d) : entry.date;
+    } catch { dateEl.textContent = entry.date; }
+
+    info.appendChild(titleEl);
+    info.appendChild(dateEl);
+
+    const del = document.createElement('button');
+    del.className = 'history-delete';
+    del.innerHTML = '&times;';
+    del.title = 'Remove';
+    del.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      deleteFromHistory(entry.url);
+    });
+
+    item.appendChild(swatch);
+    item.appendChild(info);
+    item.appendChild(del);
+    list.appendChild(item);
+  });
+
+  // Wire up clear button once
+  const clearBtn = document.getElementById('history-clear');
+  if (clearBtn && !clearBtn._wired) {
+    clearBtn._wired = true;
+    clearBtn.addEventListener('click', clearHistory);
+  }
 }
 
 // Builder functionality
@@ -1448,6 +1551,7 @@ function initBuilder() {
   });
 
   updatePreview();
+  renderHistory();
 }
 
 // Modal helper functions

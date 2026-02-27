@@ -204,21 +204,18 @@ function isValidImageUrl(urlStr) {
   }
 }
 
-// Generate OG image as SVG with title/subtitle and user styling
+// Generate OG image as SVG with title/subtitle, target date, and branding
 function generateOgImage(url) {
   const bgParam = url.searchParams.get('bg') || '';
   const fgParam = url.searchParams.get('fg') || '';
-  const bgimgParam = url.searchParams.get('bgimg') || '';
   const title = url.searchParams.get('title') || 'Countdown';
   const subtitle = url.searchParams.get('subtitle') || '';
+  const dateParam = url.searchParams.get('date') || '';
   const font = url.searchParams.get('font') || 'sans';
 
   // Validate and sanitize color inputs
   const bg = isValidHexColor(bgParam) ? bgParam : '1a1a2e';
   const fg = isValidHexColor(fgParam) ? fgParam : 'ffffff';
-
-  // Validate background image URL (must be https, escape for SVG attribute)
-  const bgimg = isValidImageUrl(bgimgParam) ? escapeHtml(bgimgParam) : '';
 
   // Font family mapping
   const fontFamilies = {
@@ -229,26 +226,41 @@ function generateOgImage(url) {
   };
   const fontFamily = fontFamilies[font] || fontFamilies.sans;
 
-  // Background - either solid color or image
-  let backgroundSvg;
-  if (bgimg) {
-    backgroundSvg = `
-      <image href="${bgimg}" x="0" y="0" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/>
-      <rect width="1200" height="630" fill="rgba(0,0,0,0.5)"/>
-    `;
-  } else {
-    backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
+  // Parse and format target date
+  let dateDisplay = '';
+  if (dateParam) {
+    try {
+      const d = new Date(dateParam.includes('Z') || dateParam.includes('+') ? dateParam : dateParam + 'Z');
+      if (!isNaN(d.getTime())) {
+        dateDisplay = d.toLocaleString('en-US', {
+          year: 'numeric', month: 'long', day: 'numeric',
+          hour: 'numeric', minute: '2-digit', timeZone: 'UTC'
+        });
+      }
+    } catch (e) { /* ignore invalid dates */ }
   }
 
-  // Position text based on whether we have subtitle
-  const titleY = subtitle ? 280 : 330;
-  const subtitleY = 360;
+  const backgroundSvg = `<rect width="1200" height="630" fill="#${bg}"/>`;
+
+  // Position text based on what content we have
+  let titleY, subtitleY, dateY;
+  if (subtitle && dateDisplay) {
+    titleY = 240; subtitleY = 310; dateY = 400;
+  } else if (subtitle) {
+    titleY = 280; subtitleY = 360;
+  } else if (dateDisplay) {
+    titleY = 270; dateY = 370;
+  } else {
+    titleY = 315;
+  }
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
   ${backgroundSvg}
   <text x="600" y="${titleY}" text-anchor="middle" font-size="72" font-weight="bold" fill="#${fg}" font-family="${fontFamily}">${escapeHtml(title)}</text>
   ${subtitle ? `<text x="600" y="${subtitleY}" text-anchor="middle" font-size="32" fill="#${fg}" opacity="0.8" font-family="${fontFamily}">${escapeHtml(subtitle)}</text>` : ''}
+  ${dateDisplay ? `<text x="600" y="${dateY}" text-anchor="middle" font-size="28" fill="#${fg}" opacity="0.5" font-family="${fontFamily}">${escapeHtml(dateDisplay)}</text>` : ''}
+  <text x="1160" y="605" text-anchor="end" font-size="20" fill="#${fg}" opacity="0.3" font-family="${fontFamily}">count.live</text>
 </svg>`;
 
   return new Response(svg, {
