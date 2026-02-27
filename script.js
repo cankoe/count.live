@@ -1061,9 +1061,9 @@ function renderHistory() {
   list.innerHTML = '';
 
   history.forEach(entry => {
-    const item = document.createElement('a');
+    const item = document.createElement('div');
     item.className = 'history-item';
-    item.href = entry.url;
+    item.addEventListener('click', () => { window.location.href = entry.url; });
 
     const bg = '#' + (entry.bg || '1a1a2e');
     const fg = '#' + (entry.fg || 'ffffff');
