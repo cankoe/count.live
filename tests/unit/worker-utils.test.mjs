@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isValidHexColor, isValidImageUrl, escapeHtml } from '../helpers/extract-worker.mjs';
+import { isValidHexColor, isValidImageUrl, escapeHtml, generateOgImage } from '../helpers/extract-worker.mjs';
 
 describe('isValidHexColor', () => {
   it('accepts valid 6-char hex: ff0000', () => {
@@ -82,5 +82,64 @@ describe('worker escapeHtml', () => {
 
   it('leaves normal string unchanged', () => {
     expect(escapeHtml('Hello World 123')).toBe('Hello World 123');
+  });
+});
+
+describe('generateOgImage', () => {
+  function makeUrl(params = '') {
+    return new URL('https://count.live/og-image?' + params);
+  }
+
+  function getSvg(params) {
+    return generateOgImage(makeUrl(params)).body;
+  }
+
+  it('includes title in SVG', () => {
+    const svg = getSvg('title=Hello+World');
+    expect(svg).toContain('Hello World');
+  });
+
+  it('includes subtitle when provided', () => {
+    const svg = getSvg('title=Test&subtitle=My+Subtitle');
+    expect(svg).toContain('My Subtitle');
+  });
+
+  it('includes formatted target date when date param is provided', () => {
+    const svg = getSvg('title=Test&date=2027-01-01T00:00:00');
+    expect(svg).toContain('January');
+    expect(svg).toContain('2027');
+  });
+
+  it('does not include date text when no date param', () => {
+    const svg = getSvg('title=Test');
+    expect(svg).not.toContain('opacity="0.5"');
+  });
+
+  it('includes count.live branding', () => {
+    const svg = getSvg('title=Test');
+    expect(svg).toContain('count.live');
+  });
+
+  it('uses custom colors when valid', () => {
+    const svg = getSvg('title=Test&bg=ff0000&fg=00ff00');
+    expect(svg).toContain('fill="#ff0000"');
+    expect(svg).toContain('fill="#00ff00"');
+  });
+
+  it('falls back to defaults for invalid colors', () => {
+    const svg = getSvg('title=Test&bg=xyz&fg=abc');
+    expect(svg).toContain('fill="#1a1a2e"');
+    expect(svg).toContain('fill="#ffffff"');
+  });
+
+  it('escapes HTML in title', () => {
+    const svg = getSvg('title=<script>alert(1)</script>');
+    expect(svg).not.toContain('<script>');
+    expect(svg).toContain('&lt;script&gt;');
+  });
+
+  it('returns correct content type', () => {
+    const response = generateOgImage(makeUrl('title=Test'));
+    expect(response.headers.get('content-type')).toBe('image/svg+xml');
   });
 });

@@ -27,4 +27,19 @@ test.describe('OG Tags and Social Metadata', () => {
     const contentType = response.headers()['content-type'];
     expect(contentType).toContain('image/svg+xml');
   });
+
+  test('/og-image includes formatted target date', async ({ request }) => {
+    const response = await request.get('/og-image?title=Test&date=2027-01-01T00:00:00');
+    const svg = await response.text();
+
+    expect(svg).toContain('January');
+    expect(svg).toContain('2027');
+  });
+
+  test('/og-image includes count.live branding', async ({ request }) => {
+    const response = await request.get('/og-image?title=Test');
+    const svg = await response.text();
+
+    expect(svg).toContain('count.live');
+  });
 });
