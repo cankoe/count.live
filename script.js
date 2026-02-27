@@ -1079,13 +1079,6 @@ function renderHistory() {
     iframe.title = entry.title || 'Countdown';
     iframeWrap.appendChild(iframe);
 
-    // Info bar
-    const info = document.createElement('div');
-    info.className = 'history-card-info';
-
-    const titleEl = document.createElement('strong');
-    titleEl.textContent = entry.title || 'Untitled countdown';
-
     const del = document.createElement('button');
     del.className = 'history-delete';
     del.innerHTML = '&times;';
@@ -1096,11 +1089,8 @@ function renderHistory() {
       deleteFromHistory(entry.url);
     });
 
-    info.appendChild(titleEl);
-    info.appendChild(del);
-
     item.appendChild(iframeWrap);
-    item.appendChild(info);
+    item.appendChild(del);
     list.appendChild(item);
   });
 
