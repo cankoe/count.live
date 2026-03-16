@@ -10,10 +10,10 @@ jobs:
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
       - run: npm ci
       - run: npx vitest run --reporter=verbose
 
@@ -21,10 +21,10 @@ jobs:
     needs: unit-tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - name: Start local server
@@ -32,7 +32,7 @@ jobs:
       - name: Wait for server
         run: npx wait-on http://localhost:8787 --timeout 30000
       - run: npx playwright test --project=local
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: failure()
         with:
           name: playwright-report
