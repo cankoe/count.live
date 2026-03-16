@@ -97,9 +97,10 @@ export default {
         .transform(response);
 
       const securedResponse = addSecurityHeaders(transformedResponse, true);
-      // Provide oEmbed discovery via HTTP Link header (for crawlers that check headers)
+      // Provide discovery via HTTP Link headers (for crawlers that check headers)
       const finalHeaders = new Headers(securedResponse.headers);
       finalHeaders.append('Link', `<${oembedDiscoveryUrl}>; rel="alternate"; type="application/json+oembed"`);
+      finalHeaders.append('Link', `<${embedHref}>; rel="iframely"; type="text/html"; media="(aspect-ratio: 2/1)"`);
       return new Response(securedResponse.body, {
         status: securedResponse.status,
         statusText: securedResponse.statusText,
