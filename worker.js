@@ -96,7 +96,15 @@ export default {
         ]))
         .transform(response);
 
-      return addSecurityHeaders(transformedResponse, true);
+      const securedResponse = addSecurityHeaders(transformedResponse, true);
+      // Provide oEmbed discovery via HTTP Link header (for crawlers that check headers)
+      const finalHeaders = new Headers(securedResponse.headers);
+      finalHeaders.append('Link', `<${oembedDiscoveryUrl}>; rel="alternate"; type="application/json+oembed"`);
+      return new Response(securedResponse.body, {
+        status: securedResponse.status,
+        statusText: securedResponse.statusText,
+        headers: finalHeaders,
+      });
     }
 
     // Apple App Site Association for Universal Links

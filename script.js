@@ -2054,6 +2054,28 @@ document.querySelectorAll('.accordion-header').forEach(header => {
   });
 });
 
+// Hash-based deep linking into documentation sections (e.g. #how-to-embed)
+function scrollToHashTarget() {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return;
+  const target = document.getElementById(hash);
+  if (!target) return;
+  // Open the accordion containing the target
+  const accordion = target.closest('.accordion-content');
+  if (accordion) {
+    accordion.parentElement.classList.add('open');
+  }
+  // Show the builder view if it's hidden (documentation lives in the builder)
+  const builder = document.getElementById('builder-view');
+  if (builder && builder.style.display === 'none') {
+    builder.style.display = '';
+    document.getElementById('countdown-view').style.display = 'none';
+  }
+  setTimeout(() => target.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+scrollToHashTarget();
+window.addEventListener('hashchange', scrollToHashTarget);
+
 // Examples carousel
 (function() {
   const carousel = document.getElementById('examples-carousel');

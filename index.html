@@ -457,8 +457,24 @@
             <h3>Progress Tracking</h3>
             <p>Use <code>progress=1</code> and/or <code>percent=1</code> with a <code>start</code> date to show a visual progress bar and percentage completion.</p>
 
-            <h3>Embedding</h3>
-            <p>Use the Embed button to get iframe code for your website. Add <code>embed=1</code> to the URL for minimal UI without the promo badge.</p>
+            <h3 id="how-to-embed">Embedding</h3>
+            <p>count.live countdowns can be embedded on any website or platform that supports iframes or rich embeds.</p>
+
+            <h4>Canva, Notion & other platforms</h4>
+            <p>Just paste a countdown URL into the embed tool — platforms that use Iframely or oEmbed (including Canva, Notion, and many others) will automatically show a live, interactive countdown.</p>
+
+            <h4>Custom website (iframe)</h4>
+            <p>Use the <strong>Embed</strong> button in the builder to get ready-to-use iframe code, or add <code>embed=1</code> to any countdown URL for minimal UI:</p>
+            <pre><code>&lt;iframe src="https://count.live/?date=2027-01-01T00:00:00&amp;title=New%20Year&amp;embed=1"
+  width="400" height="200" frameborder="0"
+  style="border:none;"&gt;&lt;/iframe&gt;</code></pre>
+
+            <h4>Tips</h4>
+            <ul>
+              <li><code>embed=1</code> hides the corner buttons and promo badge for a clean look</li>
+              <li>All customization parameters (theme, font, colors, background image, etc.) work in embedded mode</li>
+              <li>The embed is fully responsive — it adapts to whatever size you give the iframe</li>
+            </ul>
 
             <h3>Date Formats</h3>
             <p>The following date formats are supported (interpreted as UTC):</p>
