@@ -71,6 +71,12 @@ export default {
 
       const ogImageUrl = `${url.origin}/favicon-og.png`;
 
+      // Build embed URL for Iframely/oEmbed discovery
+      const embedUrl = new URL(fullUrl);
+      embedUrl.searchParams.set('embed', '1');
+      const embedHref = embedUrl.toString();
+      const oembedDiscoveryUrl = `${url.origin}/oembed?url=${encodeURIComponent(fullUrl)}`;
+
       // Use HTMLRewriter to modify meta tags
       const transformedResponse = new HTMLRewriter()
         .on('title', new TextRewriter(ogTitle))
@@ -84,6 +90,10 @@ export default {
         .on('meta[name="twitter:description"]', new AttributeRewriter('content', description))
         .on('meta[name="twitter:image"]', new AttributeRewriter('content', ogImageUrl))
         .on('link[rel="canonical"]', new AttributeRewriter('href', fullUrl))
+        .on('head', new HeadAppender([
+          `<link rel="iframely player" href="${escapeHtml(embedHref)}" type="text/html" media="(aspect-ratio: 2/1)" />`,
+          `<link rel="alternate" type="application/json+oembed" href="${escapeHtml(oembedDiscoveryUrl)}" title="${escapeHtml(ogTitle)}" />`,
+        ]))
         .transform(response);
 
       return addSecurityHeaders(transformedResponse, true);
@@ -128,6 +138,74 @@ export default {
         },
       ];
       return new Response(JSON.stringify(assetlinks), {
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=3600',
+          ...SECURITY_HEADERS,
+        },
+      });
+    }
+
+    // oEmbed endpoint for rich embed discovery (used by Iframely, Canva, Notion, etc.)
+    if (url.pathname === '/oembed') {
+      const targetUrl = url.searchParams.get('url');
+      if (!targetUrl) {
+        return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...SECURITY_HEADERS },
+        });
+      }
+
+      let target;
+      try {
+        target = new URL(targetUrl);
+      } catch {
+        return new Response(JSON.stringify({ error: 'Invalid url parameter' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...SECURITY_HEADERS },
+        });
+      }
+
+      const title = target.searchParams.get('title') || 'Countdown';
+      const subtitle = target.searchParams.get('subtitle') || '';
+      const dateParam = target.searchParams.get('date') || '';
+      const tzParam = target.searchParams.get('tz') || '';
+      const dateDisplay = workerFormatDate(dateParam, tzParam);
+
+      let description = '';
+      if (subtitle && dateDisplay) {
+        description = `${subtitle} (${dateDisplay})`;
+      } else if (subtitle) {
+        description = subtitle;
+      } else if (dateDisplay) {
+        description = `Counting down to ${dateDisplay}`;
+      } else {
+        description = 'Countdown timer';
+      }
+
+      // Build embed URL from target
+      const embedTarget = new URL(targetUrl);
+      embedTarget.searchParams.set('embed', '1');
+
+      const maxwidth = parseInt(url.searchParams.get('maxwidth')) || 800;
+      const maxheight = parseInt(url.searchParams.get('maxheight')) || 400;
+
+      const oembed = {
+        version: '1.0',
+        type: 'rich',
+        title,
+        provider_name: 'count.live',
+        provider_url: 'https://count.live',
+        description,
+        width: maxwidth,
+        height: maxheight,
+        html: `<iframe src="${embedTarget.toString()}" width="${maxwidth}" height="${maxheight}" frameborder="0" allow="autoplay" allowfullscreen style="border:none;"></iframe>`,
+        thumbnail_url: `${url.origin}/favicon-og.png`,
+        thumbnail_width: 2000,
+        thumbnail_height: 1000,
+      };
+
+      return new Response(JSON.stringify(oembed), {
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'public, max-age=3600',
@@ -212,5 +290,18 @@ class AttributeRewriter {
 
   element(element) {
     element.setAttribute(this.attribute, this.newValue);
+  }
+}
+
+// Helper class to append link tags to <head> (for oEmbed/Iframely discovery)
+class HeadAppender {
+  constructor(htmlSnippets) {
+    this.htmlSnippets = htmlSnippets;
+  }
+
+  element(element) {
+    for (const snippet of this.htmlSnippets) {
+      element.append(snippet, { html: true });
+    }
   }
 }
