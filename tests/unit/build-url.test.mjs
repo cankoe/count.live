@@ -58,4 +58,25 @@ describe('buildUrl', () => {
 
     expect(url).toBe(_mockWindow.location.origin + _mockWindow.location.pathname + '?');
   });
+
+  it('includes redirect param when set', () => {
+    const url = buildUrl({ date: '2025-12-31', redirect: 'https://example.com/launch' });
+    expect(url).toContain('redirect=' + encodeURIComponent('https://example.com/launch'));
+  });
+
+  it('includes redirectDelay param when non-zero', () => {
+    const url = buildUrl({ date: '2025-12-31', redirect: 'https://example.com', redirectDelay: '5' });
+    expect(url).toContain('redirectDelay=5');
+  });
+
+  it('omits redirectDelay when zero', () => {
+    const url = buildUrl({ date: '2025-12-31', redirect: 'https://example.com', redirectDelay: '0' });
+    expect(url).not.toContain('redirectDelay');
+  });
+
+  it('omits redirect params when redirect is empty', () => {
+    const url = buildUrl({ date: '2025-12-31', redirect: '', redirectDelay: '5' });
+    expect(url).not.toContain('redirect');
+    expect(url).not.toContain('redirectDelay');
+  });
 });

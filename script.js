@@ -1808,7 +1808,9 @@ function getBuilderConfig() {
     percent: document.getElementById('b-percent').checked,
     notify: document.getElementById('b-notify').checked,
     start: startISO,
-    tz: timezone
+    tz: timezone,
+    redirect: document.getElementById('b-redirect').value,
+    redirectDelay: document.getElementById('b-redirect-delay').value,
   };
 }
 
@@ -1836,6 +1838,12 @@ function buildUrl(config) {
   }
   if (config.notify) parts.push('notify=1');
   if (config.tz) parts.push('tz=' + encodeURIComponent(config.tz));
+  if (config.redirect) {
+    parts.push('redirect=' + encodeURIComponent(config.redirect));
+    if (config.redirectDelay && config.redirectDelay !== '0') {
+      parts.push('redirectDelay=' + config.redirectDelay);
+    }
+  }
 
   // Use query params instead of hash for better SEO/social sharing
   return base + '?' + parts.join('&');
