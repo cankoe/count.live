@@ -864,6 +864,9 @@ function init() {
   const showProgress = params.progress === '1';
   const showPercent = params.percent === '1';
   const startDate = params.start ? parseDate(params.start) : null;
+  const redirectUrl = validateRedirectUrl(params.redirect);
+  const redirectDelay = Math.max(0, parseInt(params.redirectDelay, 10) || 0);
+  const isEmbedded = window.self !== window.top;
 
   if (!targetDate) {
     renderEndMessage('Invalid or missing date', isLarge);
@@ -873,6 +876,14 @@ function init() {
   // Handle recurring countdown
   if (recur) {
     targetDate = getNextOccurrence(targetDate, recur);
+  }
+
+  // Past one-time countdown with redirect: redirect immediately (after delay)
+  if (redirectUrl && !isEmbedded && !recur && targetDate <= new Date()) {
+    setTimeout(() => {
+      window.location.href = redirectUrl;
+    }, redirectDelay * 1000);
+    return;
   }
 
   // Request notification permission if enabled
@@ -956,6 +967,15 @@ function init() {
 
         // Handle recurring countdown
         if (recur) {
+          // Redirect if configured, not embedded, and user watched it reach zero
+          if (redirectUrl && !isEmbedded) {
+            setTimeout(() => {
+              if (session !== currentSession) return;
+              window.location.href = redirectUrl;
+            }, redirectDelay * 1000);
+            return; // Stop the countdown — we're redirecting
+          }
+
           const nextOccurrence = getNextOccurrence(targetDate, recur);
           const nextEl = document.getElementById('next-occurrence');
           nextEl.textContent = `Next: ${formatLocalTime(nextOccurrence)}`;
@@ -977,6 +997,13 @@ function init() {
             if (showPercent) {
               progressText.textContent = '100% complete';
             }
+          }
+          // Redirect if configured and not embedded
+          if (redirectUrl && !isEmbedded) {
+            setTimeout(() => {
+              if (session !== currentSession) return;
+              window.location.href = redirectUrl;
+            }, redirectDelay * 1000);
           }
         }
       }, 500);
