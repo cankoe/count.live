@@ -39,6 +39,6 @@ describe('validateRedirectUrl', () => {
   });
 
   it('returns normalized URL from URL constructor', () => {
-    expect(validateRedirectUrl('https://example.com/path?q=1#frag')).toBe('https://example.com/path?q=1#frag');
+    expect(validateRedirectUrl('HTTPS://EXAMPLE.COM/PATH')).toBe('https://example.com/PATH');
   });
 });

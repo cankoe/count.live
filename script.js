@@ -230,6 +230,7 @@ function sanitizeUrlForCss(urlStr) {
 }
 
 // Validate a redirect URL - only allow http(s) absolute URLs
+// Returns the normalized href string, or null if invalid
 function validateRedirectUrl(urlStr) {
   if (!urlStr) return null;
   try {
