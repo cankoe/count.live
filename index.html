@@ -378,6 +378,19 @@
               </div>
             </div>
 
+            <div class="builder-row" id="redirect-row">
+              <label>Redirect URL</label>
+              <input type="url" id="b-redirect" placeholder="https://example.com">
+              <small class="input-hint">When the countdown ends, visitors will be sent to this URL.</small>
+              <small class="input-error" id="redirect-error" style="display:none;color:#ff6b6b;">URL must start with http:// or https://</small>
+            </div>
+
+            <div class="builder-row" id="redirect-delay-row" style="display:none;">
+              <label>Redirect Delay (seconds)</label>
+              <input type="number" id="b-redirect-delay" min="0" value="0" placeholder="0">
+              <small class="input-hint">Seconds to wait before redirecting. Use this to let celebration effects play first.</small>
+            </div>
+
             <div class="builder-row" id="start-date-row" style="display:none;">
               <label>Progress Start Date</label>
               <input type="datetime-local" id="b-start">
