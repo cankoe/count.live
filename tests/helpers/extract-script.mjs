@@ -162,7 +162,7 @@ const exportNames = [
   'DEFAULTS', 'MAX_LENGTHS', 'THEME_PRESETS', 'FONT_STACKS',
   'UNIT_CONFIG', 'UNIT_ALIASES', 'UNIT_SHORT', 'SOUNDS',
   'parseHash', 'parseParams', 'parseDate', 'parseUnits', 'parseColor',
-  'truncate', 'sanitizeUrlForCss', 'escapeHtml', 'linkifyText',
+  'truncate', 'sanitizeUrlForCss', 'validateRedirectUrl', 'escapeHtml', 'linkifyText',
   'addYears', 'addMonths', 'calculateTimeUnits', 'getNextOccurrence',
   'calculateProgress', 'buildUrl', 'formatTitleCountdown', 'padValue',
   'generateICS', 'utcToLocal', 'localToUTC', 'localToISO', 'formatDateForDisplay',
@@ -195,6 +195,7 @@ export const parseUnits = __exports.parseUnits;
 export const parseColor = __exports.parseColor;
 export const truncate = __exports.truncate;
 export const sanitizeUrlForCss = __exports.sanitizeUrlForCss;
+export const validateRedirectUrl = __exports.validateRedirectUrl;
 export const escapeHtml = __exports.escapeHtml;
 export const linkifyText = __exports.linkifyText;
 export const addYears = __exports.addYears;

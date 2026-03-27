@@ -229,6 +229,18 @@ function sanitizeUrlForCss(urlStr) {
   }
 }
 
+// Validate a redirect URL - only allow http(s) absolute URLs
+function validateRedirectUrl(urlStr) {
+  if (!urlStr) return null;
+  try {
+    const parsed = new URL(urlStr);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
