@@ -865,7 +865,7 @@ function init() {
   const showPercent = params.percent === '1';
   const startDate = params.start ? parseDate(params.start) : null;
   const redirectUrl = validateRedirectUrl(params.redirect);
-  const redirectDelay = Math.max(0, parseInt(params.redirectDelay, 10) || 0);
+  const redirectDelay = Math.min(3600, Math.max(0, parseInt(params.redirectDelay, 10) || 0));
   const isEmbedded = window.self !== window.top;
 
   if (!targetDate) {
@@ -881,6 +881,7 @@ function init() {
   // Past one-time countdown with redirect: redirect immediately (after delay)
   if (redirectUrl && !isEmbedded && !recur && targetDate <= new Date()) {
     setTimeout(() => {
+      if (session !== currentSession) return;
       window.location.href = redirectUrl;
     }, redirectDelay * 1000);
     return;
