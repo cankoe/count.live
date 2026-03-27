@@ -1458,6 +1458,14 @@ function initBuilder() {
       document.getElementById('b-start').value = utcToLocal(prefill.start, tz);
     }
 
+    if (prefill.redirect) {
+      document.getElementById('b-redirect').value = decodeURIComponent(prefill.redirect);
+      document.getElementById('redirect-delay-row').style.display = '';
+    }
+    if (prefill.redirectDelay) {
+      document.getElementById('b-redirect-delay').value = prefill.redirectDelay;
+    }
+
     // Show start date row if progress/percent is enabled
     if (prefill.progress === '1' || prefill.percent === '1') {
       document.getElementById('start-date-row').style.display = '';
@@ -1655,6 +1663,26 @@ function initBuilder() {
 
     updatePreview();
   });
+
+  // Redirect URL validation and delay visibility
+  const redirectInput = document.getElementById('b-redirect');
+  const redirectError = document.getElementById('redirect-error');
+  const redirectDelayRow = document.getElementById('redirect-delay-row');
+
+  redirectInput.addEventListener('input', () => {
+    const val = redirectInput.value.trim();
+    if (val && !validateRedirectUrl(val)) {
+      redirectError.style.display = '';
+      redirectInput.setCustomValidity('URL must start with http:// or https://');
+    } else {
+      redirectError.style.display = 'none';
+      redirectInput.setCustomValidity('');
+    }
+    redirectDelayRow.style.display = val ? '' : 'none';
+    updatePreview();
+  });
+
+  document.getElementById('b-redirect-delay').addEventListener('input', updatePreview);
 
   updatePreview();
   renderHistory();
