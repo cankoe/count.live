@@ -325,6 +325,8 @@ body.builder-light .theme-toggle:hover {
 }
 
 body.builder-light .builder-row input[type="text"],
+body.builder-light .builder-row input[type="url"],
+body.builder-light .builder-row input[type="number"],
 body.builder-light .builder-row input[type="datetime-local"],
 body.builder-light .builder-row select,
 body.builder-light .builder-row textarea,
@@ -470,6 +472,8 @@ body.builder-light .accordion-item {
 }
 
 .builder-row input[type="text"],
+.builder-row input[type="url"],
+.builder-row input[type="number"],
 .builder-row input[type="datetime-local"],
 .builder-row select,
 .builder-row textarea,
@@ -1077,6 +1081,8 @@ body.builder-light .email-button-small {
   }
 
   .builder-row input[type="text"],
+  .builder-row input[type="url"],
+  .builder-row input[type="number"],
   .builder-row input[type="datetime-local"],
   .builder-row select,
   .builder-row textarea {
