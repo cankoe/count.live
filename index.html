@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Free online countdown timer — create, customize, and share countdowns for any event in seconds. No sign-up, no tracking. Custom colors, fonts, units, and embeddable anywhere.">
-  <meta name="keywords" content="countdown timer, online countdown, event timer, free timer, countdown clock, shareable countdown">
+  <meta name="description" content="Free online countdown timer — create, customize, and share countdowns for any event in seconds. Embed in Canva, Notion, or any website. No sign-up, no tracking.">
+  <meta name="keywords" content="countdown timer, online countdown, event timer, free timer, countdown clock, shareable countdown, countdown for canva, notion countdown, embed countdown timer, countdown widget">
   <meta property="og:title" content="count.live - Free Online Countdown Timer">
   <meta property="og:description" content="Create and customize beautiful countdown timers in seconds — free, private, and shareable. No sign-up, no tracking.">
   <meta property="og:type" content="website">
@@ -40,7 +40,8 @@
     "featureList": [
       "Customizable colors, fonts, and themes",
       "Shareable via URL",
-      "Embeddable via iframe",
+      "Embeddable via iframe, oEmbed, and Iframely",
+      "Works with Canva, Notion, and other platforms",
       "Recurring countdowns",
       "Progress bars",
       "No sign-up required",
@@ -49,6 +50,46 @@
     ],
     "screenshot": "https://count.live/logo.png",
     "browserRequirements": "Requires a modern web browser"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I add a countdown timer to Canva?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Create your countdown on count.live, copy the URL, then paste it into a Canva Embed element (Apps > Embeds). Canva auto-detects the embed and shows a live, interactive countdown."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I embed a countdown in Notion?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Create your countdown on count.live, copy the URL, then paste it into Notion and choose 'Create embed'. The countdown updates in real time for anyone viewing the page."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I embed a countdown timer on my website?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Use the Embed button in the count.live builder to get ready-to-use iframe code, or add embed=1 to any countdown URL for a clean, minimal look. The embed is fully responsive and supports all customization options."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is count.live free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, count.live is completely free with no sign-up, no tracking, and no ads. Create unlimited countdowns with full customization and embed them anywhere."
+        }
+      }
+    ]
   }
   </script>
 </head>
@@ -473,8 +514,23 @@
             <h3 id="how-to-embed">Embedding</h3>
             <p>count.live countdowns can be embedded on any website or platform that supports iframes or rich embeds.</p>
 
-            <h4>Canva, Notion & other platforms</h4>
-            <p>Just paste a countdown URL into the embed tool — platforms that use Iframely or oEmbed (including Canva, Notion, and many others) will automatically show a live, interactive countdown.</p>
+            <h4>Embed in Canva</h4>
+            <ol>
+              <li>Create your countdown on count.live and copy the URL</li>
+              <li>In Canva, add an Embed element (<strong>Apps &gt; Embeds</strong> or type <code>/embed</code>)</li>
+              <li>Paste the countdown URL</li>
+              <li>Canva auto-detects the embed and shows a live countdown</li>
+            </ol>
+            <p>Tip: Add <code>&amp;embed=1</code> to the URL for a cleaner look without corner buttons.</p>
+
+            <h4>Embed in Notion</h4>
+            <ol>
+              <li>Create your countdown on count.live and copy the URL</li>
+              <li>In Notion, type <code>/embed</code> or paste the URL directly</li>
+              <li>Choose "Create embed" when prompted</li>
+              <li>Resize the block to fit your layout</li>
+            </ol>
+            <p>Tip: The countdown is fully interactive — visitors see it count down in real time.</p>
 
             <h4>Custom website (iframe)</h4>
             <p>Use the <strong>Embed</strong> button in the builder to get ready-to-use iframe code, or add <code>embed=1</code> to any countdown URL for minimal UI:</p>
@@ -487,6 +543,7 @@
               <li><code>embed=1</code> hides the corner buttons and promo badge for a clean look</li>
               <li>All customization parameters (theme, font, colors, background image, etc.) work in embedded mode</li>
               <li>The embed is fully responsive — it adapts to whatever size you give the iframe</li>
+              <li>All customization (theme, colors, fonts, sounds, celebrations) works in every embed method</li>
             </ul>
 
             <h3>Date Formats</h3>
