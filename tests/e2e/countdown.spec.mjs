@@ -59,3 +59,53 @@ test.describe('Countdown View', () => {
     await expect(page).toHaveTitle(/My Event/);
   });
 });
+
+test.describe('Redirect on completion', () => {
+  test('past one-time countdown redirects to configured URL', async ({ page }) => {
+    let redirectedUrl = null;
+    await page.route('https://example.com/**', route => {
+      redirectedUrl = route.request().url();
+      route.abort();
+    });
+
+    await page.goto('/?date=2020-01-01T00:00:00&redirect=' + encodeURIComponent('https://example.com/launched'));
+
+    // Wait for the redirect to be attempted
+    await page.waitForTimeout(2000);
+    expect(redirectedUrl).toBe('https://example.com/launched');
+  });
+
+  test('past one-time countdown with delay redirects after delay', async ({ page }) => {
+    let redirectedUrl = null;
+    await page.route('https://example.com/**', route => {
+      redirectedUrl = route.request().url();
+      route.abort();
+    });
+
+    await page.goto('/?date=2020-01-01T00:00:00&redirect=' + encodeURIComponent('https://example.com/launched') + '&redirectDelay=2');
+
+    // Should not have redirected immediately
+    expect(redirectedUrl).toBeNull();
+
+    // Should redirect after the 2-second delay
+    await page.waitForTimeout(3000);
+    expect(redirectedUrl).toBe('https://example.com/launched');
+  });
+
+  test('countdown without redirect param shows end message as usual', async ({ page }) => {
+    await page.goto('/?date=2020-01-01T00:00:00&title=Past');
+
+    const endMessage = page.locator('#countdown .end-message');
+    await expect(endMessage).toBeVisible();
+
+    // URL should not have changed
+    expect(page.url()).toContain('date=2020-01-01');
+  });
+
+  test('invalid redirect URL is ignored', async ({ page }) => {
+    await page.goto('/?date=2020-01-01T00:00:00&redirect=not-a-url');
+
+    const endMessage = page.locator('#countdown .end-message');
+    await expect(endMessage).toBeVisible();
+  });
+});
