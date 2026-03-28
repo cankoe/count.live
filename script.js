@@ -878,8 +878,10 @@ function init() {
     targetDate = getNextOccurrence(targetDate, recur);
   }
 
-  // Past one-time countdown with redirect: redirect immediately (after delay)
+  // Past one-time countdown with redirect: show end message, then redirect after delay
   if (redirectUrl && !isEmbedded && !recur && targetDate <= new Date()) {
+    renderEndMessage(endMessage, isLarge);
+    document.title = (title ? title + ' - ' : '') + endMessage;
     setTimeout(() => {
       if (session !== currentSession) return;
       window.location.href = redirectUrl;
