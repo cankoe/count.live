@@ -783,7 +783,7 @@ function init() {
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = 'none';
   document.getElementById('multi-view').style.display = 'none';
-  document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image');
+  document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image', 'hide-attribution');
 
   // Show builder if no date or in edit mode
   if (!params.date || params.edit === '1') {
@@ -805,6 +805,11 @@ function init() {
   // Embed mode - minimal UI
   if (params.embed === '1') {
     document.body.classList.add('embed-mode');
+  }
+
+  // Attribution link defaults visible; opt-out via attribution=0
+  if (params.attribution === '0') {
+    document.body.classList.add('hide-attribution');
   }
 
   // Apply theme if specified
@@ -1497,6 +1502,7 @@ function initBuilder() {
     document.getElementById('b-progress').checked = prefill.progress === '1';
     document.getElementById('b-percent').checked = prefill.percent === '1';
     document.getElementById('b-notify').checked = prefill.notify === '1';
+    document.getElementById('b-attribution').checked = prefill.attribution !== '0';
 
     if (prefill.start) {
       const tz = prefill.tz || 'UTC';
@@ -1605,6 +1611,7 @@ function initBuilder() {
   percentCheckbox.addEventListener('change', updateStartDateVisibility);
   document.getElementById('b-showtz').addEventListener('change', updatePreview);
   document.getElementById('b-notify').addEventListener('change', updatePreview);
+  document.getElementById('b-attribution').addEventListener('change', updatePreview);
   document.getElementById('b-start').addEventListener('input', updatePreview);
 
   // Add listeners to all text inputs
@@ -1627,6 +1634,7 @@ function initBuilder() {
       const originalText = btn.innerHTML;
       btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Link copied!';
       setTimeout(() => btn.innerHTML = originalText, 1500);
+      showPublishCelebration();
     });
   };
 
@@ -1644,7 +1652,7 @@ function initBuilder() {
         title: title,
         text: 'Check out this countdown!',
         url: url
-      }).catch(() => {});
+      }).then(() => showPublishCelebration()).catch(() => {});
     } else {
       copyUrl();
     }
@@ -1655,6 +1663,7 @@ function initBuilder() {
     const url = getPublishUrl();
     if (!url) return;
     window.open(url, '_blank');
+    showPublishCelebration();
   });
 
   // Embed button
@@ -1798,6 +1807,24 @@ function getPublishUrl() {
   return output?.dataset.fullUrl || '';
 }
 
+let celebrationTimer = null;
+function showPublishCelebration() {
+  const btn = document.getElementById('support-coffee-btn');
+  if (!btn) return;
+  // is-published persists for the rest of the session — keeps the expanded layout
+  // and the message text visible. is-celebrating only adds the rainbow + animation,
+  // and is removed after 5 seconds.
+  btn.classList.add('is-published');
+  btn.classList.remove('is-celebrating');
+  // Force a reflow so the rainbow animation restarts on each publish action.
+  void btn.offsetWidth;
+  btn.classList.add('is-celebrating');
+  clearTimeout(celebrationTimer);
+  celebrationTimer = setTimeout(() => {
+    btn.classList.remove('is-celebrating');
+  }, 5000);
+}
+
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
   closeAllOpenModals();
@@ -1820,6 +1847,7 @@ function copyEmbedCode() {
   const code = document.getElementById('embed-code').value;
   navigator.clipboard.writeText(code).then(() => {
     closeModal('embed-modal');
+    showPublishCelebration();
   });
 }
 
@@ -1829,6 +1857,7 @@ function copyPlatformUrl(modalId, successMessage) {
   navigator.clipboard.writeText(url).then(() => {
     showToast(successMessage);
     closeModal(modalId);
+    showPublishCelebration();
   }).catch(() => {
     showToast('Could not copy link. Please copy it from the URL field.');
   });
@@ -1848,6 +1877,7 @@ function downloadICS() {
   link.href = URL.createObjectURL(blob);
   link.click();
   closeModal('calendar-modal');
+  showPublishCelebration();
 }
 
 // Converts a date string to the local time in a given timezone.
@@ -1962,6 +1992,7 @@ function getBuilderConfig() {
     progress: document.getElementById('b-progress').checked,
     percent: document.getElementById('b-percent').checked,
     notify: document.getElementById('b-notify').checked,
+    attribution: document.getElementById('b-attribution').checked,
     start: startISO,
     tz: timezone,
     redirect: document.getElementById('b-redirect').value,
@@ -1992,6 +2023,7 @@ function buildUrl(config) {
     parts.push('start=' + encodeURIComponent(config.start));
   }
   if (config.notify) parts.push('notify=1');
+  if (config.attribution === false) parts.push('attribution=0');
   if (config.tz) parts.push('tz=' + encodeURIComponent(config.tz));
   if (config.redirect) {
     parts.push('redirect=' + encodeURIComponent(config.redirect));
