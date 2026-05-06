@@ -78,7 +78,7 @@
         "name": "Can I embed a countdown timer on my website?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Use the Embed button in the count.live builder to get ready-to-use iframe code, or add embed=1 to any countdown URL for a clean, minimal look. The embed is fully responsive and supports all customization options."
+          "text": "Yes. Use the Embed button in the count.live builder to get ready-to-use iframe code, or add embed=1 to any countdown URL for a clean, minimal look. The embed is responsive, supports visual customization, and disables post-end redirects while embedded."
         }
       },
       {
@@ -138,19 +138,25 @@
     </div>
   </div>
 
-  <div class="builder" id="builder-view" style="display: none;">
-    <div class="builder-header">
-      <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
+  <main class="builder" id="builder-view" style="display: none;">
+    <header class="builder-header">
+      <div class="builder-header-main">
+        <p class="builder-kicker">Free Countdown Timer Builder</p>
+        <h1 class="logo"><a href="/">count<span class="dot">.</span>live</a></h1>
+      </div>
       <button type="button" class="theme-toggle" id="builder-theme-toggle" title="Toggle light/dark mode">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
-    </div>
-    <p class="builder-subtitle">Create and customize beautiful countdowns in seconds — free, private, and shareable. No sign-up, no tracking.</p>
+    </header>
 
     <div class="builder-layout">
       <!-- STICKY PREVIEW SECTION -->
       <div class="preview-sticky">
+        <div class="preview-header">
+          <h2>Live Preview</h2>
+          <p>This is how your published countdown page will appear.</p>
+        </div>
         <div class="preview-frame" id="preview-frame">
           <h1 class="title" id="preview-title"></h1>
           <p class="subtitle" id="preview-subtitle"></p>
@@ -162,110 +168,63 @@
           </div>
         </div>
         <div class="preview-actions">
-          <button type="button" class="preview-btn" id="preview-end-btn">Preview End</button>
+          <button type="button" class="preview-btn" id="preview-end-btn">Preview finished state</button>
         </div>
-        <div class="url-output" id="url-output" title="Click to copy"></div>
-        <div class="url-actions">
-          <button type="button" class="url-action-btn" id="copy-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-          <button type="button" class="url-action-btn" id="share-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Share
-          </button>
-          <button type="button" class="url-action-btn" id="open-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-            Open
-          </button>
-        </div>
-        <div class="url-actions">
-          <button type="button" class="url-action-btn" id="embed-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            Embed
-          </button>
-          <button type="button" class="url-action-btn" id="calendar-btn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Calendar
-          </button>
-        </div>
-        <div class="preview-support">
-          <a href="https://buymeacoffee.com/cankoe" target="_blank" rel="noopener" class="coffee-button-small">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.216 6.415l-.132-.666c-.119-.598-.388-1.163-1.001-1.379-.197-.069-.42-.098-.57-.241-.152-.143-.196-.366-.231-.572-.065-.378-.125-.756-.192-1.133-.057-.325-.102-.69-.25-.987-.195-.4-.597-.634-.996-.788a5.723 5.723 0 00-.626-.194c-1-.263-2.05-.36-3.077-.416a25.834 25.834 0 00-3.7.062c-.915.083-1.88.184-2.75.5-.318.116-.646.256-.888.501-.297.302-.393.77-.177 1.146.154.267.415.456.692.58.36.162.737.284 1.123.366 1.075.238 2.189.331 3.287.37 1.218.05 2.437.01 3.65-.118.299-.033.598-.073.896-.119.352-.054.578-.513.474-.834-.124-.383-.457-.531-.834-.473-.466.074-.96.108-1.382.146-1.177.08-2.358.082-3.536.006a22.228 22.228 0 01-1.157-.107c-.086-.01-.18-.025-.258-.036-.243-.036-.484-.08-.724-.13-.111-.027-.111-.185 0-.212h.005c.277-.06.557-.108.838-.147h.002c.131-.009.263-.032.394-.048a25.076 25.076 0 013.426-.12c.674.019 1.347.067 2.017.144l.228.031c.267.04.533.088.798.145.392.085.895.113 1.07.542.055.137.08.288.111.431l.319 1.484a.237.237 0 01-.199.284h-.003c-.037.006-.075.01-.112.015a36.704 36.704 0 01-4.743.295 37.059 37.059 0 01-4.699-.304c-.14-.017-.293-.042-.417-.06-.326-.048-.649-.108-.973-.161-.393-.065-.768-.032-1.123.161-.29.16-.527.404-.675.701-.154.316-.199.66-.267 1-.069.34-.176.707-.135 1.056.087.753.613 1.365 1.37 1.502a39.69 39.69 0 0011.343.376.483.483 0 01.535.53l-.071.697-1.018 9.907c-.041.41-.047.832-.125 1.237-.122.637-.553 1.028-1.182 1.171-.577.131-1.165.2-1.756.205-.656.004-1.31-.025-1.966-.022-.699.004-1.556-.06-2.095-.58-.475-.458-.54-1.174-.605-1.793l-.731-7.013-.322-3.094c-.037-.351-.286-.695-.678-.678-.336.015-.718.3-.678.679l.228 2.185.949 9.112c.147 1.344 1.174 2.068 2.446 2.272.742.12 1.503.144 2.257.156.966.016 1.942.053 2.892-.122 1.408-.258 2.465-1.198 2.616-2.657.34-3.332.683-6.663 1.024-9.995l.215-2.087a.484.484 0 01.39-.426c.402-.078.787-.212 1.074-.518.455-.488.546-1.124.385-1.766zm-1.478.772c-.145.137-.363.201-.578.233-2.416.359-4.866.54-7.308.46-1.748-.06-3.477-.254-5.207-.498-.17-.024-.353-.055-.47-.18-.22-.236-.111-.71-.054-.995.052-.26.152-.609.463-.646.484-.057 1.046.148 1.526.22.577.088 1.156.159 1.737.212 2.48.226 5.002.19 7.472-.14.45-.06.899-.13 1.345-.21.399-.072.84-.206 1.08.206.166.281.188.657.162.974a.544.544 0 01-.169.364z"/></svg>
-            Buy the developer a coffee
-          </a>
-          <a href="https://github.com/cankoe/count.live/issues" target="_blank" rel="noopener" class="github-button-small">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            Bug Report
-          </a>
-          <a href="mailto:dev@count.live?subject=count.live%20Feature%20Request" class="email-button-small">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-            Feature Request (dev@count.live)
-          </a>
-        </div>
-
-        <!-- EXAMPLES CAROUSEL -->
-        <div class="examples-carousel" id="examples-carousel">
-          <h3 class="examples-title">Examples</h3>
-          <div class="carousel-viewport">
-            <a class="example-card active" href="/?date=2027-01-01T00:00:00&title=New%20Year&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2027-01-01T00:00:00&title=New%20Year&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg&embed=1" loading="lazy" title="New Year's Countdown" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>New Year's Countdown</strong>
-                <span>Recurring yearly countdown timer with confetti and chime</span>
-              </div>
-            </a>
-            <a class="example-card" href="/?date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg&embed=1" loading="lazy" title="Valentine's Day" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>Valentine's Day Countdown</strong>
-                <span>Recurring yearly event countdown with sunset theme</span>
-              </div>
-            </a>
-            <a class="example-card" href="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T00:00:00" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T00:00:00&embed=1" loading="lazy" title="Race Day" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>Race Day Countdown</strong>
-                <span>Event countdown timer with milliseconds and progress bar</span>
-              </div>
-            </a>
-            <a class="example-card" href="/?date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&end=We're%20live!%20https%3A%2F%2Fcount.live&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&end=We're%20live!%20https%3A%2F%2Fcount.live&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg&embed=1" loading="lazy" title="Product Launch" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>Product Launch Countdown</strong>
-                <span>Launch countdown timer with neon theme and custom units</span>
-              </div>
-            </a>
-            <a class="example-card" href="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg&embed=1" loading="lazy" title="Daily Standup" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>Daily Standup Timer</strong>
-                <span>Recurring daily countdown with ocean theme</span>
-              </div>
-            </a>
-            <a class="example-card" href="/?date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg" target="_blank" rel="noopener">
-              <div class="example-iframe-wrap">
-                <iframe src="/?date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg&embed=1" loading="lazy" title="Birthday Countdown" tabindex="-1"></iframe>
-              </div>
-              <div class="example-info">
-                <strong>Birthday Countdown Timer</strong>
-                <span>Birthday countdown with fireworks, progress bar, and balloons</span>
-              </div>
-            </a>
+        <section class="publish-panel" id="publish-panel" aria-label="Publish countdown">
+          <div class="publish-panel-header">
+            <div>
+              <p class="publish-kicker">Publish</p>
+              <h3>Share or embed your countdown</h3>
+            </div>
+            <p class="publish-status" id="publish-status">Copy your link, use it in Canva, or embed it on your website.</p>
           </div>
-          <div class="carousel-nav">
-            <button class="carousel-arrow carousel-prev" id="carousel-prev" aria-label="Previous example">&lsaquo;</button>
-            <button class="carousel-arrow carousel-next" id="carousel-next" aria-label="Next example">&rsaquo;</button>
+          <button type="button" class="url-action-btn url-action-btn-primary" id="copy-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy link
+          </button>
+          <button type="button" class="url-output" id="url-output" title="Click to copy">
+            <span class="url-output-label">Shareable link</span>
+            <span class="url-output-value" id="url-output-value"></span>
+            <span class="url-output-meta" id="url-output-meta">Anyone with this link can view your countdown. Settings are stored in the URL.</span>
+          </button>
+          <div class="publish-actions-secondary">
+            <button type="button" class="url-action-btn" id="canva-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 3 7v10l9 5 9-5V7z"/><path d="M8 10h8"/><path d="M8 14h6"/></svg>
+              Use in Canva
+            </button>
+            <button type="button" class="url-action-btn" id="embed-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              Embed on website
+            </button>
+          </div>
+          <details class="publish-more" id="publish-more">
+            <summary>More actions</summary>
+            <div class="publish-more-actions">
+              <button type="button" class="url-action-btn" id="notion-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 8v8"/><path d="M8 8l8 8"/><path d="M16 8v8"/></svg>
+                Use in Notion
+              </button>
+              <button type="button" class="url-action-btn" id="share-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
+              <button type="button" class="url-action-btn" id="open-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                Open in new tab
+              </button>
+              <button type="button" class="url-action-btn" id="calendar-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Add to calendar
+              </button>
+            </div>
+          </details>
+        </section>
+        <div class="preview-support">
+          <p class="preview-support-title">Feedback and support</p>
+          <div class="preview-support-links">
+            <a href="https://github.com/cankoe/count.live/issues" target="_blank" rel="noopener" class="preview-support-link">Report a bug</a>
+            <a href="mailto:dev@count.live?subject=count.live%20Feature%20Request" class="preview-support-link">Request a feature</a>
+            <a href="https://buymeacoffee.com/cankoe" target="_blank" rel="noopener" class="preview-support-link">Support the project</a>
           </div>
         </div>
 
@@ -273,178 +232,217 @@
 
       <!-- CONTROLS SECTION -->
       <div class="builder-controls">
+        <section class="builder-section builder-intro-section" id="builder-intro">
+          <p class="builder-subtitle">Build and customize shareable countdowns in minutes. Preview changes live, then share a link or embed in your favourite services like Canva and Notion. <a href="#no-signup-doc">No sign-up</a>, <a href="#no-tracking-doc">No tracking</a>.</p>
+          <ul class="builder-value-pills" aria-label="Key product highlights">
+            <li>Instant live preview</li>
+            <li>Share link or embed in Canva/Notion</li>
+            <li>Works in Canva, Notion, and websites</li>
+            <li>Private by default</li>
+          </ul>
+          <p class="builder-trust-note">
+            Anyone with your link can view the countdown. Your settings stay in the URL.
+            <a href="#no-tracking-doc">How privacy works</a>
+          </p>
+          <nav class="builder-jump-links" aria-label="Jump to builder sections">
+            <a href="#builder-basics">Event Setup</a>
+            <a href="#builder-content">Messaging</a>
+            <a href="#builder-style">Styling</a>
+            <a href="#builder-advanced">Advanced</a>
+          </nav>
+        </section>
 
-    <!-- ESSENTIAL CONTROLS -->
-    <div class="builder-row">
-      <label>Date & Time</label>
-      <div class="datetime-row">
-        <input type="datetime-local" id="b-date">
-        <div class="tz-combobox" id="tz-combobox">
-          <input type="text" id="b-timezone-input" class="tz-input" placeholder="Timezone..." autocomplete="off">
-          <input type="hidden" id="b-timezone">
-          <div class="tz-dropdown" id="tz-dropdown"></div>
-        </div>
-      </div>
-      <div class="quick-times">
-        <button type="button" class="quick-time-btn" data-time="00:00">Midnight</button>
-        <button type="button" class="quick-time-btn" data-time="12:00">Noon</button>
-      </div>
-    </div>
+        <section class="builder-section" id="builder-basics">
+          <h2 class="builder-section-title">1. Event Setup</h2>
+          <p class="builder-section-copy">Choose when your event happens and which time units visitors should see.</p>
 
-    <div class="builder-row">
-      <label>Units to display</label>
-      <div class="units-grid">
-        <label class="unit-checkbox"><input type="checkbox" value="y" id="b-u-y"> Years</label>
-        <label class="unit-checkbox"><input type="checkbox" value="mo" id="b-u-mo"> Months</label>
-        <label class="unit-checkbox"><input type="checkbox" value="w" id="b-u-w"> Weeks</label>
-        <label class="unit-checkbox"><input type="checkbox" value="d" id="b-u-d" checked> Days</label>
-        <label class="unit-checkbox"><input type="checkbox" value="h" id="b-u-h" checked> Hours</label>
-        <label class="unit-checkbox"><input type="checkbox" value="m" id="b-u-m" checked> Minutes</label>
-        <label class="unit-checkbox"><input type="checkbox" value="s" id="b-u-s" checked> Seconds</label>
-        <label class="unit-checkbox"><input type="checkbox" value="ms" id="b-u-ms"> MS</label>
-      </div>
-    </div>
-
-    <!-- TEXT INPUTS -->
-    <div class="builder-row">
-      <label>Title (optional)</label>
-      <input type="text" id="b-title" maxlength="50" placeholder="My Event">
-      <small class="input-hint">URLs will become clickable links</small>
-    </div>
-
-    <div class="builder-row">
-      <label>Subtitle (optional)</label>
-      <textarea id="b-subtitle" maxlength="200" rows="2" placeholder="The countdown begins..."></textarea>
-      <small class="input-hint">URLs will become clickable links</small>
-    </div>
-
-    <div class="builder-row">
-      <label>End message</label>
-      <input type="text" id="b-end" maxlength="100" placeholder="Event Started!">
-      <small class="input-hint">URLs will become clickable links</small>
-    </div>
-
-    <!-- THEME & STYLING -->
-    <div class="builder-row">
-      <label>Theme</label>
-      <div class="theme-presets" id="theme-presets"></div>
-    </div>
-
-    <div class="builder-row color-row">
-      <div>
-        <label>Background</label>
-        <div class="color-input">
-          <input type="color" id="b-bg-picker" value="#1a1a2e">
-          <input type="text" id="b-bg" value="1a1a2e" maxlength="8">
-        </div>
-      </div>
-      <div>
-        <label>Text Color</label>
-        <div class="color-input">
-          <input type="color" id="b-fg-picker" value="#ffffff">
-          <input type="text" id="b-fg" value="ffffff" maxlength="8">
-        </div>
-      </div>
-    </div>
-
-    <div class="builder-row">
-      <label>Font</label>
-      <select id="b-font">
-        <option value="sans">Sans-serif (Default)</option>
-        <option value="serif">Serif</option>
-        <option value="mono">Monospace</option>
-        <option value="display">Display</option>
-      </select>
-    </div>
-
-    <!-- ADVANCED OPTIONS - Collapsible -->
-    <div class="accordion" style="margin-top:1rem;padding-top:0;border-top:none;">
-      <div class="accordion-item" style="border-top:1px solid rgba(255,255,255,0.1);">
-        <button class="accordion-header" type="button">Advanced Options</button>
-        <div class="accordion-content">
-          <div class="accordion-body" style="opacity:1;">
-
-            <div class="builder-row" id="recur-row">
-              <label>Recurring</label>
-              <select id="b-recur">
-                <option value="">One-time (no recurrence)</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-
-            <div class="builder-row">
-              <label>Background Image URL</label>
-              <input type="text" id="b-bgimg" placeholder="https://example.com/image.jpg">
-            </div>
-
-            <div class="builder-row builder-row-inline">
-              <div>
-                <label>End Sound</label>
-                <select id="b-sound">
-                  <option value="">None</option>
-                  <option value="chime">Chime</option>
-                  <option value="bell">Bell</option>
-                </select>
-              </div>
-              <div>
-                <label>Celebration</label>
-                <select id="b-celebrate">
-                  <option value="">None</option>
-                  <option value="confetti">Confetti</option>
-                  <option value="fireworks">Fireworks</option>
-                </select>
+          <div class="builder-row">
+            <label>Date & Time</label>
+            <div class="datetime-row">
+              <input type="datetime-local" id="b-date">
+              <div class="tz-combobox" id="tz-combobox">
+                <input type="text" id="b-timezone-input" class="tz-input" placeholder="Timezone..." autocomplete="off">
+                <input type="hidden" id="b-timezone">
+                <div class="tz-dropdown" id="tz-dropdown"></div>
               </div>
             </div>
-
-            <div class="builder-row">
-              <label>Display Options</label>
-              <div class="checkbox-row">
-                <input type="checkbox" id="b-showtz">
-                <label for="b-showtz">Show timezone display</label>
-              </div>
-              <div class="checkbox-row">
-                <input type="checkbox" id="b-progress">
-                <label for="b-progress">Show progress bar</label>
-              </div>
-              <div class="checkbox-row">
-                <input type="checkbox" id="b-percent">
-                <label for="b-percent">Show percentage</label>
-              </div>
-              <div class="checkbox-row">
-                <input type="checkbox" id="b-notify">
-                <label for="b-notify">Browser notification when complete</label>
-              </div>
+            <div class="quick-times">
+              <button type="button" class="quick-time-btn" data-time="00:00">Midnight</button>
+              <button type="button" class="quick-time-btn" data-time="12:00">Noon</button>
             </div>
-
-            <div class="builder-row" id="redirect-row">
-              <label>Redirect URL</label>
-              <input type="url" id="b-redirect" placeholder="https://example.com">
-              <small class="input-hint">When the countdown ends, visitors will be sent to this URL.</small>
-              <small class="input-error" id="redirect-error" style="display:none;color:#ff6b6b;">URL must start with http:// or https://</small>
-            </div>
-
-            <div class="builder-row" id="redirect-delay-row" style="display:none;">
-              <label>Redirect Delay (seconds)</label>
-              <input type="number" id="b-redirect-delay" min="0" max="3600" value="0" placeholder="0">
-              <small class="input-hint">Seconds to wait before redirecting. Use this to let celebration effects play first.</small>
-            </div>
-
-            <div class="builder-row" id="start-date-row" style="display:none;">
-              <label>Progress Start Date</label>
-              <input type="datetime-local" id="b-start">
-              <small class="input-hint">When the countdown period started (for progress %)</small>
-            </div>
-
           </div>
-        </div>
-      </div>
-    </div>
 
+          <div class="builder-row">
+            <label>Units to display</label>
+            <div class="units-grid">
+              <label class="unit-checkbox"><input type="checkbox" value="y" id="b-u-y"> Years</label>
+              <label class="unit-checkbox"><input type="checkbox" value="mo" id="b-u-mo"> Months</label>
+              <label class="unit-checkbox"><input type="checkbox" value="w" id="b-u-w"> Weeks</label>
+              <label class="unit-checkbox"><input type="checkbox" value="d" id="b-u-d" checked> Days</label>
+              <label class="unit-checkbox"><input type="checkbox" value="h" id="b-u-h" checked> Hours</label>
+              <label class="unit-checkbox"><input type="checkbox" value="m" id="b-u-m" checked> Minutes</label>
+              <label class="unit-checkbox"><input type="checkbox" value="s" id="b-u-s" checked> Seconds</label>
+              <label class="unit-checkbox"><input type="checkbox" value="ms" id="b-u-ms"> MS</label>
+            </div>
+          </div>
+        </section>
+
+        <section class="builder-section" id="builder-content">
+          <h2 class="builder-section-title">2. Messaging</h2>
+          <p class="builder-section-copy">Add event context and the final message visitors will see when the countdown ends.</p>
+
+          <div class="builder-row">
+            <label>Title (optional)</label>
+            <input type="text" id="b-title" maxlength="50" placeholder="My Event">
+            <small class="input-hint">URLs will become clickable links</small>
+          </div>
+
+          <div class="builder-row">
+            <label>Subtitle (optional)</label>
+            <textarea id="b-subtitle" maxlength="200" rows="2" placeholder="The countdown begins..."></textarea>
+            <small class="input-hint">URLs will become clickable links</small>
+          </div>
+
+          <div class="builder-row">
+            <label>End message</label>
+            <input type="text" id="b-end" maxlength="100" placeholder="Event Started!">
+            <small class="input-hint">URLs will become clickable links</small>
+          </div>
+        </section>
+
+        <section class="builder-section" id="builder-style">
+          <h2 class="builder-section-title">3. Styling</h2>
+          <p class="builder-section-copy">Match your brand with presets, custom colors, font choices, and optional background imagery.</p>
+
+          <div class="builder-row">
+            <label>Theme</label>
+            <div class="theme-presets" id="theme-presets"></div>
+          </div>
+
+          <div class="builder-row color-row">
+            <div>
+              <label>Background</label>
+              <div class="color-input">
+                <input type="color" id="b-bg-picker" value="#1a1a2e">
+                <input type="text" id="b-bg" value="1a1a2e" maxlength="8">
+              </div>
+            </div>
+            <div>
+              <label>Text Color</label>
+              <div class="color-input">
+                <input type="color" id="b-fg-picker" value="#ffffff">
+                <input type="text" id="b-fg" value="ffffff" maxlength="8">
+              </div>
+            </div>
+          </div>
+
+          <div class="builder-row">
+            <label>Font</label>
+            <select id="b-font">
+              <option value="sans">Sans-serif (Default)</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Monospace</option>
+              <option value="display">Display</option>
+            </select>
+          </div>
+        </section>
+
+        <section class="builder-section" id="builder-advanced">
+          <h2 class="builder-section-title">4. Advanced Controls</h2>
+          <p class="builder-section-copy">Enable recurrence, celebration effects, redirects, progress tracking, and embed-ready enhancements.</p>
+
+          <div class="accordion builder-advanced-accordion">
+            <div class="accordion-item" style="border-top:1px solid rgba(255,255,255,0.1);">
+              <button class="accordion-header" type="button">Advanced Options</button>
+              <div class="accordion-content">
+                <div class="accordion-body" style="opacity:1;">
+
+                  <div class="builder-row" id="recur-row">
+                    <label>Recurring</label>
+                    <select id="b-recur">
+                      <option value="">One-time (no recurrence)</option>
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+
+                  <div class="builder-row">
+                    <label>Background Image URL</label>
+                    <input type="text" id="b-bgimg" placeholder="https://example.com/image.jpg">
+                  </div>
+
+                  <div class="builder-row builder-row-inline">
+                    <div>
+                      <label>End Sound</label>
+                      <select id="b-sound">
+                        <option value="">None</option>
+                        <option value="chime">Chime</option>
+                        <option value="bell">Bell</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label>Celebration</label>
+                      <select id="b-celebrate">
+                        <option value="">None</option>
+                        <option value="confetti">Confetti</option>
+                        <option value="fireworks">Fireworks</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="builder-row">
+                    <label>Display Options</label>
+                    <div class="checkbox-row">
+                      <input type="checkbox" id="b-showtz">
+                      <label for="b-showtz">Show timezone display</label>
+                    </div>
+                    <div class="checkbox-row">
+                      <input type="checkbox" id="b-progress">
+                      <label for="b-progress">Show progress bar</label>
+                    </div>
+                    <div class="checkbox-row">
+                      <input type="checkbox" id="b-percent">
+                      <label for="b-percent">Show percentage</label>
+                    </div>
+                    <div class="checkbox-row">
+                      <input type="checkbox" id="b-notify">
+                      <label for="b-notify">Browser notification when complete</label>
+                    </div>
+                  </div>
+
+                  <div class="builder-row" id="redirect-row">
+                    <label>Redirect URL</label>
+                    <input type="url" id="b-redirect" placeholder="https://example.com">
+                    <small class="input-hint">When the countdown ends, visitors will be sent to this URL.</small>
+                    <small class="input-error" id="redirect-error" style="display:none;color:#ff6b6b;">URL must start with http:// or https://</small>
+                  </div>
+
+                  <div class="builder-row" id="redirect-delay-row" style="display:none;">
+                    <label>Redirect Delay (seconds)</label>
+                    <input type="number" id="b-redirect-delay" min="0" max="3600" value="0" placeholder="0">
+                    <small class="input-hint">Seconds to wait before redirecting. Use this to let celebration effects play first.</small>
+                  </div>
+
+                  <div class="builder-row" id="start-date-row" style="display:none;">
+                    <label>Progress Start Date</label>
+                    <input type="datetime-local" id="b-start">
+                    <small class="input-hint">When the countdown period started (for progress %)</small>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       </div><!-- end builder-controls -->
     </div><!-- end builder-layout -->
+
+    <section class="builder-resources-intro" aria-label="Additional resources">
+      <p class="builder-resources-kicker">More resources</p>
+      <p class="builder-resources-copy">Examples, recent countdowns, documentation, privacy details, and support stay available below when you need them.</p>
+    </section>
 
     <!-- RECENT COUNTDOWNS -->
     <div class="history-section" id="history-section" style="display:none">
@@ -455,23 +453,93 @@
       <div class="history-list" id="history-list"></div>
     </div>
 
-    <div class="accordion">
+    <div class="accordion" id="builder-examples">
       <div class="accordion-item">
+        <button class="accordion-header" type="button">Examples</button>
+        <div class="accordion-content">
+          <div class="accordion-body">
+            <div class="examples-carousel" id="examples-carousel">
+              <h3 class="examples-title">Try a template and tweak it</h3>
+              <div class="carousel-viewport">
+                <a class="example-card" href="/?date=2027-01-01T00:00:00&title=New%20Year&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2027-01-01T00:00:00&title=New%20Year&end=Happy%20New%20Year!&celebrate=confetti&sound=chime&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fnewyear.jpg&embed=1" loading="lazy" title="New Year's Countdown" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>New Year's Countdown</strong>
+                    <span>Recurring yearly countdown timer with confetti and chime</span>
+                  </div>
+                </a>
+                <a class="example-card" href="/?date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2025-02-14T00:00:00&title=%E2%9D%A4%EF%B8%8F%20Valentine's%20Day&subtitle=Love%20is%20in%20the%20air&theme=sunset&font=serif&celebrate=confetti&recur=yearly&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fvalentines.jpg&embed=1" loading="lazy" title="Valentine's Day" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>Valentine's Day Countdown</strong>
+                    <span>Recurring yearly event countdown with sunset theme</span>
+                  </div>
+                </a>
+                <a class="example-card" href="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T00:00:00" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2029-03-15T12:00:00&title=Race%20Day&subtitle=Marathon%202029&font=display&units=d,h,m,s,ms&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fraceday.jpg&progress=1&percent=1&start=2026-02-01T00:00:00&embed=1" loading="lazy" title="Race Day" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>Race Day Countdown</strong>
+                    <span>Event countdown timer with milliseconds and progress bar</span>
+                  </div>
+                </a>
+                <a class="example-card" href="/?date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&end=We're%20live!%20https%3A%2F%2Fcount.live&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2029-04-01T09:00:00&title=Product%20Launch&subtitle=Something%20big%20is%20coming&end=We're%20live!%20https%3A%2F%2Fcount.live&theme=neon&font=mono&units=w,d,h,m&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Ftech.jpg&embed=1" loading="lazy" title="Product Launch" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>Product Launch Countdown</strong>
+                    <span>Launch countdown timer with neon theme and custom units</span>
+                  </div>
+                </a>
+                <a class="example-card" href="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2026-02-09T14:30:00&title=Daily%20Standup&recur=daily&units=h,m,s&theme=ocean&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Foffice.jpg&embed=1" loading="lazy" title="Daily Standup" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>Daily Standup Timer</strong>
+                    <span>Recurring daily countdown with ocean theme</span>
+                  </div>
+                </a>
+                <a class="example-card" href="/?date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg" target="_blank" rel="noopener">
+                  <div class="example-iframe-wrap">
+                    <iframe src="/?date=2026-08-15T00:00:00&title=Birthday!&subtitle=The%20big%20day%20is%20coming&theme=sunset&celebrate=fireworks&sound=bell&progress=1&percent=1&start=2026-01-01T00:00:00&bgimg=https%3A%2F%2Fcount.live%2Fimages%2Fballoons.jpg&embed=1" loading="lazy" title="Birthday Countdown" tabindex="-1"></iframe>
+                  </div>
+                  <div class="example-info">
+                    <strong>Birthday Countdown Timer</strong>
+                    <span>Birthday countdown with fireworks, progress bar, and balloons</span>
+                  </div>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion" id="builder-help">
+      <div class="accordion-item docs-item">
         <button class="accordion-header">Documentation</button>
         <div class="accordion-content">
           <div class="accordion-body">
             <h3>URL Parameters</h3>
-            <p>All configuration is passed via the URL hash. Parameters are separated by <code>&</code>.</p>
+            <p>Builder-generated links use query parameters. Hash-based URLs are also accepted as a fallback. Parameters are separated by <code>&</code>.</p>
             <table>
               <tr><th>Parameter</th><th>Description</th><th>Example</th></tr>
-              <tr><td><code>date</code></td><td>Target date/time (ISO 8601 format)</td><td><code>2025-12-31T23:59:59</code></td></tr>
+              <tr><td><code>date</code></td><td>Target date/time</td><td><code>2025-12-31T23:59:59</code></td></tr>
+              <tr><td><code>tz</code></td><td>IANA timezone for builder-generated dates</td><td><code>America/Los_Angeles</code></td></tr>
               <tr><td><code>title</code></td><td>Event title (max 50 chars)</td><td><code>New Year</code></td></tr>
               <tr><td><code>subtitle</code></td><td>Subtitle text, supports multiple lines (max 200 chars)</td><td><code>The countdown begins</code></td></tr>
               <tr><td><code>bg</code></td><td>Background color (hex without #)</td><td><code>1a1a2e</code></td></tr>
               <tr><td><code>fg</code></td><td>Foreground/text color (hex without #)</td><td><code>ffffff</code></td></tr>
               <tr><td><code>theme</code></td><td>Color theme preset</td><td><code>neon</code></td></tr>
               <tr><td><code>font</code></td><td>Font style: <code>sans</code>, <code>serif</code>, <code>mono</code>, <code>display</code></td><td><code>mono</code></td></tr>
-              <tr><td><code>bgimg</code></td><td>Background image URL (URL encoded)</td><td><code>https://...</code></td></tr>
+              <tr><td><code>bgimg</code></td><td>HTTPS background image URL (URL encoded)</td><td><code>https://...</code></td></tr>
               <tr><td><code>units</code></td><td>Comma-separated time units</td><td><code>d,h,m,s</code></td></tr>
               <tr><td><code>end</code></td><td>Message when countdown ends (max 100 chars)</td><td><code>Happy New Year!</code></td></tr>
               <tr><td><code>recur</code></td><td>Recurrence: <code>daily</code>, <code>weekly</code>, <code>monthly</code>, <code>yearly</code></td><td><code>weekly</code></td></tr>
@@ -479,9 +547,11 @@
               <tr><td><code>celebrate</code></td><td>End animation: <code>confetti</code>, <code>fireworks</code></td><td><code>confetti</code></td></tr>
               <tr><td><code>notify</code></td><td>Browser notification on end (<code>1</code> to enable)</td><td><code>1</code></td></tr>
               <tr><td><code>showtz</code></td><td>Show timezone display (<code>1</code> to enable)</td><td><code>1</code></td></tr>
-              <tr><td><code>progress</code></td><td>Show progress bar (<code>1</code> to enable)</td><td><code>1</code></td></tr>
-              <tr><td><code>percent</code></td><td>Show percentage text (<code>1</code> to enable)</td><td><code>1</code></td></tr>
+              <tr><td><code>progress</code></td><td>Show progress bar (<code>1</code> to enable, requires <code>start</code>)</td><td><code>1</code></td></tr>
+              <tr><td><code>percent</code></td><td>Show percentage text (<code>1</code> to enable, requires <code>start</code>)</td><td><code>1</code></td></tr>
               <tr><td><code>start</code></td><td>Start date for progress calculation (ISO 8601)</td><td><code>2025-01-01T00:00:00</code></td></tr>
+              <tr><td><code>redirect</code></td><td>Redirect URL after the countdown ends</td><td><code>https://example.com/launch</code></td></tr>
+              <tr><td><code>redirectDelay</code></td><td>Redirect delay in seconds (requires <code>redirect</code>)</td><td><code>5</code></td></tr>
               <tr><td><code>embed</code></td><td>Embed mode - minimal UI (<code>1</code> to enable)</td><td><code>1</code></td></tr>
               <tr><td><code>multi</code></td><td>Multiple countdowns mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
             </table>
@@ -503,10 +573,10 @@
             </table>
 
             <h3>Recurring Countdowns</h3>
-            <p>Use <code>recur</code> to auto-reset the countdown. When the countdown reaches zero, it automatically calculates the next occurrence and continues.</p>
+            <p>Use <code>recur</code> to auto-reset the countdown. When the countdown reaches zero, it calculates the next occurrence and continues unless a top-level redirect is configured.</p>
 
             <h3>Multiple Countdowns</h3>
-            <p>Use <code>multi=1</code> with numbered parameters: <code>date1</code>, <code>title1</code>, <code>date2</code>, <code>title2</code>, etc. Up to 5 countdowns supported.</p>
+            <p>Use <code>multi=1</code> with numbered parameters such as <code>date1</code>, <code>title1</code>, <code>end1</code>, <code>date2</code>, <code>title2</code>, <code>end2</code>, etc. Shared <code>units</code>, <code>bg</code>, <code>fg</code>, and <code>font</code> settings apply to the whole multi view. Up to 5 countdowns are supported.</p>
 
             <h3>Progress Tracking</h3>
             <p>Use <code>progress=1</code> and/or <code>percent=1</code> with a <code>start</code> date to show a visual progress bar and percentage completion.</p>
@@ -541,13 +611,13 @@
             <h4>Tips</h4>
             <ul>
               <li><code>embed=1</code> hides the corner buttons and promo badge for a clean look</li>
-              <li>All customization parameters (theme, font, colors, background image, etc.) work in embedded mode</li>
+              <li>Visual customization parameters (theme, font, colors, background image, etc.) work in embedded mode</li>
               <li>The embed is fully responsive — it adapts to whatever size you give the iframe</li>
-              <li>All customization (theme, colors, fonts, sounds, celebrations) works in every embed method</li>
+              <li>Post-end redirects are disabled when the countdown is embedded</li>
             </ul>
 
             <h3>Date Formats</h3>
-            <p>The following date formats are supported (interpreted as UTC):</p>
+            <p>The following date formats are supported. Examples without an explicit timezone are interpreted as UTC:</p>
             <ul>
               <li><code>2025-12-31T23:59:59</code> - Full date and time</li>
               <li><code>2025-12-31T23:59</code> - Date and time without seconds</li>
@@ -569,7 +639,7 @@
         </div>
       </div>
 
-      <div class="accordion-item">
+      <div class="accordion-item tos-item">
         <button class="accordion-header">Terms of Service</button>
         <div class="accordion-content">
           <div class="accordion-body">
@@ -579,7 +649,7 @@
             <p>By accessing and using this countdown timer service, you accept and agree to be bound by these Terms of Service.</p>
 
             <h3>Service Description</h3>
-            <p>This is a free, static countdown timer generator. The service is provided "as is" without warranties of any kind.</p>
+            <p>This is a free countdown timer generator. Countdown rendering happens in the browser, and hosted pages may include embed metadata served from Cloudflare Workers. The service is provided "as is" without warranties of any kind.</p>
 
             <h3>Permitted Use</h3>
             <p>You may use this service for personal, educational, or commercial purposes. You may embed countdown URLs on your own websites or share them freely.</p>
@@ -602,19 +672,22 @@
         </div>
       </div>
 
-      <div class="accordion-item">
+      <div class="accordion-item privacy-item">
         <button class="accordion-header">Privacy Policy</button>
         <div class="accordion-content">
           <div class="accordion-body">
             <p><strong>Last updated:</strong> February 2026</p>
 
+            <h3 id="no-signup-doc">No Sign-up Required</h3>
+            <p>You can create, customize, and share countdowns without creating an account.</p>
+
             <h3>Data Collection</h3>
             <p>We do not collect, store, or process any personal data ourselves. All countdown calculations happen in your browser.</p>
 
             <h3>No Cookies</h3>
-            <p>This website does not use cookies. The only local storage used is to remember your builder theme preference (light/dark mode).</p>
+            <p>This website does not use cookies. Local storage is used to remember your builder theme preference (light/dark mode) and to store recent countdown history on your device.</p>
 
-            <h3>No First-Party Analytics</h3>
+            <h3 id="no-tracking-doc">No First-Party Analytics</h3>
             <p>We do not use any analytics or tracking services of our own.</p>
 
             <h3>Cloudflare Hosting</h3>
@@ -626,12 +699,12 @@
         </div>
       </div>
 
-      <div class="accordion-item">
+      <div class="accordion-item about-item">
         <button class="accordion-header">About</button>
         <div class="accordion-content">
           <div class="accordion-body">
             <h3>What is this?</h3>
-            <p>A simple, free countdown timer that runs entirely in your browser. Create customizable countdowns for events, deadlines, launches, or any occasion.</p>
+            <p>A simple, free countdown timer with browser-based countdowns and shareable URLs. Create customizable countdowns for events, deadlines, launches, or any occasion.</p>
 
             <h3>Features</h3>
             <ul>
@@ -640,7 +713,7 @@
               <li>Works offline once loaded</li>
               <li>No ads or tracking</li>
               <li>Mobile-friendly responsive design</li>
-              <li>Shareable URLs that work forever</li>
+              <li>Shareable URLs you can bookmark, reuse, and embed</li>
             </ul>
 
             <h3>Technical Details</h3>
@@ -648,7 +721,7 @@
               <li>Pure HTML, CSS, and JavaScript</li>
               <li>No external dependencies or frameworks</li>
               <li>Hosted on Cloudflare Workers</li>
-              <li>Open source and free to use</li>
+              <li>Free to use</li>
             </ul>
 
             <h3>Source Code</h3>
@@ -673,13 +746,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   <!-- Embed Modal -->
-  <div class="modal-overlay" id="embed-modal">
-    <div class="modal" style="position:relative;">
-      <button class="modal-close" onclick="closeModal('embed-modal')">&times;</button>
-      <h3>Embed Code</h3>
+  <div class="modal-overlay" id="embed-modal" role="dialog" aria-modal="true" aria-labelledby="embed-modal-title">
+    <div class="modal" tabindex="-1">
+      <button type="button" class="modal-close" data-close-modal="embed-modal">&times;</button>
+      <h3 id="embed-modal-title">Embed Code</h3>
       <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Copy this code to embed the countdown on your website:</p>
       <textarea id="embed-code" readonly></textarea>
       <div style="margin-top:0.75rem;">
@@ -691,22 +764,58 @@
         </div>
       </div>
       <div class="modal-actions">
-        <button class="modal-btn primary" onclick="copyEmbedCode()">Copy Code</button>
+        <button type="button" class="modal-btn primary" id="embed-copy-btn">Copy Code</button>
       </div>
     </div>
   </div>
 
   <!-- Calendar Modal -->
-  <div class="modal-overlay" id="calendar-modal">
-    <div class="modal" style="position:relative;">
-      <button class="modal-close" onclick="closeModal('calendar-modal')">&times;</button>
-      <h3>Add to Calendar</h3>
+  <div class="modal-overlay" id="calendar-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title">
+    <div class="modal" tabindex="-1">
+      <button type="button" class="modal-close" data-close-modal="calendar-modal">&times;</button>
+      <h3 id="calendar-modal-title">Add to Calendar</h3>
       <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Download the event file to add to your calendar:</p>
       <div class="modal-actions" style="justify-content:center;">
-        <button class="modal-btn primary" onclick="downloadICS()">
+        <button type="button" class="modal-btn primary" id="calendar-download-btn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right:0.5rem;vertical-align:middle;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
           Download .ics
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Canva Modal -->
+  <div class="modal-overlay" id="canva-modal" role="dialog" aria-modal="true" aria-labelledby="canva-modal-title">
+    <div class="modal" tabindex="-1">
+      <button type="button" class="modal-close" data-close-modal="canva-modal">&times;</button>
+      <h3 id="canva-modal-title">Use in Canva</h3>
+      <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.85rem;">No coding needed - follow these steps:</p>
+      <ol class="platform-steps">
+        <li>Copy your countdown link.</li>
+        <li>In Canva, paste the link directly into your design (or use <strong>Apps &gt; Embeds</strong>).</li>
+        <li>Canva will turn it into a live embedded countdown.</li>
+      </ol>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="modal-btn primary" id="canva-copy-btn">Copy Countdown Link</button>
+        <a href="https://www.canva.com/" target="_blank" rel="noopener" class="modal-btn modal-link-btn">Open Canva</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notion Modal -->
+  <div class="modal-overlay" id="notion-modal" role="dialog" aria-modal="true" aria-labelledby="notion-modal-title">
+    <div class="modal" tabindex="-1">
+      <button type="button" class="modal-close" data-close-modal="notion-modal">&times;</button>
+      <h3 id="notion-modal-title">Use in Notion</h3>
+      <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.85rem;">No coding needed - follow these steps:</p>
+      <ol class="platform-steps">
+        <li>Copy your countdown link.</li>
+        <li>In Notion, paste the link directly on your page (or type <code>/embed</code>).</li>
+        <li>Choose <strong>Create embed</strong> to show the live countdown.</li>
+      </ol>
+      <div class="modal-actions" style="justify-content:flex-start;">
+        <button class="modal-btn primary" id="notion-copy-btn">Copy Countdown Link</button>
+        <a href="https://www.notion.so/" target="_blank" rel="noopener" class="modal-btn modal-link-btn">Open Notion</a>
       </div>
     </div>
   </div>

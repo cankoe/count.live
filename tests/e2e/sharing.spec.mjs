@@ -13,10 +13,11 @@ test.describe('Sharing and Export', () => {
     await expect(copyBtn).toBeVisible();
   });
 
-  test('calendar download button exists on builder page', async ({ page }) => {
+  test('calendar action is available from more actions on the builder page', async ({ page }) => {
     await page.goto('/');
 
-    // The calendar button should be visible in the builder
+    await page.locator('#publish-more summary').click();
+
     const calendarBtn = page.locator('#calendar-btn');
     await expect(calendarBtn).toBeVisible();
   });

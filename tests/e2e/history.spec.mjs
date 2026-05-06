@@ -18,14 +18,6 @@ test.describe('Countdown History', () => {
     await expect(card).toBeVisible();
   });
 
-  test('history cards show iframe previews', async ({ page }) => {
-    await page.goto('/?date=2030-01-01T00:00:00&title=Preview+Test');
-    await page.goto('/');
-
-    const iframe = page.locator('.history-iframe-wrap iframe').first();
-    await expect(iframe).toBeAttached();
-  });
-
   test('clicking delete removes a history card', async ({ page }) => {
     // Start clean — clear storage then seed exactly 2 entries
     await page.goto('/');

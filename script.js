@@ -1152,6 +1152,7 @@ function saveToHistory(params) {
     title: params.title || '',
     subtitle: params.subtitle || '',
     date: params.date,
+    tz: params.tz || '',
     bg: params.bg || (params.theme && THEME_PRESETS[params.theme] ? THEME_PRESETS[params.theme].bg : '1a1a2e'),
     fg: params.fg || (params.theme && THEME_PRESETS[params.theme] ? THEME_PRESETS[params.theme].fg : 'ffffff'),
     visitedAt: Date.now()
@@ -1172,6 +1173,11 @@ function clearHistory() {
   renderHistory();
 }
 
+function normalizeHistoryHex(color, fallback) {
+  const cleaned = String(color || '').replace('#', '').trim();
+  return /^[0-9a-fA-F]{6}$/.test(cleaned) ? cleaned.toLowerCase() : fallback;
+}
+
 function renderHistory() {
   const section = document.getElementById('history-section');
   const list = document.getElementById('history-list');
@@ -1189,21 +1195,30 @@ function renderHistory() {
   history.forEach(entry => {
     const item = document.createElement('div');
     item.className = 'history-card';
+    const bg = normalizeHistoryHex(entry.bg, '1a1a2e');
+    const fg = normalizeHistoryHex(entry.fg, 'ffffff');
+    item.style.setProperty('--history-bg', '#' + bg);
+    item.style.setProperty('--history-fg', '#' + fg);
+    item.style.setProperty('--history-border', '#' + fg + '33');
     item.addEventListener('click', (e) => {
       if (!e.target.closest('.history-delete')) {
         window.location.href = entry.url;
       }
     });
 
-    // Iframe preview
-    const iframeWrap = document.createElement('div');
-    iframeWrap.className = 'history-iframe-wrap';
-    const iframe = document.createElement('iframe');
-    iframe.src = entry.url + (entry.url.includes('?') ? '&' : '?') + 'embed=1';
-    iframe.loading = 'lazy';
-    iframe.tabIndex = -1;
-    iframe.title = entry.title || 'Countdown';
-    iframeWrap.appendChild(iframe);
+    const body = document.createElement('div');
+    body.className = 'history-card-body';
+
+    const title = document.createElement('p');
+    title.className = 'history-card-title';
+    title.textContent = entry.title || 'Untitled countdown';
+
+    const date = document.createElement('p');
+    date.className = 'history-card-date';
+    date.textContent = formatDateForDisplay(entry.date, entry.tz) || entry.date || '';
+
+    body.appendChild(title);
+    body.appendChild(date);
 
     const del = document.createElement('button');
     del.className = 'history-delete';
@@ -1215,7 +1230,7 @@ function renderHistory() {
       deleteFromHistory(entry.url);
     });
 
-    item.appendChild(iframeWrap);
+    item.appendChild(body);
     item.appendChild(del);
     list.appendChild(item);
   });
@@ -1605,11 +1620,12 @@ function initBuilder() {
 
   // Copy functionality
   const copyUrl = () => {
-    const url = document.getElementById('url-output').textContent;
+    const url = getPublishUrl();
+    if (!url) return;
     navigator.clipboard.writeText(url).then(() => {
       const btn = document.getElementById('copy-btn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Link copied!';
       setTimeout(() => btn.innerHTML = originalText, 1500);
     });
   };
@@ -1619,8 +1635,9 @@ function initBuilder() {
 
   // Share functionality
   document.getElementById('share-btn').addEventListener('click', () => {
-    const url = document.getElementById('url-output').textContent;
+    const url = getPublishUrl();
     const title = document.getElementById('b-title').value || 'Countdown Timer';
+    if (!url) return;
 
     if (navigator.share) {
       navigator.share({
@@ -1635,45 +1652,67 @@ function initBuilder() {
 
   // Open in new tab
   document.getElementById('open-btn').addEventListener('click', () => {
-    const url = document.getElementById('url-output').textContent;
+    const url = getPublishUrl();
+    if (!url) return;
     window.open(url, '_blank');
   });
 
   // Embed button
-  document.getElementById('embed-btn').addEventListener('click', () => {
-    const url = document.getElementById('url-output').textContent + '&embed=1';
+  document.getElementById('embed-btn').addEventListener('click', (event) => {
+    const publishUrl = getPublishUrl();
+    if (!publishUrl) return;
+    const url = publishUrl + '&embed=1';
     updateEmbedCode(url);
-    document.getElementById('embed-modal').classList.add('open');
+    openModal('embed-modal', event.currentTarget);
   });
 
   // Embed dimension inputs
-  document.getElementById('embed-width').addEventListener('input', () => {
-    const url = document.getElementById('url-output').textContent + '&embed=1';
-    updateEmbedCode(url);
-  });
-  document.getElementById('embed-height').addEventListener('input', () => {
-    const url = document.getElementById('url-output').textContent + '&embed=1';
-    updateEmbedCode(url);
-  });
+  document.getElementById('embed-width').addEventListener('input', refreshEmbedModalCode);
+  document.getElementById('embed-height').addEventListener('input', refreshEmbedModalCode);
 
   // Calendar button
-  document.getElementById('calendar-btn').addEventListener('click', () => {
-    document.getElementById('calendar-modal').classList.add('open');
+  document.getElementById('calendar-btn').addEventListener('click', (event) => {
+    openModal('calendar-modal', event.currentTarget);
+  });
+
+  // Modal action buttons
+  document.getElementById('embed-copy-btn').addEventListener('click', copyEmbedCode);
+  document.getElementById('calendar-download-btn').addEventListener('click', downloadICS);
+
+  // Platform helpers (Canva / Notion)
+  document.getElementById('canva-btn').addEventListener('click', (event) => {
+    openModal('canva-modal', event.currentTarget);
+  });
+  document.getElementById('notion-btn').addEventListener('click', (event) => {
+    openModal('notion-modal', event.currentTarget);
+  });
+
+  document.getElementById('canva-copy-btn').addEventListener('click', () => {
+    copyPlatformUrl('canva-modal', 'Countdown link copied. Paste it into Canva Embed.');
+  });
+  document.getElementById('notion-copy-btn').addEventListener('click', () => {
+    copyPlatformUrl('notion-modal', 'Countdown link copied. Paste it into Notion /embed.');
+  });
+
+  // Close modals on explicit close buttons
+  document.querySelectorAll('[data-close-modal]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modalId = btn.getAttribute('data-close-modal');
+      if (modalId) closeModal(modalId);
+    });
   });
 
   // Close modals on overlay click
-  document.querySelectorAll('.modal-overlay').forEach(modal => {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        modal.classList.remove('open');
-      }
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeAllOpenModals();
     });
   });
 
   // Preview End button - toggle between countdown and end state
   document.getElementById('preview-end-btn').addEventListener('click', function() {
     previewEndMode = !previewEndMode;
-    this.textContent = previewEndMode ? 'Preview Countdown' : 'Preview End';
+    this.textContent = previewEndMode ? 'Preview live countdown' : 'Preview finished state';
 
     if (previewEndMode) {
       // Show end state, play sound, and trigger celebration
@@ -1719,15 +1758,62 @@ function initBuilder() {
 }
 
 // Modal helper functions
-function closeModal(modalId) {
-  document.getElementById(modalId).classList.remove('open');
+let lastModalTrigger = null;
+
+function openModal(modalId, trigger) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  lastModalTrigger = trigger || document.activeElement;
+  modal.classList.add('open');
+  const modalPanel = modal.querySelector('.modal');
+  if (modalPanel) {
+    setTimeout(() => modalPanel.focus({ preventScroll: true }), 50);
+  }
 }
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal || !modal.classList.contains('open')) return;
+  modal.classList.remove('open');
+  if (lastModalTrigger && typeof lastModalTrigger.focus === 'function') {
+    lastModalTrigger.focus();
+  }
+  lastModalTrigger = null;
+}
+
+function closeAllOpenModals() {
+  const openOverlays = document.querySelectorAll('.modal-overlay.open');
+  if (!openOverlays.length) return;
+  openOverlays.forEach(overlay => {
+    overlay.classList.remove('open');
+  });
+  if (lastModalTrigger && typeof lastModalTrigger.focus === 'function') {
+    lastModalTrigger.focus();
+  }
+  lastModalTrigger = null;
+}
+
+function getPublishUrl() {
+  const output = document.getElementById('url-output');
+  return output?.dataset.fullUrl || '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  closeAllOpenModals();
+});
 
 function updateEmbedCode(url) {
   const width = document.getElementById('embed-width').value || 400;
   const height = document.getElementById('embed-height').value || 200;
   const code = `<iframe src="${url}" width="${width}" height="${height}" frameborder="0" style="border-radius:8px;"></iframe>`;
   document.getElementById('embed-code').value = code;
+}
+
+function refreshEmbedModalCode() {
+  const publishUrl = getPublishUrl();
+  if (!publishUrl) return;
+  updateEmbedCode(publishUrl + '&embed=1');
 }
 
 function copyEmbedCode() {
@@ -1737,12 +1823,23 @@ function copyEmbedCode() {
   });
 }
 
+function copyPlatformUrl(modalId, successMessage) {
+  const url = getPublishUrl();
+  if (!url) return;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast(successMessage);
+    closeModal(modalId);
+  }).catch(() => {
+    showToast('Could not copy link. Please copy it from the URL field.');
+  });
+}
+
 function downloadICS() {
   const config = getBuilderConfig();
   const targetDate = parseDate(config.date);
   if (!targetDate) return;
 
-  const url = document.getElementById('url-output').textContent;
+  const url = getPublishUrl();
   const icsContent = generateICS(config.title, targetDate, url);
 
   const blob = new Blob([icsContent], { type: 'text/calendar' });
@@ -1907,14 +2004,56 @@ function buildUrl(config) {
   return base + '?' + parts.join('&');
 }
 
+function formatShareUrl(url) {
+  if (!url) return '';
+  const compact = url.replace(/^https?:\/\//, '');
+  return compact.length > 72 ? compact.slice(0, 69) + '...' : compact;
+}
+
 function updatePreview() {
   previewSession++;
   const session = previewSession;
   const config = getBuilderConfig();
+  const isPublishReady = Boolean(parseDate(config.date));
 
   // Update URL display
   const generatedUrl = buildUrl(config);
-  document.getElementById('url-output').textContent = generatedUrl;
+  const publishPanel = document.getElementById('publish-panel');
+  const urlOutput = document.getElementById('url-output');
+  const urlValue = document.getElementById('url-output-value');
+  const urlMeta = document.getElementById('url-output-meta');
+  const publishMore = document.getElementById('publish-more');
+  const publishButtons = [
+    'copy-btn',
+    'canva-btn',
+    'embed-btn',
+    'notion-btn',
+    'share-btn',
+    'open-btn',
+    'calendar-btn'
+  ].map((id) => document.getElementById(id));
+
+  publishPanel.classList.toggle('publish-panel-pending', !isPublishReady);
+  publishButtons.forEach((button) => {
+    button.disabled = !isPublishReady;
+  });
+  publishMore.classList.toggle('is-disabled', !isPublishReady);
+  if (!isPublishReady) {
+    publishMore.open = false;
+  }
+
+  urlOutput.disabled = !isPublishReady;
+  urlOutput.dataset.fullUrl = isPublishReady ? generatedUrl : '';
+  urlOutput.title = isPublishReady ? generatedUrl : 'Set a date to create your shareable link.';
+  urlValue.textContent = isPublishReady
+    ? formatShareUrl(generatedUrl)
+    : 'Set a date to create your shareable link.';
+  urlMeta.textContent = isPublishReady
+    ? 'Anyone with this link can view your countdown. Settings are stored in the URL.'
+    : 'Choose when your event happens, then share or embed it anywhere.';
+  document.getElementById('publish-status').textContent = isPublishReady
+    ? 'Copy your link, use it in Canva, or embed it on your website.'
+    : 'Set a date to create your shareable link.';
 
   // Update browser URL in real-time (so refresh preserves work and stays in builder)
   // Only update if we have a date set to avoid cluttering URL with defaults
@@ -2126,24 +2265,57 @@ document.getElementById('countdown-edit').addEventListener('click', () => {
 });
 
 // Accordion functionality
+function syncAccordionHeight(item) {
+  const content = item?.querySelector('.accordion-content');
+  if (!content) return;
+  content.style.maxHeight = item.classList.contains('open') ? content.scrollHeight + 'px' : '0px';
+}
+
+// Re-sync the accordion height when lazy-loaded media inside finishes loading,
+// otherwise the panel clips below the late-arriving iframes/images.
+const accordionMediaTracked = new WeakSet();
+function trackAccordionMedia(item) {
+  const content = item?.querySelector('.accordion-content');
+  if (!content) return;
+  content.querySelectorAll('iframe, img[loading="lazy"]').forEach(el => {
+    if (accordionMediaTracked.has(el)) return;
+    accordionMediaTracked.add(el);
+    el.addEventListener('load', () => {
+      if (item.classList.contains('open')) syncAccordionHeight(item);
+    });
+  });
+}
+
 document.querySelectorAll('.accordion-header').forEach(header => {
   header.addEventListener('click', () => {
     const item = header.parentElement;
     item.classList.toggle('open');
+    syncAccordionHeight(item);
+    if (item.classList.contains('open')) trackAccordionMedia(item);
   });
 });
 
+document.querySelectorAll('.accordion-item').forEach(syncAccordionHeight);
+window.addEventListener('resize', () => {
+  document.querySelectorAll('.accordion-item.open').forEach(syncAccordionHeight);
+});
+
 // Hash-based deep linking into documentation sections (e.g. #how-to-embed)
+function openAccordionForTarget(target) {
+  const accordion = target.closest('.accordion-content');
+  if (!accordion) return;
+  const accordionItem = accordion.parentElement;
+  accordionItem.classList.add('open');
+  syncAccordionHeight(accordionItem);
+}
+
 function scrollToHashTarget() {
   const hash = window.location.hash.slice(1);
   if (!hash) return;
   const target = document.getElementById(hash);
   if (!target) return;
   // Open the accordion containing the target
-  const accordion = target.closest('.accordion-content');
-  if (accordion) {
-    accordion.parentElement.classList.add('open');
-  }
+  openAccordionForTarget(target);
   // Show the builder view if it's hidden (documentation lives in the builder)
   const builder = document.getElementById('builder-view');
   if (builder && builder.style.display === 'none') {
@@ -2155,40 +2327,24 @@ function scrollToHashTarget() {
 scrollToHashTarget();
 window.addEventListener('hashchange', scrollToHashTarget);
 
-// Examples carousel
-(function() {
-  const carousel = document.getElementById('examples-carousel');
-  if (!carousel) return;
-  const cards = carousel.querySelectorAll('.example-card');
-  const prevBtn = document.getElementById('carousel-prev');
-  const nextBtn = document.getElementById('carousel-next');
-  if (cards.length === 0) return;
+// Ensure subtitle links open their docs accordion section even on repeat clicks
+document.querySelectorAll('.builder-subtitle a[href^="#"]').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const href = link.getAttribute('href');
+    if (!href || href.length < 2) return;
+    const hash = href.startsWith('#') ? href : '#' + href;
+    const target = document.getElementById(hash.slice(1));
+    if (!target) return;
 
-  let current = 0;
-  let timer = null;
-  let paused = false;
-
-  function goTo(index) {
-    cards[current].classList.remove('active');
-    current = ((index % cards.length) + cards.length) % cards.length;
-    cards[current].classList.add('active');
-  }
-
-  function startTimer() {
-    if (timer) clearInterval(timer);
-    timer = setInterval(function() {
-      if (!paused) goTo(current + 1);
-    }, 4000);
-  }
-
-  prevBtn.addEventListener('click', function() { goTo(current - 1); startTimer(); });
-  nextBtn.addEventListener('click', function() { goTo(current + 1); startTimer(); });
-
-  carousel.addEventListener('mouseenter', function() { paused = true; });
-  carousel.addEventListener('mouseleave', function() { paused = false; });
-
-  startTimer();
-})();
+    e.preventDefault();
+    if (window.location.hash !== hash) {
+      window.location.hash = hash;
+    } else {
+      openAccordionForTarget(target);
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
