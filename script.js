@@ -61,7 +61,7 @@ document.addEventListener('click', (e) => {
   if (!link) return;
   const email = link.href.replace('mailto:', '').split('?')[0];
   navigator.clipboard.writeText(email).then(() => {
-    showToast(`${email} copied to clipboard`);
+    showToast('Email copied');
   }).catch(() => {});
 });
 
@@ -761,7 +761,7 @@ function showBuilder(prefillParams = null) {
 
   document.body.style.color = DEFAULTS.fg;
   document.body.style.backgroundColor = DEFAULTS.bg;
-  document.title = 'count.live - Free Online Countdown Timer | Create & Share';
+  document.title = 'count.live — Free shareable countdown timer for any date';
   window._builderPrefill = prefillParams;
   initBuilder();
 }
@@ -874,7 +874,7 @@ function init() {
   const isEmbedded = window.self !== window.top;
 
   if (!targetDate) {
-    renderEndMessage('Invalid or missing date', isLarge);
+    renderEndMessage('This countdown link looks broken. Build your own at https://count.live', isLarge);
     return;
   }
 
@@ -1083,7 +1083,7 @@ function initMultiCountdown(params) {
   }
 
   if (countdowns.length === 0) {
-    container.innerHTML = '<p style="opacity:0.5">No countdowns configured</p>';
+    container.innerHTML = '<p style="opacity:0.5">No countdowns yet — add one with the builder.</p>';
     return;
   }
 
@@ -1644,13 +1644,16 @@ function initBuilder() {
   // Share functionality
   document.getElementById('share-btn').addEventListener('click', () => {
     const url = getPublishUrl();
-    const title = document.getElementById('b-title').value || 'Countdown Timer';
+    const userTitle = document.getElementById('b-title').value;
     if (!url) return;
+
+    const shareTitle = userTitle || 'Countdown Timer';
+    const shareText = userTitle ? `Counting down to ${userTitle}` : 'I made a countdown — here it is.';
 
     if (navigator.share) {
       navigator.share({
-        title: title,
-        text: 'Check out this countdown!',
+        title: shareTitle,
+        text: shareText,
         url: url
       }).then(() => showPublishCelebration()).catch(() => {});
     } else {
@@ -1859,7 +1862,7 @@ function copyPlatformUrl(modalId, successMessage) {
     closeModal(modalId);
     showPublishCelebration();
   }).catch(() => {
-    showToast('Could not copy link. Please copy it from the URL field.');
+    showToast("Couldn't copy automatically — tap the link above to copy it manually.");
   });
 }
 
@@ -2076,16 +2079,16 @@ function updatePreview() {
 
   urlOutput.disabled = !isPublishReady;
   urlOutput.dataset.fullUrl = isPublishReady ? generatedUrl : '';
-  urlOutput.title = isPublishReady ? generatedUrl : 'Set a date to create your shareable link.';
+  urlOutput.title = isPublishReady ? generatedUrl : 'Set a date first';
   urlValue.textContent = isPublishReady
     ? formatShareUrl(generatedUrl)
-    : 'Set a date to create your shareable link.';
+    : 'Your link will appear here';
   urlMeta.textContent = isPublishReady
-    ? 'Anyone with this link can view your countdown. Settings are stored in the URL.'
-    : 'Choose when your event happens, then share or embed it anywhere.';
+    ? 'Anyone with this link can view your countdown.'
+    : 'Pick a date in step 1 to generate your shareable link.';
   document.getElementById('publish-status').textContent = isPublishReady
-    ? 'Copy your link, use it in Canva, or embed it on your website.'
-    : 'Set a date to create your shareable link.';
+    ? 'Copy the link, drop it in Canva, or embed it anywhere.'
+    : 'Pick a date in step 1 to generate your shareable link.';
 
   // Update browser URL in real-time (so refresh preserves work and stays in builder)
   // Only update if we have a date set to avoid cluttering URL with defaults

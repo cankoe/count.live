@@ -221,7 +221,7 @@ test.describe('Builder View', () => {
 
     await page.locator('#b-date').fill('');
 
-    await expect(page.locator('#publish-status')).toHaveText('Set a date to create your shareable link.');
+    await expect(page.locator('#publish-status')).toHaveText('Pick a date in step 1 to generate your shareable link.');
     await expect(page.locator('#copy-btn')).toBeDisabled();
     await expect(page.locator('#url-output')).toBeDisabled();
   });
@@ -244,7 +244,7 @@ test.describe('Builder View', () => {
     const disabledUrl = await urlOutput.evaluate((el) => el.dataset.fullUrl || '');
     expect(disabledUrl).toBe('');
     // Regression guard: the placeholder title should never leak through as a "URL"
-    await expect(urlOutput).toHaveAttribute('title', 'Set a date to create your shareable link.');
+    await expect(urlOutput).toHaveAttribute('title', 'Set a date first');
 
     await dateInput.fill('2030-12-25T09:30');
     await expect(copyBtn).toBeEnabled();
