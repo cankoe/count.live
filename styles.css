@@ -2839,3 +2839,106 @@ body.builder-light.builder-mode .accordion#builder-help .accordion-body code {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Get the App section ──────────────────────────────────────── */
+.get-app-section {
+  margin-top: 2.5rem;
+  padding: 0 0.55rem 2rem;
+}
+
+.get-app-inner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(140, 167, 255, 0.10), rgba(140, 167, 255, 0.03));
+  border: 1px solid var(--builder-border, rgba(255,255,255,0.12));
+  flex-wrap: wrap;
+}
+
+.get-app-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.get-app-text {
+  flex: 1;
+  min-width: 160px;
+}
+
+.get-app-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.01em;
+}
+
+.get-app-copy {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.app-store-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.app-store-badge:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+@media (max-width: 480px) {
+  .get-app-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
+/* ──────────────────────────────────────────────────────────────── */
+
+/* ── Site footer ─────────────────────────────────────────────── */
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1.25rem 0.55rem 2rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--builder-border, rgba(255,255,255,0.08));
+  font-size: 0.72rem;
+  color: var(--builder-muted, rgba(255,255,255,0.4));
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.site-footer-links a {
+  color: var(--builder-muted, rgba(255,255,255,0.4));
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.site-footer-links a:hover {
+  color: var(--builder-fg, rgba(255,255,255,0.85));
+}
+
+@media (max-width: 400px) {
+  .site-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+/* ──────────────────────────────────────────────────────────────── */

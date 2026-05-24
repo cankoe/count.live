@@ -115,7 +115,7 @@ export default {
           apps: [],
           details: [
             {
-              appID: 'TEAM_ID.live.count.app', // TODO: Replace TEAM_ID with Apple Team ID
+              appID: 'TEAM_ID.live.count.countLiveApp', // TODO: Replace TEAM_ID with your Apple Developer Team ID
               paths: ['/*'],
             },
           ],
@@ -137,10 +137,13 @@ export default {
           relation: ['delegate_permission/common.handle_all_urls'],
           target: {
             namespace: 'android_app',
-            package_name: 'live.count.app',
+            package_name: 'live.count.count_live_app',
             sha256_cert_fingerprints: [
-              // TODO: Replace with actual signing certificate fingerprint
-              // Get with: keytool -list -v -keystore your-keystore.jks | grep SHA256
+              // TODO: Replace with your release signing certificate fingerprint.
+              // Get it with:
+              //   keytool -list -v -keystore your-keystore.jks -alias your-alias | grep SHA256
+              // (For Play App Signing, copy the SHA-256 from Play Console >
+              //  Setup > App integrity > App signing key certificate.)
               'SHA256_FINGERPRINT_HERE',
             ],
           },
