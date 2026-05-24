@@ -77,8 +77,13 @@ export default {
       const embedHref = embedUrl.toString();
       const oembedDiscoveryUrl = `${url.origin}/oembed?url=${encodeURIComponent(fullUrl)}`;
 
+      // Determine body classes to pre-apply server-side (prevents CLS)
+      const isEmbed = url.searchParams.get('embed') === '1';
+      const isEdit = url.searchParams.get('edit') === '1';
+      const bodyClasses = isEmbed ? ['embed-mode'] : isEdit ? ['builder-mode'] : [];
+
       // Use HTMLRewriter to modify meta tags
-      const transformedResponse = new HTMLRewriter()
+      const rewriter = new HTMLRewriter()
         .on('title', new TextRewriter(ogTitle))
         .on('meta[property="og:title"]', new AttributeRewriter('content', ogTitle))
         .on('meta[property="og:description"]', new AttributeRewriter('content', description))
@@ -94,9 +99,10 @@ export default {
           `<link rel="iframely player" href="${escapeHtml(embedHref)}" type="text/html" media="(aspect-ratio: 2/1)" />`,
           `<link rel="alternate" type="application/json+oembed" href="${escapeHtml(oembedDiscoveryUrl)}" title="${escapeHtml(ogTitle)}" />`,
         ]))
+        .on('body', bodyClasses.length ? new BodyClassAdder(bodyClasses) : { element() {} })
         .transform(response);
 
-      const securedResponse = addSecurityHeaders(transformedResponse, true);
+      const securedResponse = addSecurityHeaders(rewriter, true);
       // Provide discovery via HTTP Link headers (for crawlers that check headers)
       const finalHeaders = new Headers(securedResponse.headers);
       finalHeaders.append('Link', `<${oembedDiscoveryUrl}>; rel="alternate"; type="application/json+oembed"`);
@@ -226,6 +232,23 @@ export default {
       });
     }
 
+    // For the root path without ?date, inject builder-mode (or embed-mode) on
+    // the <body> server-side so the class is present before JS runs, eliminating
+    // the CLS caused by JS adding it after first paint.
+    if (url.pathname === '/') {
+      const assetResponse = await env.ASSETS.fetch(request);
+      const contentType = assetResponse.headers.get('content-type') || '';
+      if (contentType.includes('text/html')) {
+        const isEmbed = url.searchParams.get('embed') === '1';
+        const bodyClasses = isEmbed ? ['embed-mode'] : ['builder-mode'];
+        const transformed = new HTMLRewriter()
+          .on('body', new BodyClassAdder(bodyClasses))
+          .transform(assetResponse);
+        return addSecurityHeaders(transformed, true);
+      }
+      return addSecurityHeaders(assetResponse, false);
+    }
+
     // For all other requests, serve static assets with security headers
     const assetResponse = await env.ASSETS.fetch(request);
     const contentType = assetResponse.headers.get('content-type') || '';
@@ -314,6 +337,20 @@ class HeadAppender {
   element(element) {
     for (const snippet of this.htmlSnippets) {
       element.append(snippet, { html: true });
+    }
+  }
+}
+
+// Adds classes to <body> server-side to prevent CLS from JS-driven class additions.
+class BodyClassAdder {
+  constructor(classes) {
+    this.classes = classes;
+  }
+
+  element(element) {
+    for (const cls of this.classes) {
+      element.setAttribute('class',
+        ((element.getAttribute('class') || '') + ' ' + cls).trim());
     }
   }
 }

@@ -761,6 +761,7 @@ function showBuilder(prefillParams = null) {
 
   document.body.style.color = DEFAULTS.fg;
   document.body.style.backgroundColor = DEFAULTS.bg;
+  requestAnimationFrame(() => document.body.classList.add('theme-ready'));
   document.title = 'count.live — Free shareable countdown timer for any date';
   window._builderPrefill = prefillParams;
   initBuilder();
@@ -823,6 +824,8 @@ function init() {
   }
   document.body.style.color = fg;
   document.body.style.backgroundColor = bg;
+  // Enable color transitions after first paint to avoid CLS on load.
+  requestAnimationFrame(() => document.body.classList.add('theme-ready'));
   updateFavicon(fg, bg);
 
   // Apply font
@@ -1067,6 +1070,7 @@ function initMultiCountdown(params) {
   const bg = parseColor(params.bg, 'bg') || DEFAULTS.bg;
   document.body.style.color = fg;
   document.body.style.backgroundColor = bg;
+  requestAnimationFrame(() => document.body.classList.add('theme-ready'));
   updateFavicon(fg, bg);
   document.body.style.fontFamily = FONT_STACKS[params.font] || FONT_STACKS.sans;
 
