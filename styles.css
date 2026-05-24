@@ -163,14 +163,16 @@ body.builder-mode {
   font-size: clamp(1rem, 6vw, 4rem);
   font-weight: 200;
   opacity: 0.5;
-  align-self: flex-start;
-  padding-top: clamp(0.25rem, 1vw, 1rem);
+  align-self: center;
   flex-shrink: 0;
+  /* Shift up by roughly half the label+gap height so colon aligns with
+     the number digit center rather than the unit tile center */
+  margin-bottom: clamp(0.7rem, 1.5vw, 1.15rem);
 }
 
 .countdown.large .separator {
   font-size: clamp(1.5rem, 10vw, 6rem);
-  padding-top: clamp(0.5rem, 2vw, 1.5rem);
+  margin-bottom: clamp(0.9rem, 2vw, 1.4rem);
 }
 
 .countdown.vertical .separator {
@@ -244,7 +246,7 @@ body.builder-mode {
 
   .countdown:not(.vertical) .separator {
     font-size: clamp(0.75rem, 4vw, 1.5rem);
-    padding-top: 0.15rem;
+    margin-bottom: 0.7rem;
   }
 
   .countdown.vertical .unit {
@@ -837,6 +839,7 @@ body.builder-light .email-button-small {
 
 .preview-frame .countdown {
   gap: 0.5rem;
+  min-height: 0;
 }
 
 .preview-frame .unit {
@@ -854,7 +857,8 @@ body.builder-light .email-button-small {
 
 .preview-frame .separator {
   font-size: 1.25rem;
-  padding-top: 0.5rem;
+  align-self: center;
+  margin-bottom: 0.85rem;
 }
 
 .preview-frame .end-message {
@@ -1223,7 +1227,8 @@ body.builder-light .email-button-small {
 
   .preview-frame .separator {
     font-size: 1rem;
-    padding-top: 0.3rem;
+    align-self: center;
+    margin-bottom: 0.75rem;
   }
 
   .preview-frame .end-message {
@@ -1284,6 +1289,7 @@ body.builder-light .email-button-small {
 
   .preview-frame .countdown {
     gap: 0.25rem;
+    min-height: 0;
   }
 
   .preview-frame .unit {
