@@ -1358,7 +1358,7 @@ function initBuilder() {
     });
   }
 
-  // Populate theme presets
+  // Populate color presets — clicking a swatch updates the bg/fg color fields
   const themeContainer = document.getElementById('theme-presets');
   Object.entries(THEME_PRESETS).forEach(([key, theme]) => {
     const btn = document.createElement('button');
