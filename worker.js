@@ -121,7 +121,7 @@ export default {
           apps: [],
           details: [
             {
-              appID: 'TEAM_ID.live.count.countLiveApp', // TODO: Replace TEAM_ID with your Apple Developer Team ID
+              appID: 'YR2858YXC5.live.count.countLiveApp',
               paths: ['/*'],
             },
           ],
