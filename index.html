@@ -117,18 +117,18 @@
   <div class="multi-container" id="multi-view" style="display:none;"></div>
 
   <div class="corner-actions">
-    <button class="corner-btn share-btn" id="countdown-share" title="Share">
+    <button class="corner-btn share-btn" id="countdown-share" title="Share" aria-label="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
         <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
       </svg>
     </button>
-    <button class="corner-btn" id="countdown-edit" title="Edit">
+    <button class="corner-btn" id="countdown-edit" title="Edit" aria-label="Edit countdown">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
       </svg>
     </button>
-    <button class="corner-btn" id="countdown-fullscreen" title="Fullscreen">
+    <button class="corner-btn" id="countdown-fullscreen" title="Fullscreen" aria-label="Toggle fullscreen">
       <svg class="icon-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
         <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
       </svg>
@@ -137,8 +137,9 @@
       </svg>
     </button>
     <div class="promo-badge">
-      <span class="promo-icon">+</span>
-      <div class="promo-modal">
+      <button type="button" class="promo-icon" id="promo-toggle"
+              aria-expanded="false" aria-controls="promo-modal" aria-label="About count.live">+</button>
+      <div class="promo-modal" id="promo-modal">
         <p>Want one of these?</p>
         <a href="/">Build your own — free</a>
       </div>
@@ -150,7 +151,7 @@
       <div class="builder-header-main">
         <div class="logo"><a href="/">count<span class="dot">.</span>live</a></div>
       </div>
-      <button type="button" class="theme-toggle" id="builder-theme-toggle" title="Toggle light/dark mode">
+      <button type="button" class="theme-toggle" id="builder-theme-toggle" title="Toggle light/dark mode" aria-label="Toggle light or dark mode">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
       </button>
@@ -745,7 +746,7 @@
   <!-- Embed Modal -->
   <div class="modal-overlay" id="embed-modal" role="dialog" aria-modal="true" aria-labelledby="embed-modal-title">
     <div class="modal" tabindex="-1">
-      <button type="button" class="modal-close" data-close-modal="embed-modal">&times;</button>
+      <button type="button" class="modal-close" data-close-modal="embed-modal" aria-label="Close">&times;</button>
       <h3 id="embed-modal-title">Embed Code</h3>
       <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Copy this code to embed the countdown on your website:</p>
       <textarea id="embed-code" readonly></textarea>
@@ -766,7 +767,7 @@
   <!-- Calendar Modal -->
   <div class="modal-overlay" id="calendar-modal" role="dialog" aria-modal="true" aria-labelledby="calendar-modal-title">
     <div class="modal" tabindex="-1">
-      <button type="button" class="modal-close" data-close-modal="calendar-modal">&times;</button>
+      <button type="button" class="modal-close" data-close-modal="calendar-modal" aria-label="Close">&times;</button>
       <h3 id="calendar-modal-title">Add to Calendar</h3>
       <p style="font-size:0.85rem;opacity:0.7;margin-bottom:1rem;">Download the event file to add to your calendar:</p>
       <div class="modal-actions" style="justify-content:center;">
@@ -781,7 +782,7 @@
   <!-- Canva Modal -->
   <div class="modal-overlay" id="canva-modal" role="dialog" aria-modal="true" aria-labelledby="canva-modal-title">
     <div class="modal" tabindex="-1">
-      <button type="button" class="modal-close" data-close-modal="canva-modal">&times;</button>
+      <button type="button" class="modal-close" data-close-modal="canva-modal" aria-label="Close">&times;</button>
       <h3 id="canva-modal-title">Use in Canva</h3>
       <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.85rem;">No code needed — just three steps:</p>
       <ol class="platform-steps">
@@ -799,7 +800,7 @@
   <!-- Notion Modal -->
   <div class="modal-overlay" id="notion-modal" role="dialog" aria-modal="true" aria-labelledby="notion-modal-title">
     <div class="modal" tabindex="-1">
-      <button type="button" class="modal-close" data-close-modal="notion-modal">&times;</button>
+      <button type="button" class="modal-close" data-close-modal="notion-modal" aria-label="Close">&times;</button>
       <h3 id="notion-modal-title">Use in Notion</h3>
       <p style="font-size:0.85rem;opacity:0.8;margin-bottom:0.85rem;">No code needed — just three steps:</p>
       <ol class="platform-steps">

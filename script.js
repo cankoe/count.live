@@ -65,6 +65,36 @@ document.addEventListener('click', (e) => {
   }).catch(() => {});
 });
 
+// Promo badge: click/Enter to toggle on touch + keyboard, plus outside-click
+// and Escape to dismiss. Hover-only (the prior behaviour) was invisible to
+// keyboard users and unusable on touch devices.
+document.addEventListener('DOMContentLoaded', () => {
+  const toggle = document.getElementById('promo-toggle');
+  if (!toggle) return;
+  const modal = document.getElementById('promo-modal');
+
+  const setOpen = (open) => {
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (toggle.getAttribute('aria-expanded') !== 'true') return;
+    if (!modal.contains(e.target) && e.target !== toggle) setOpen(false);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+});
+
 // Sound effects - generated at runtime for better quality
 const SOUNDS = (function() {
   function createWav(samples, sampleRate) {
@@ -792,11 +822,47 @@ function showCountdown() {
 function showAppUpsellModal() {
   const overlay = document.getElementById('app-upsell-modal');
   if (!overlay) return;
+  const dialog = overlay.querySelector('.modal');
+  const closeBtn = document.getElementById('app-upsell-close');
+  const dismissBtn = document.getElementById('app-upsell-dismiss');
+  const previouslyFocused = document.activeElement;
+
+  // Focus-trap inside the dialog. Tab cycles through the close button, the
+  // App Store CTA, and the "Maybe later" link.
+  const onKeyDown = (e) => {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    const focusables = dialog.querySelectorAll(
+      'a[href], button, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
+  const onOverlayClick = (e) => { if (e.target === overlay) close(); };
+
+  const close = () => {
+    overlay.classList.remove('open');
+    document.removeEventListener('keydown', onKeyDown);
+    overlay.removeEventListener('click', onOverlayClick);
+    if (previouslyFocused && previouslyFocused.focus) previouslyFocused.focus();
+  };
+
   overlay.classList.add('open');
-  const close = () => overlay.classList.remove('open');
-  document.getElementById('app-upsell-close').onclick = close;
-  document.getElementById('app-upsell-dismiss').onclick = close;
-  overlay.addEventListener('click', e => { if (e.target === overlay) close(); }, { once: true });
+  closeBtn.onclick = close;
+  dismissBtn.onclick = close;
+  overlay.addEventListener('click', onOverlayClick);
+  document.addEventListener('keydown', onKeyDown);
+  // Defer focus until after the open transition so VoiceOver picks it up.
+  requestAnimationFrame(() => dialog.focus());
 }
 
 function showBuilder(prefillParams = null) {
@@ -1164,52 +1230,79 @@ function initMultiCountdown(params) {
   const units = parseUnits(params.units);
   document.title = countdowns[0].title || 'Multiple Countdowns';
 
-  countdowns.forEach((cd, index) => {
+  // Build each countdown's DOM once up front, then update textContent on each
+  // tick. Replaces the prior pattern of N independent setTimeout loops each
+  // doing a full innerHTML rebuild 10×/sec — wasteful for what's typically
+  // a seconds-granularity display.
+  const entries = countdowns.map((cd, index) => {
     const item = document.createElement('div');
     item.className = 'countdown-item';
     item.id = 'countdown-' + (index + 1);
-    item.innerHTML = `
-      <h1 class="title">${escapeHtml(cd.title)}</h1>
-      <div class="countdown" id="countdown-inner-${index + 1}"></div>
-    `;
+
+    const titleEl = document.createElement('h1');
+    titleEl.className = 'title';
+    titleEl.textContent = cd.title;
+    item.appendChild(titleEl);
+
+    const countdownEl = document.createElement('div');
+    countdownEl.className = 'countdown';
+    countdownEl.id = 'countdown-inner-' + (index + 1);
+    countdownEl.setAttribute('aria-live', 'off');
+    countdownEl.setAttribute('aria-hidden', 'true');
+    item.appendChild(countdownEl);
     container.appendChild(item);
 
-    if (!cd.date) return;
+    if (!cd.date) return null;
 
-    let ended = false;
-    function updateMulti() {
-      if (ended) return;
-      const countdownEl = document.getElementById('countdown-inner-' + (index + 1));
-      if (!countdownEl) return;
+    const valueEls = {};
+    units.forEach((unit, idx) => {
+      const unitEl = document.createElement('div');
+      unitEl.className = 'unit';
+      const valueEl = document.createElement('span');
+      valueEl.className = 'value';
+      valueEls[unit] = valueEl;
+      const labelEl = document.createElement('span');
+      labelEl.className = 'label';
+      labelEl.textContent = UNIT_CONFIG[unit].label;
+      unitEl.appendChild(valueEl);
+      unitEl.appendChild(labelEl);
+      countdownEl.appendChild(unitEl);
 
-      if (cd.date.getTime() <= Date.now()) {
-        ended = true;
-        countdownEl.innerHTML = `<div class="end-message">${linkifyText(cd.end)}</div>`;
-        return;
+      const timeUnits = ['hours', 'minutes', 'seconds'];
+      const nextUnit = units[idx + 1];
+      if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
+        const sep = document.createElement('span');
+        sep.className = 'separator';
+        sep.textContent = ':';
+        countdownEl.appendChild(sep);
       }
+    });
 
-      const values = calculateTimeUnits(cd.date, units);
-      countdownEl.innerHTML = '';
-      units.forEach((unit, idx) => {
-        const unitEl = document.createElement('div');
-        unitEl.className = 'unit';
-        unitEl.innerHTML = `<span class="value">${padValue(values[unit], unit)}</span><span class="label">${UNIT_CONFIG[unit].label}</span>`;
-        countdownEl.appendChild(unitEl);
+    return { cd, countdownEl, valueEls, ended: false };
+  }).filter(Boolean);
 
-        const timeUnits = ['hours', 'minutes', 'seconds'];
-        const nextUnit = units[idx + 1];
-        if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
-          const sep = document.createElement('span');
-          sep.className = 'separator';
-          sep.textContent = ':';
-          countdownEl.appendChild(sep);
-        }
+  // One shared 1Hz tick drives every countdown — multi view doesn't show ms.
+  function tickAll() {
+    let stillRunning = false;
+    for (const entry of entries) {
+      if (entry.ended) continue;
+      if (entry.cd.date.getTime() <= Date.now()) {
+        entry.ended = true;
+        entry.countdownEl.innerHTML = `<div class="end-message">${linkifyText(entry.cd.end)}</div>`;
+        continue;
+      }
+      stillRunning = true;
+      const values = calculateTimeUnits(entry.cd.date, units);
+      units.forEach((unit) => {
+        const el = entry.valueEls[unit];
+        if (!el) return;
+        const newVal = padValue(values[unit], unit);
+        if (el.textContent !== newVal) el.textContent = newVal;
       });
-
-      setTimeout(updateMulti, 100);
     }
-    updateMulti();
-  });
+    if (stillRunning) setTimeout(tickAll, 1000);
+  }
+  tickAll();
 }
 
 // Countdown history
@@ -1303,6 +1396,7 @@ function renderHistory() {
     del.className = 'history-delete';
     del.innerHTML = '&times;';
     del.title = 'Remove';
+    del.setAttribute('aria-label', `Remove ${entry.title || 'countdown'}`);
     del.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -2246,24 +2340,15 @@ function updatePreview() {
     return;
   }
 
-  function updatePreviewCountdown() {
-    if (session !== previewSession) return;
+  // Fast-path bookkeeping: only rebuild the DOM when units change.
+  // Otherwise just update the textContent of the cached value spans.
+  let previewBuiltForUnits = null;
+  const previewValueEls = {};
 
-    // If in end preview mode, show end message
-    if (previewEndMode) {
-      previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
-      previewCountdown.className = 'countdown';
-      return;
-    }
-
-    if (targetDate.getTime() <= Date.now()) {
-      previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
-      return;
-    }
-
-    const values = calculateTimeUnits(targetDate, units);
+  function buildPreviewDom() {
     previewCountdown.innerHTML = '';
     previewCountdown.className = 'countdown';
+    for (const k of Object.keys(previewValueEls)) delete previewValueEls[k];
 
     units.forEach((unit, index) => {
       const unitEl = document.createElement('div');
@@ -2271,7 +2356,7 @@ function updatePreview() {
 
       const valueEl = document.createElement('span');
       valueEl.className = 'value';
-      valueEl.textContent = padValue(values[unit], unit);
+      previewValueEls[unit] = valueEl;
 
       const labelEl = document.createElement('span');
       labelEl.className = 'label';
@@ -2289,6 +2374,38 @@ function updatePreview() {
         sep.textContent = ':';
         previewCountdown.appendChild(sep);
       }
+    });
+    previewBuiltForUnits = units.join(',');
+  }
+
+  function updatePreviewCountdown() {
+    if (session !== previewSession) return;
+
+    // If in end preview mode, show end message
+    if (previewEndMode) {
+      previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
+      previewCountdown.className = 'countdown';
+      previewBuiltForUnits = null;
+      return;
+    }
+
+    if (targetDate.getTime() <= Date.now()) {
+      previewCountdown.innerHTML = '<div class="end-message">' + linkifyText(config.end || DEFAULTS.end) + '</div>';
+      previewBuiltForUnits = null;
+      return;
+    }
+
+    const values = calculateTimeUnits(targetDate, units);
+    const unitsKey = units.join(',');
+    if (previewBuiltForUnits !== unitsKey) {
+      buildPreviewDom();
+    }
+    // Fast path: just update textContent of the cached value spans.
+    units.forEach((unit) => {
+      const el = previewValueEls[unit];
+      if (!el) return;
+      const newVal = padValue(values[unit], unit);
+      if (el.textContent !== newVal) el.textContent = newVal;
     });
 
     const interval = units.includes('milliseconds') ? 50 : 250;

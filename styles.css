@@ -1424,10 +1424,13 @@ body.builder-light .email-button-small {
   justify-content: center;
   width: 28px;
   height: 28px;
+  padding: 0;
+  line-height: 1;
   border-radius: 50%;
   background: color-mix(in srgb, currentColor 12%, transparent);
   color: currentColor;
   border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  font: inherit;
   font-size: 0.85rem;
   cursor: pointer;
   opacity: 0.6;
@@ -1435,7 +1438,8 @@ body.builder-light .email-button-small {
 }
 
 .promo-badge:hover .promo-icon,
-.promo-badge:focus-within .promo-icon {
+.promo-badge:focus-within .promo-icon,
+.promo-icon[aria-expanded="true"] {
   background: color-mix(in srgb, currentColor 22%, transparent);
   border-color: color-mix(in srgb, currentColor 32%, transparent);
   opacity: 1;
@@ -1457,7 +1461,8 @@ body.builder-light .email-button-small {
   transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
 }
 
-.promo-badge:hover .promo-modal {
+.promo-badge:hover .promo-modal,
+.promo-icon[aria-expanded="true"] + .promo-modal {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);

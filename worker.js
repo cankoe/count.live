@@ -313,15 +313,20 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Helper class to rewrite text content
+// Helper class to rewrite text content.
+// HTMLRewriter can split a text node into multiple chunks; replacing each
+// chunk with the full new text would duplicate it. Empty all chunks except
+// the last, and write the full replacement only on the final chunk.
 class TextRewriter {
   constructor(newText) {
     this.newText = newText;
   }
 
   text(text) {
-    if (text.text) {
+    if (text.lastInTextNode) {
       text.replace(this.newText);
+    } else {
+      text.replace('');
     }
   }
 }
