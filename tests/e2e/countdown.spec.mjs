@@ -61,7 +61,10 @@ test.describe('Countdown View', () => {
 });
 
 test.describe('Redirect on completion', () => {
-  test('past one-time countdown redirects to configured URL', async ({ page }) => {
+  test('past one-time countdown shows continue prompt with destination host (delay=0)', async ({ page }) => {
+    // With redirectDelay=0 we no longer auto-redirect — that allowed silent
+    // open-redirect / phishing attacks. The destination host must be visible
+    // and the user must click Continue.
     let redirectedUrl = null;
     await page.route('https://example.com/**', route => {
       redirectedUrl = route.request().url();
@@ -70,8 +73,18 @@ test.describe('Redirect on completion', () => {
 
     await page.goto('/?date=2020-01-01T00:00:00&redirect=' + encodeURIComponent('https://example.com/launched'));
 
-    // Wait for the redirect to be attempted
-    await page.waitForTimeout(2000);
+    // No auto-redirect should occur.
+    await page.waitForTimeout(1500);
+    expect(redirectedUrl).toBeNull();
+
+    // Destination host is shown and a Continue button is rendered.
+    const prompt = page.locator('.redirect-prompt');
+    await expect(prompt).toBeVisible();
+    await expect(prompt.locator('.redirect-prompt-host')).toHaveText('example.com');
+
+    // Clicking Continue navigates to the destination.
+    await prompt.locator('.redirect-prompt-btn').click();
+    await page.waitForTimeout(500);
     expect(redirectedUrl).toBe('https://example.com/launched');
   });
 

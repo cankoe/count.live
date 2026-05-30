@@ -6,8 +6,8 @@ describe('validateRedirectUrl', () => {
     expect(validateRedirectUrl('https://example.com/launch')).toBe('https://example.com/launch');
   });
 
-  it('returns the URL for valid http URL', () => {
-    expect(validateRedirectUrl('http://example.com/launch')).toBe('http://example.com/launch');
+  it('returns null for http URL (https only — http allows protocol downgrade)', () => {
+    expect(validateRedirectUrl('http://example.com/launch')).toBeNull();
   });
 
   it('returns null for javascript: URL', () => {
