@@ -357,8 +357,65 @@ function parseUnits(unitsStr) {
   return filtered.length > 0 ? filtered : DEFAULTS.units;
 }
 
-// Helper: add years to a date, handling leap year edge cases
-function addYears(date, years) {
+// --- Timezone helpers for calendar arithmetic ----------------------------
+// Calendar math (years/months/days) is done in the countdown's own timezone
+// when one is supplied, so the breakdown is identical for every viewer and
+// matches the native apps. With no timezone we fall back to the browser's
+// local zone (the original behaviour) by using local Date methods.
+
+// UTC offset (ms) of `timeZone` at `date`: (wall-clock shown there) - (instant).
+function tzOffsetMs(timeZone, date) {
+  const dtf = new Intl.DateTimeFormat('en-US', {
+    timeZone, hourCycle: 'h23',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+  });
+  const map = {};
+  for (const p of dtf.formatToParts(date)) {
+    if (p.type !== 'literal') map[p.type] = p.value;
+  }
+  const asUTC = Date.UTC(+map.year, +map.month - 1, +map.day,
+    +map.hour, +map.minute, +map.second);
+  return asUTC - date.getTime();
+}
+
+// Wall-clock parts (0-based month) of an instant as seen in `timeZone`.
+function partsInTz(date, timeZone) {
+  const shifted = new Date(date.getTime() + tzOffsetMs(timeZone, date));
+  return {
+    year: shifted.getUTCFullYear(), month: shifted.getUTCMonth(),
+    day: shifted.getUTCDate(), hour: shifted.getUTCHours(),
+    minute: shifted.getUTCMinutes(), second: shifted.getUTCSeconds(),
+    ms: shifted.getUTCMilliseconds(),
+  };
+}
+
+// Instant for wall-clock parts interpreted in `timeZone`.
+// DST handling: at a fall-back overlap a wall-clock time occurs twice; we
+// deterministically prefer the EARLIER instant (the larger offset), matching
+// java.time / Foundation defaults so the app, widgets, and web agree. At a
+// spring-forward gap the time doesn't exist; the two-offset estimate lands on
+// the standard-offset side, which is the conventional resolution.
+function dateFromPartsInTz(p, timeZone) {
+  const asUTC = Date.UTC(p.year, p.month, p.day, p.hour, p.minute, p.second, p.ms || 0);
+  const off1 = tzOffsetMs(timeZone, new Date(asUTC));
+  const utc1 = asUTC - off1;
+  const off2 = tzOffsetMs(timeZone, new Date(utc1));
+  if (off2 === off1) return new Date(utc1);
+  // Offsets disagree (near a transition): take the earlier of the two candidate
+  // instants so an overlap always resolves the same way.
+  return new Date(Math.min(utc1, asUTC - off2));
+}
+
+// Helper: add years to a date, handling leap year edge cases.
+// Walks in `timeZone` when given, else the browser's local zone.
+function addYears(date, years, timeZone) {
+  if (timeZone) {
+    const p = partsInTz(date, timeZone);
+    const year = p.year + years;
+    const lastDay = new Date(Date.UTC(year, p.month + 1, 0)).getUTCDate();
+    return dateFromPartsInTz({ ...p, year, day: Math.min(p.day, lastDay) }, timeZone);
+  }
   const result = new Date(date);
   const originalMonth = result.getMonth();
   const originalDay = result.getDate();
@@ -370,8 +427,17 @@ function addYears(date, years) {
   return result;
 }
 
-// Helper: add months to a date, handling variable month lengths
-function addMonths(date, months) {
+// Helper: add months to a date, handling variable month lengths.
+// Walks in `timeZone` when given, else the browser's local zone.
+function addMonths(date, months, timeZone) {
+  if (timeZone) {
+    const p = partsInTz(date, timeZone);
+    const total = p.month + months;
+    const year = p.year + Math.floor(total / 12);
+    const month = ((total % 12) + 12) % 12;
+    const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+    return dateFromPartsInTz({ ...p, year, month, day: Math.min(p.day, lastDay) }, timeZone);
+  }
   const result = new Date(date);
   const originalDay = result.getDate();
   result.setMonth(result.getMonth() + months);
@@ -382,7 +448,19 @@ function addMonths(date, months) {
   return result;
 }
 
-function calculateTimeUnits(targetDate, units) {
+// Helper: add calendar days, preserving wall-clock time across DST.
+// Walks in `timeZone` when given, else the browser's local zone.
+function addDays(date, days, timeZone) {
+  if (timeZone) {
+    const p = partsInTz(date, timeZone);
+    return dateFromPartsInTz({ ...p, day: p.day + days }, timeZone);
+  }
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function calculateTimeUnits(targetDate, units, timeZone) {
   const result = {};
   let current = new Date();
   const target = new Date(targetDate);
@@ -392,25 +470,25 @@ function calculateTimeUnits(targetDate, units) {
     return units.reduce((acc, u) => { acc[u] = 0; return acc; }, {});
   }
 
-  // Handle calendar-based units precisely
+  // Handle calendar-based units precisely (in the countdown's tz when given)
   if (units.includes('years')) {
     let years = 0;
-    let next = addYears(current, 1);
+    let next = addYears(current, 1, timeZone);
     while (next <= target) {
       years++;
       current = next;
-      next = addYears(current, 1);
+      next = addYears(current, 1, timeZone);
     }
     result.years = years;
   }
 
   if (units.includes('months')) {
     let months = 0;
-    let next = addMonths(current, 1);
+    let next = addMonths(current, 1, timeZone);
     while (next <= target) {
       months++;
       current = next;
-      next = addMonths(current, 1);
+      next = addMonths(current, 1, timeZone);
     }
     result.months = months;
   }
@@ -446,15 +524,15 @@ function calculateTimeUnits(targetDate, units) {
 }
 
 // Get next occurrence for recurring countdowns
-function getNextOccurrence(baseDate, recur) {
+function getNextOccurrence(baseDate, recur, timeZone) {
   const now = new Date();
   let next = new Date(baseDate);
 
   while (next <= now) {
-    if (recur === 'daily') next.setDate(next.getDate() + 1);
-    else if (recur === 'weekly') next.setDate(next.getDate() + 7);
-    else if (recur === 'monthly') next = addMonths(next, 1);
-    else if (recur === 'yearly') next = addYears(next, 1);
+    if (recur === 'daily') next = addDays(next, 1, timeZone);
+    else if (recur === 'weekly') next = addDays(next, 7, timeZone);
+    else if (recur === 'monthly') next = addMonths(next, 1, timeZone);
+    else if (recur === 'yearly') next = addYears(next, 1, timeZone);
     else break;
   }
   return next;
@@ -936,7 +1014,6 @@ function init() {
   // Hide all views first
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = 'none';
-  document.getElementById('multi-view').style.display = 'none';
   document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image', 'hide-attribution');
 
   // Reset render-state globals that the countdown renderer caches across ticks.
@@ -951,11 +1028,6 @@ function init() {
     return;
   }
 
-  // Check for multi-countdown mode
-  if (params.multi === '1') {
-    initMultiCountdown(params);
-    return;
-  }
 
   showCountdown();
 
@@ -1042,7 +1114,7 @@ function init() {
 
   // Handle recurring countdown
   if (recur) {
-    targetDate = getNextOccurrence(targetDate, recur);
+    targetDate = getNextOccurrence(targetDate, recur, params.tz);
   }
 
   // Past one-time countdown with redirect: show end message + visible prompt.
@@ -1103,6 +1175,10 @@ function init() {
   const effectiveEndTime = Math.floor(targetDate.getTime() / smallestDivisor) * smallestDivisor;
   let showingZero = false;
   let celebrationTriggered = false;
+  // Generation token for the milliseconds rAF loop: each per-second update()
+  // starts a fresh ms loop, so we invalidate the previous one instead of
+  // letting concurrent rAF chains pile up.
+  let msGen = 0;
 
   function update() {
     if (session !== currentSession) return;
@@ -1149,7 +1225,7 @@ function init() {
             return; // Stop the countdown — we're redirecting
           }
 
-          const nextOccurrence = getNextOccurrence(targetDate, recur);
+          const nextOccurrence = getNextOccurrence(targetDate, recur, params.tz);
           const nextEl = document.getElementById('next-occurrence');
           nextEl.textContent = `Next: ${formatLocalTime(nextOccurrence)}`;
           nextEl.style.display = 'block';
@@ -1182,7 +1258,7 @@ function init() {
 
     if (showingZero) return;
 
-    const values = calculateTimeUnits(targetDate, units);
+    const values = calculateTimeUnits(targetDate, units, params.tz);
     renderCountdown(values, units, isLarge);
 
     const countdownStr = formatTitleCountdown(values, units);
@@ -1190,11 +1266,13 @@ function init() {
 
     const hasLargerUnits = units.some(u => u !== 'milliseconds');
     if (units.includes('milliseconds') && hasLargerUnits) {
-      // ms alongside other units: interpolate just the fractional ms at 60fps
+      // ms alongside other units: interpolate just the fractional ms at 60fps.
+      // Bump the generation so any prior ms loop (from the last update() tick)
+      // stops itself — otherwise a new rAF chain would stack every second.
+      const myGen = ++msGen;
       const msUpdate = () => {
-        // Bail when the user has navigated away — otherwise this rAF loop keeps
-        // running against stale closure state for the previous countdown.
-        if (session !== currentSession || showingZero) return;
+        // Bail when navigated away or superseded by a newer ms loop.
+        if (session !== currentSession || showingZero || myGen !== msGen) return;
         const remaining = targetDate - new Date();
         if (remaining <= 0) { update(); return; }
         const msVal = remaining % 1000;
@@ -1217,117 +1295,6 @@ function init() {
   }
 
   update();
-}
-
-// Multi-countdown view
-function initMultiCountdown(params) {
-  const container = document.getElementById('multi-view');
-  container.style.display = '';
-  container.innerHTML = '';
-  document.body.classList.remove('builder-mode');
-
-  // Apply colors
-  const fg = parseColor(params.fg, 'fg') || DEFAULTS.fg;
-  const bg = parseColor(params.bg, 'bg') || DEFAULTS.bg;
-  document.body.style.color = fg;
-  document.body.style.backgroundColor = bg;
-  requestAnimationFrame(() => document.body.classList.add('theme-ready'));
-  updateFavicon(fg, bg);
-  document.body.style.fontFamily = FONT_STACKS[params.font] || FONT_STACKS.sans;
-
-  // Parse multiple countdowns (max 5)
-  const countdowns = [];
-  for (let i = 1; i <= 5; i++) {
-    if (params['date' + i]) {
-      countdowns.push({
-        date: parseDate(params['date' + i]),
-        title: params['title' + i] || '',
-        end: params['end' + i] || DEFAULTS.end
-      });
-    }
-  }
-
-  if (countdowns.length === 0) {
-    container.innerHTML = '<p style="opacity:0.5">No countdowns yet — add one with the builder.</p>';
-    return;
-  }
-
-  const units = parseUnits(params.units);
-  document.title = countdowns[0].title || 'Multiple Countdowns';
-
-  // Build each countdown's DOM once up front, then update textContent on each
-  // tick. Replaces the prior pattern of N independent setTimeout loops each
-  // doing a full innerHTML rebuild 10×/sec — wasteful for what's typically
-  // a seconds-granularity display.
-  const entries = countdowns.map((cd, index) => {
-    const item = document.createElement('div');
-    item.className = 'countdown-item';
-    item.id = 'countdown-' + (index + 1);
-
-    const titleEl = document.createElement('h1');
-    titleEl.className = 'title';
-    titleEl.textContent = cd.title;
-    item.appendChild(titleEl);
-
-    const countdownEl = document.createElement('div');
-    countdownEl.className = 'countdown';
-    countdownEl.id = 'countdown-inner-' + (index + 1);
-    countdownEl.setAttribute('aria-live', 'off');
-    countdownEl.setAttribute('aria-hidden', 'true');
-    item.appendChild(countdownEl);
-    container.appendChild(item);
-
-    if (!cd.date) return null;
-
-    const valueEls = {};
-    units.forEach((unit, idx) => {
-      const unitEl = document.createElement('div');
-      unitEl.className = 'unit';
-      const valueEl = document.createElement('span');
-      valueEl.className = 'value';
-      valueEls[unit] = valueEl;
-      const labelEl = document.createElement('span');
-      labelEl.className = 'label';
-      labelEl.textContent = UNIT_CONFIG[unit].label;
-      unitEl.appendChild(valueEl);
-      unitEl.appendChild(labelEl);
-      countdownEl.appendChild(unitEl);
-
-      const timeUnits = ['hours', 'minutes', 'seconds'];
-      const nextUnit = units[idx + 1];
-      if (nextUnit && timeUnits.includes(unit) && timeUnits.includes(nextUnit)) {
-        const sep = document.createElement('span');
-        sep.className = 'separator';
-        sep.textContent = ':';
-        countdownEl.appendChild(sep);
-      }
-    });
-
-    return { cd, countdownEl, valueEls, ended: false };
-  }).filter(Boolean);
-
-  // One shared 1Hz tick drives every countdown — multi view doesn't show ms.
-  function tickAll() {
-    let stillRunning = false;
-    for (const entry of entries) {
-      if (entry.ended) continue;
-      if (entry.cd.date.getTime() <= Date.now()) {
-        entry.ended = true;
-        entry.countdownEl.innerHTML = `<div class="end-message">${linkifyText(entry.cd.end)}</div>`;
-        continue;
-      }
-      stillRunning = true;
-      const values = calculateTimeUnits(entry.cd.date, units);
-      units.forEach((unit) => {
-        const el = entry.valueEls[unit];
-        if (!el) return;
-        const newVal = padValue(values[unit], unit);
-        if (el.textContent !== newVal) el.textContent = newVal;
-      });
-    }
-    if (stillRunning) setTimeout(tickAll, 1000);
-  }
-  tickAll();
 }
 
 // Countdown history
@@ -1456,7 +1423,14 @@ const TIMEZONES = (typeof Intl !== 'undefined' && Intl.supportedValuesOf
   name: id.replace(/_/g, ' ').split('/').pop()
 }));
 
+const _tzOffsetLabelCache = new Map();
 function getTimezoneOffset(tzId) {
+  // Memoized: building the timezone picker calls this for ~400 zones, several
+  // times each, and toLocaleString is comparatively expensive. The label is
+  // stable for the session (DST shifts mid-session are immaterial here).
+  const cached = _tzOffsetLabelCache.get(tzId);
+  if (cached !== undefined) return cached;
+  let label;
   try {
     const now = new Date();
     const utcDate = new Date(now.toLocaleString('en-US', { timeZone: 'UTC' }));
@@ -1465,10 +1439,12 @@ function getTimezoneOffset(tzId) {
     const hours = Math.floor(Math.abs(offsetMinutes) / 60);
     const minutes = Math.abs(offsetMinutes) % 60;
     const sign = offsetMinutes >= 0 ? '+' : '-';
-    return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    label = `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
   } catch (e) {
-    return 'GMT+00:00';
+    label = 'GMT+00:00';
   }
+  _tzOffsetLabelCache.set(tzId, label);
+  return label;
 }
 
 // Localize example card URLs to use the user's timezone.
@@ -2362,7 +2338,7 @@ function updatePreview() {
 
   // Advance to next occurrence for recurring countdowns
   if (targetDate && config.recur) {
-    targetDate = getNextOccurrence(targetDate, config.recur);
+    targetDate = getNextOccurrence(targetDate, config.recur, config.tz);
   }
 
   if (!targetDate) {
@@ -2425,7 +2401,7 @@ function updatePreview() {
       return;
     }
 
-    const values = calculateTimeUnits(targetDate, units);
+    const values = calculateTimeUnits(targetDate, units, config.tz);
     const unitsKey = units.join(',');
     if (previewBuiltForUnits !== unitsKey) {
       buildPreviewDom();

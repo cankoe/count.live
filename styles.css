@@ -1913,29 +1913,6 @@ body.builder-light .history-clear:hover {
   border-color: rgba(255,221,0,0.4);
 }
 
-/* Multi-countdown view */
-.multi-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-  max-width: 900px;
-}
-.countdown-item {
-  padding: 1.5rem;
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  background: rgba(255,255,255,0.03);
-}
-.countdown-item .title {
-  font-size: clamp(1.2rem, 3vw, 1.8rem);
-  margin-bottom: 0.25rem;
-}
-.countdown-item .subtitle {
-  font-size: clamp(0.9rem, 2vw, 1rem);
-  margin-bottom: 1rem;
-}
-
 /* Builder additions */
 .builder-row-inline {
   display: flex;

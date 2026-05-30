@@ -193,8 +193,13 @@ export default {
       const embedTarget = new URL(targetUrl);
       embedTarget.searchParams.set('embed', '1');
 
-      const maxwidth = parseInt(url.searchParams.get('maxwidth')) || 800;
-      const maxheight = parseInt(url.searchParams.get('maxheight')) || 400;
+      // Clamp to sane bounds — these are reflected into the iframe dimensions.
+      const clampDim = (v, fallback) => {
+        const n = parseInt(v, 10);
+        return Number.isFinite(n) ? Math.min(2000, Math.max(120, n)) : fallback;
+      };
+      const maxwidth = clampDim(url.searchParams.get('maxwidth'), 800);
+      const maxheight = clampDim(url.searchParams.get('maxheight'), 400);
 
       const oembed = {
         version: '1.0',

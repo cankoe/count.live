@@ -113,9 +113,6 @@
     <a href="https://count.live" class="countdown-attribution" rel="home" target="_blank">Made with <strong>count.live</strong></a>
   </div>
 
-  <!-- Multi-countdown container -->
-  <div class="multi-container" id="multi-view" style="display:none;"></div>
-
   <div class="corner-actions">
     <button class="corner-btn share-btn" id="countdown-share" title="Share" aria-label="Share">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
@@ -597,7 +594,6 @@
               <tr><td><code>redirect</code></td><td>Redirect URL after the countdown ends</td><td><code>https://example.com/launch</code></td></tr>
               <tr><td><code>redirectDelay</code></td><td>Redirect delay in seconds (requires <code>redirect</code>)</td><td><code>5</code></td></tr>
               <tr><td><code>embed</code></td><td>Embed mode - minimal UI (<code>1</code> to enable)</td><td><code>1</code></td></tr>
-              <tr><td><code>multi</code></td><td>Multiple countdowns mode (<code>1</code> to enable)</td><td><code>1</code></td></tr>
             </table>
 
             <h3>Theme Presets</h3>
@@ -619,8 +615,6 @@
             <h3>Recurring Countdowns</h3>
             <p>Use <code>recur</code> to auto-reset the countdown. When the countdown reaches zero, it calculates the next occurrence and continues unless a top-level redirect is configured.</p>
 
-            <h3>Multiple Countdowns</h3>
-            <p>Use <code>multi=1</code> with numbered parameters such as <code>date1</code>, <code>title1</code>, <code>end1</code>, <code>date2</code>, <code>title2</code>, <code>end2</code>, etc. Shared <code>units</code>, <code>bg</code>, <code>fg</code>, and <code>font</code> settings apply to the whole multi view. Up to 5 countdowns are supported.</p>
 
             <h3>Progress Tracking</h3>
             <p>Use <code>progress=1</code> and/or <code>percent=1</code> with a <code>start</code> date to show a visual progress bar and percentage completion.</p>
