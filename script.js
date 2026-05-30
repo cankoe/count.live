@@ -797,6 +797,14 @@ function init() {
     robotsMeta.content = 'index, follow';
   }
 
+  // Smart App Banner: pass the current URL so the app opens the same countdown.
+  // Only set app-argument for countdown pages — on the homepage/builder we just
+  // promote the app without a specific deep link.
+  const smartBanner = document.getElementById('smart-app-banner-meta');
+  if (smartBanner && params.date) {
+    smartBanner.content = `app-id=6772674967, app-argument=${window.location.href}`;
+  }
+
   // Hide all views first
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = 'none';
