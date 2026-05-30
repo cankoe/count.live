@@ -184,6 +184,16 @@ export default {
         });
       }
 
+      // Only oEmbed our own URLs — otherwise an attacker could craft
+      // /oembed?url=https://evil.com/... and have Iframely/Notion/Canva
+      // render attacker content inside an iframe under the count.live brand.
+      if (target.hostname !== 'count.live' && target.hostname !== 'www.count.live') {
+        return new Response(JSON.stringify({ error: 'URL must be on count.live' }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...SECURITY_HEADERS },
+        });
+      }
+
       const title = target.searchParams.get('title') || 'Countdown';
       const subtitle = target.searchParams.get('subtitle') || '';
       const dateParam = target.searchParams.get('date') || '';

@@ -99,7 +99,12 @@
     <h1 class="title" id="title"></h1>
     <p class="subtitle" id="subtitle"></p>
     <p class="timezone-display" id="timezone-display" style="display:none;"></p>
-    <div class="countdown" id="countdown"></div>
+    <!-- Polite summary for screen readers — updated once on load and again
+         when the countdown ends. Avoids hammering AT with per-tick updates. -->
+    <p class="visually-hidden" id="countdown-summary" aria-live="polite" aria-atomic="true"></p>
+    <!-- aria-live="off": the countdown updates up to 60×/sec when ms is enabled.
+         Screen readers should rely on #countdown-summary instead. -->
+    <div class="countdown" id="countdown" aria-live="off" aria-hidden="true"></div>
     <p class="next-occurrence" id="next-occurrence" style="display:none;"></p>
     <div class="progress-container" id="progress-container" style="display:none;">
       <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
@@ -187,7 +192,7 @@
           <h2 class="title" id="preview-title"></h2>
           <p class="subtitle" id="preview-subtitle"></p>
           <p class="timezone-display" id="preview-tz" style="display:none;font-size:0.7rem;opacity:0.7;margin-bottom:0.5rem;"></p>
-          <div class="countdown" id="preview-countdown"></div>
+          <div class="countdown" id="preview-countdown" aria-live="off" aria-hidden="true"></div>
           <div class="progress-container" id="preview-progress-container" style="display:none;margin-top:0.75rem;max-width:100%;">
             <div class="progress-bar" style="height:6px;"><div class="progress-fill" id="preview-progress-fill" style="width:35%;"></div></div>
             <p class="progress-text" id="preview-progress-text" style="font-size:0.7rem;margin-top:0.25rem;"></p>

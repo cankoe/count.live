@@ -229,13 +229,15 @@ function sanitizeUrlForCss(urlStr) {
   }
 }
 
-// Validate a redirect URL - only allow http(s) absolute URLs
-// Returns the normalized href string, or null if invalid
+// Validate a redirect URL — https only.
+// Returns the normalized href string, or null if invalid.
+// http: is rejected so a count.live link can't be used to demote a user
+// from a secure connection to an insecure one.
 function validateRedirectUrl(urlStr) {
   if (!urlStr) return null;
   try {
     const parsed = new URL(urlStr);
-    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return null;
+    if (parsed.protocol !== 'https:') return null;
     return parsed.href;
   } catch {
     return null;
@@ -736,6 +738,47 @@ function renderEndMessage(message, isLarge) {
   msgEl.className = 'end-message' + (isLarge ? ' large' : '');
   msgEl.innerHTML = linkifyText(message);
   countdown.appendChild(msgEl);
+
+  // Announce end state to screen readers via the polite summary region.
+  const summary = document.getElementById('countdown-summary');
+  if (summary) summary.textContent = message;
+}
+
+// Render a redirect prompt that always reveals the destination host so a
+// shared count.live link can't silently send a viewer to an arbitrary site.
+// Behaviour:
+//   • delaySeconds > 0 → auto-redirect after the delay; destination is visible
+//     during the wait and a "Continue now" button is available.
+//   • delaySeconds === 0 → no auto-redirect; user must click to continue.
+function renderRedirectPrompt(redirectUrl, delaySeconds, session) {
+  const countdown = document.getElementById('countdown');
+  let hostname;
+  try { hostname = new URL(redirectUrl).hostname; } catch { hostname = redirectUrl; }
+
+  const prompt = document.createElement('div');
+  prompt.className = 'redirect-prompt';
+  const label = document.createElement('p');
+  label.className = 'redirect-prompt-label';
+  label.textContent = delaySeconds > 0 ? 'Redirecting to' : 'Continue to';
+  const host = document.createElement('p');
+  host.className = 'redirect-prompt-host';
+  host.textContent = hostname;
+  const btn = document.createElement('a');
+  btn.className = 'redirect-prompt-btn';
+  btn.href = redirectUrl;
+  btn.rel = 'noopener noreferrer';
+  btn.textContent = delaySeconds > 0 ? 'Continue now →' : 'Continue →';
+  prompt.appendChild(label);
+  prompt.appendChild(host);
+  prompt.appendChild(btn);
+  countdown.appendChild(prompt);
+
+  if (delaySeconds > 0) {
+    setTimeout(() => {
+      if (session !== currentSession) return;
+      window.location.href = redirectUrl;
+    }, delaySeconds * 1000);
+  }
 }
 
 let currentSession = 0;
@@ -911,14 +954,11 @@ function init() {
     targetDate = getNextOccurrence(targetDate, recur);
   }
 
-  // Past one-time countdown with redirect: show end message, then redirect after delay
+  // Past one-time countdown with redirect: show end message + visible prompt.
   if (redirectUrl && !isEmbedded && !recur && targetDate <= new Date()) {
     renderEndMessage(endMessage, isLarge);
     document.title = (title ? title + ' - ' : '') + endMessage;
-    setTimeout(() => {
-      if (session !== currentSession) return;
-      window.location.href = redirectUrl;
-    }, redirectDelay * 1000);
+    renderRedirectPrompt(redirectUrl, redirectDelay, session);
     return;
   }
 
@@ -934,6 +974,15 @@ function init() {
     tzDisplay.style.display = 'block';
   } else {
     tzDisplay.style.display = 'none';
+  }
+
+  // Set a one-shot summary for screen readers. The live countdown updates up
+  // to 60×/sec which is unusable via assistive tech; this region announces
+  // the target once on load and again from renderEndMessage when it completes.
+  const summary = document.getElementById('countdown-summary');
+  if (summary) {
+    const subject = title || 'Countdown';
+    summary.textContent = `${subject}. Counting down to ${formatLocalTime(targetDate)}.`;
   }
 
   // Setup progress tracking
@@ -1005,10 +1054,7 @@ function init() {
         if (recur) {
           // Redirect if configured, not embedded, and user watched it reach zero
           if (redirectUrl && !isEmbedded) {
-            setTimeout(() => {
-              if (session !== currentSession) return;
-              window.location.href = redirectUrl;
-            }, redirectDelay * 1000);
+            renderRedirectPrompt(redirectUrl, redirectDelay, session);
             return; // Stop the countdown — we're redirecting
           }
 
@@ -1036,10 +1082,7 @@ function init() {
           }
           // Redirect if configured and not embedded
           if (redirectUrl && !isEmbedded) {
-            setTimeout(() => {
-              if (session !== currentSession) return;
-              window.location.href = redirectUrl;
-            }, redirectDelay * 1000);
+            renderRedirectPrompt(redirectUrl, redirectDelay, session);
           }
         }
       }, 500);
@@ -1058,7 +1101,9 @@ function init() {
     if (units.includes('milliseconds') && hasLargerUnits) {
       // ms alongside other units: interpolate just the fractional ms at 60fps
       const msUpdate = () => {
-        if (showingZero) return;
+        // Bail when the user has navigated away — otherwise this rAF loop keeps
+        // running against stale closure state for the previous countdown.
+        if (session !== currentSession || showingZero) return;
         const remaining = targetDate - new Date();
         if (remaining <= 0) { update(); return; }
         const msVal = remaining % 1000;
