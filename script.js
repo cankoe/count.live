@@ -6,6 +6,14 @@ const DEFAULTS = {
   font: 'sans'
 };
 
+// Centralized localStorage key names. Add new keys here so naming stays
+// consistent and typos at call sites become impossible.
+const STORAGE_KEYS = {
+  builderVisits: 'cl_builder_visits',
+  builderTheme:  'builderTheme',
+  history:       'countdownHistory',
+};
+
 const MAX_LENGTHS = {
   title: 50,
   subtitle: 200,
@@ -569,6 +577,13 @@ function launchConfetti() {
 
   let frame = 0;
   function animate() {
+    // When tab is hidden, freeze the animation instead of burning through
+    // its frame budget — otherwise by the time the user returns the celebration
+    // is already over (rAF is throttled but still ticks at ~1Hz).
+    if (document.hidden) {
+      requestAnimationFrame(animate);
+      return;
+    }
     if (frame++ > 180) {
       canvas.remove();
       return;
@@ -632,6 +647,10 @@ function launchFireworks() {
 
   let frame = 0;
   function animate() {
+    if (document.hidden) {
+      requestAnimationFrame(animate);
+      return;
+    }
     if (frame++ > 200) {
       canvas.remove();
       return;
@@ -872,13 +891,13 @@ function showBuilder(prefillParams = null) {
 
   // Show app upsell popup on the second builder visit (not the first).
   try {
-    const visits = parseInt(localStorage.getItem('cl_builder_visits') || '0', 10) + 1;
-    localStorage.setItem('cl_builder_visits', visits);
+    const visits = parseInt(localStorage.getItem(STORAGE_KEYS.builderVisits) || '0', 10) + 1;
+    localStorage.setItem(STORAGE_KEYS.builderVisits, visits);
     if (visits === 2) setTimeout(showAppUpsellModal, 1200);
   } catch (_) {}
 
   // Apply saved builder theme preference
-  const savedBuilderTheme = localStorage.getItem('builderTheme');
+  const savedBuilderTheme = localStorage.getItem(STORAGE_KEYS.builderTheme);
   if (savedBuilderTheme === 'light') {
     document.body.classList.add('builder-light');
   } else {
@@ -919,6 +938,12 @@ function init() {
   document.getElementById('builder-view').style.display = 'none';
   document.getElementById('multi-view').style.display = 'none';
   document.body.classList.remove('builder-mode', 'embed-mode', 'has-bg-image', 'hide-attribution');
+
+  // Reset render-state globals that the countdown renderer caches across ticks.
+  // Without this, switching from a countdown to the builder (or to a different
+  // countdown URL) can leave the next render with stale layout/unit decisions.
+  lastVerticalState = false;
+  countdownBuiltForUnits = null;
 
   // Show builder if no date or in edit mode
   if (!params.date || params.edit === '1') {
@@ -1308,7 +1333,7 @@ function initMultiCountdown(params) {
 // Countdown history
 function getHistory() {
   try {
-    return JSON.parse(localStorage.getItem('countdownHistory') || '[]');
+    return JSON.parse(localStorage.getItem(STORAGE_KEYS.history) || '[]');
   } catch { return []; }
 }
 
@@ -1331,17 +1356,17 @@ function saveToHistory(params) {
   };
   const history = getHistory().filter(h => h.url !== url);
   history.unshift(entry);
-  localStorage.setItem('countdownHistory', JSON.stringify(history.slice(0, 10)));
+  localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history.slice(0, 10)));
 }
 
 function deleteFromHistory(url) {
   const history = getHistory().filter(h => h.url !== url);
-  localStorage.setItem('countdownHistory', JSON.stringify(history));
+  localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(history));
   renderHistory();
 }
 
 function clearHistory() {
-  localStorage.removeItem('countdownHistory');
+  localStorage.removeItem(STORAGE_KEYS.history);
   renderHistory();
 }
 
@@ -1446,8 +1471,13 @@ function getTimezoneOffset(tzId) {
   }
 }
 
-// Localize example card URLs to use the user's timezone
+// Localize example card URLs to use the user's timezone.
+// Memoized — the example URLs and the user's timezone don't change within a
+// session, so re-running on every builder mount is wasted parse + URL work.
+let examplesLocalized = false;
 function localizeExamples() {
+  if (examplesLocalized) return;
+  examplesLocalized = true;
   const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const cards = document.querySelectorAll('.example-card');
 
@@ -1509,14 +1539,14 @@ function initBuilder() {
   const builderThemeToggle = document.getElementById('builder-theme-toggle');
   if (builderThemeToggle) {
     // Check for saved preference (default to light)
-    const savedBuilderTheme = localStorage.getItem('builderTheme');
+    const savedBuilderTheme = localStorage.getItem(STORAGE_KEYS.builderTheme);
     if (savedBuilderTheme !== 'dark') {
       document.body.classList.add('builder-light');
     }
 
     builderThemeToggle.addEventListener('click', () => {
       document.body.classList.toggle('builder-light');
-      localStorage.setItem('builderTheme',
+      localStorage.setItem(STORAGE_KEYS.builderTheme,
         document.body.classList.contains('builder-light') ? 'light' : 'dark'
       );
     });

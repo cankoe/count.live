@@ -136,35 +136,13 @@ export default {
       });
     }
 
-    // Android App Links - Digital Asset Links
-    if (url.pathname === '/.well-known/assetlinks.json') {
-      const assetlinks = [
-        {
-          relation: ['delegate_permission/common.handle_all_urls'],
-          target: {
-            namespace: 'android_app',
-            package_name: 'live.count.count_live_app',
-            sha256_cert_fingerprints: [
-              // TODO: Replace with your release signing certificate fingerprint.
-              // Get it with:
-              //   keytool -list -v -keystore your-keystore.jks -alias your-alias | grep SHA256
-              // (For Play App Signing, copy the SHA-256 from Play Console >
-              //  Setup > App integrity > App signing key certificate.)
-              'SHA256_FINGERPRINT_HERE',
-            ],
-          },
-        },
-      ];
-      return new Response(JSON.stringify(assetlinks), {
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'public, max-age=3600',
-          ...SECURITY_HEADERS,
-        },
-      });
-    }
+    // Android App Links (assetlinks.json) intentionally omitted until the
+    // Android app actually ships. Serving a placeholder fingerprint would
+    // either silently fail verification or, worse, vouch for an arbitrary
+    // signing key. Reinstate this block with the real Play App Signing
+    // SHA-256 once the Android app is released.
 
-    // oEmbed endpoint for rich embed discovery (used by Iframely, Canva, Notion, etc.)
+// oEmbed endpoint for rich embed discovery (used by Iframely, Canva, Notion, etc.)
     if (url.pathname === '/oembed') {
       const targetUrl = url.searchParams.get('url');
       if (!targetUrl) {
@@ -273,8 +251,13 @@ export default {
 function workerFormatDate(dateStr, tzParam) {
   if (!dateStr) return '';
   try {
+    // A trailing Z or ±HH:MM means the string already specifies a zone;
+    // otherwise treat as UTC by appending Z. Looking at the trailing offset
+    // explicitly avoids the prior precedence ambiguity around lastIndexOf('-').
+    const hasZ = dateStr.endsWith('Z');
     const hasOffset = /[+-]\d{2}:\d{2}$/.test(dateStr);
-    const d = new Date(dateStr.includes('Z') || dateStr.includes('+') || dateStr.includes('-') && dateStr.lastIndexOf('-') > 7 ? dateStr : dateStr + 'Z');
+    const normalized = (hasZ || hasOffset) ? dateStr : dateStr + 'Z';
+    const d = new Date(normalized);
     if (isNaN(d.getTime())) return '';
 
     const opts = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' };
@@ -285,12 +268,14 @@ function workerFormatDate(dateStr, tzParam) {
       } catch {
         return d.toLocaleString('en-US', { ...opts, timeZone: 'UTC', timeZoneName: 'short' });
       }
-    } else if (hasOffset) {
+    }
+
+    if (hasOffset) {
       const match = dateStr.match(/([+-])(\d{2}):(\d{2})$/);
       if (match) {
         const sign = match[1] === '+' ? 1 : -1;
-        const offH = parseInt(match[2]);
-        const offM = parseInt(match[3]);
+        const offH = parseInt(match[2], 10);
+        const offM = parseInt(match[3], 10);
         const offsetMs = sign * (offH * 3600000 + offM * 60000);
         const local = new Date(d.getTime() + offsetMs);
         return local.toLocaleString('en-US', { ...opts, timeZone: 'UTC' });
