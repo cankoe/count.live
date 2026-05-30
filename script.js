@@ -746,10 +746,27 @@ function showCountdown() {
   document.body.classList.remove('builder-mode');
 }
 
+function showAppUpsellModal() {
+  const overlay = document.getElementById('app-upsell-modal');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  const close = () => overlay.classList.remove('open');
+  document.getElementById('app-upsell-close').onclick = close;
+  document.getElementById('app-upsell-dismiss').onclick = close;
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); }, { once: true });
+}
+
 function showBuilder(prefillParams = null) {
   document.getElementById('countdown-view').style.display = 'none';
   document.getElementById('builder-view').style.display = '';
   document.body.classList.add('builder-mode');
+
+  // Show app upsell popup on the second builder visit (not the first).
+  try {
+    const visits = parseInt(localStorage.getItem('cl_builder_visits') || '0', 10) + 1;
+    localStorage.setItem('cl_builder_visits', visits);
+    if (visits === 2) setTimeout(showAppUpsellModal, 1200);
+  } catch (_) {}
 
   // Apply saved builder theme preference
   const savedBuilderTheme = localStorage.getItem('builderTheme');
@@ -905,7 +922,7 @@ function init() {
   // Show timezone display
   const tzDisplay = document.getElementById('timezone-display');
   if (showTz) {
-    tzDisplay.textContent = `Event: ${formatLocalTime(targetDate)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
+    tzDisplay.textContent = `${formatLocalTime(targetDate)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
     tzDisplay.style.display = 'block';
   } else {
     tzDisplay.style.display = 'none';
@@ -2137,7 +2154,7 @@ function updatePreview() {
   const previewTz = document.getElementById('preview-tz');
   const targetDateForTz = parseDate(config.date);
   if (config.showtz && targetDateForTz) {
-    previewTz.textContent = `Event: ${formatLocalTime(targetDateForTz)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
+    previewTz.textContent = `${formatLocalTime(targetDateForTz)} (${Intl.DateTimeFormat().resolvedOptions().timeZone})`;
     previewTz.style.display = 'block';
   } else {
     previewTz.style.display = 'none';
