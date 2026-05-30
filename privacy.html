@@ -164,7 +164,7 @@
     <div class="doc-body">
 
       <div class="callout">
-        <p><strong>Short version:</strong> count.live doesn't collect, store, or sell any personal data. No accounts, no cookies. Privacy-preserving analytics are provided by Cloudflare — no individual user data is exposed.</p>
+        <p><strong>Short version:</strong> count.live doesn't collect, store, or sell any personal data. No accounts, no cookies. This policy covers both the count.live website and the iOS app. Privacy-preserving analytics are provided by Cloudflare — no individual user data is exposed.</p>
       </div>
 
       <h2>No Sign-up Required</h2>
@@ -178,14 +178,15 @@
 
       <h2>Analytics</h2>
       <p>This site uses <strong>Cloudflare Web Analytics</strong> to measure page views and performance. Cloudflare Web Analytics is cookie-free and privacy-preserving — it collects only aggregated metrics (visit counts, page views, load times) and does not track individual users, build behavioral profiles, or share data with advertisers.</p>
-      <p>We do not use Google Analytics or any other third-party tracking service. The iOS app does not include any analytics SDK.</p>
+      <p>We do not use Google Analytics or any other third-party tracking service. The iOS app uses <a href="https://sentry.io/privacy/" target="_blank" rel="noopener">Sentry</a> solely for crash reporting — if the app crashes, an anonymised error report (stack trace, device model, iOS version) is sent to Sentry. No personal data, no user identifiers, and no countdown content is included in these reports.</p>
 
       <h2>Cloudflare Hosting</h2>
       <p>This site is hosted on <a href="https://cloudflare.com" target="_blank" rel="noopener">Cloudflare Workers</a>. Cloudflare may collect standard infrastructure logs (IP addresses, browser type, request metadata) as part of operating their network. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a> for details.</p>
 
       <h2>iOS App</h2>
       <p>The count.live iOS app stores your saved countdowns locally on your device using iOS's standard storage (UserDefaults / shared app group). This data is not transmitted to any server. Notifications are scheduled locally on your device and are never sent to our servers.</p>
-      <p>The app does not collect, transmit, or share any personal data.</p>
+      <p>If you use a background image URL for a countdown, the app downloads and caches that image locally on your device (in the app's private storage area) so it can be displayed in home screen widgets. The image is fetched directly from the URL you provide; we do not proxy or store it on our servers.</p>
+      <p>Other than anonymised crash reports (see above), the app does not collect, transmit, or share any personal data.</p>
 
       <h2>URL Sharing</h2>
       <p>When you share a countdown URL, the event configuration (date, title, colors, etc.) is encoded in the URL itself. Be mindful of any personal information you include in countdown titles or subtitles if sharing publicly.</p>
