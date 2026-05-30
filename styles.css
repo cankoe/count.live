@@ -2348,7 +2348,7 @@ body.builder-mode .coffee-button.is-published {
 }
 
 body.builder-mode .coffee-button.is-published .coffee-message {
-  max-height: 5em;
+  max-height: 8em;
   opacity: 1;
   margin-bottom: 0.55rem;
 }
