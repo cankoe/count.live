@@ -2911,9 +2911,47 @@ body.builder-light.builder-mode .accordion#builder-help .accordion-body code {
 
 @media (max-width: 480px) {
   .get-app-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "icon text"
+      "badge badge";
+    gap: 0.5rem 0.9rem;
+    padding: 1rem 1.1rem 1.1rem;
+    align-items: center;
+  }
+
+  .get-app-icon {
+    grid-area: icon;
+    width: 44px;
+    height: 44px;
+  }
+
+  .get-app-text {
+    grid-area: text;
+    min-width: 0;
+  }
+
+  .get-app-heading {
+    font-size: 0.95rem;
+    margin: 0 0 0.15rem;
+  }
+
+  .get-app-copy {
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+
+  .app-store-badge {
+    grid-area: badge;
+    justify-self: stretch;
+    margin-top: 0.25rem;
+  }
+
+  .app-store-badge svg {
+    width: 100%;
+    height: auto;
+    max-height: 44px;
   }
 }
 /* ──────────────────────────────────────────────────────────────── */
