@@ -43,6 +43,23 @@ describe('parseDate', () => {
     expect(d.getUTCSeconds()).toBe(59);
   });
 
+  it('recovers a "+" offset that decoded to a space (un-encoded URL +)', () => {
+    // "...T22:00:00+03:00" in a query string decodes to "...T22:00:00 03:00".
+    const d = parseDate('2026-05-16T22:00:00 03:00');
+    expect(d).toBeInstanceOf(Date);
+    // 22:00:00 +03:00 → 19:00:00 UTC
+    expect(d.getUTCHours()).toBe(19);
+    expect(d.getUTCMinutes()).toBe(0);
+    expect(d.getUTCSeconds()).toBe(0);
+  });
+
+  it('recovers a space-offset without seconds', () => {
+    const d = parseDate('2026-05-16T22:00 03:00');
+    // 22:00 +03:00 → 19:00 UTC
+    expect(d.getUTCHours()).toBe(19);
+    expect(d.getUTCMinutes()).toBe(0);
+  });
+
   it('returns null for invalid date string', () => {
     expect(parseDate('not-a-date')).toBeNull();
   });

@@ -321,6 +321,15 @@ function parseDate(dateStr) {
 
   let normalized = dateStr.trim();
 
+  // Recover a "+" offset that arrived as a space. In a URL query string "+"
+  // means space, so an un-encoded offset like "...T22:00:00+03:00" decodes to
+  // "...T22:00:00 03:00" and would otherwise be treated as having no timezone.
+  // If we see a space where the offset sign belongs, restore the "+".
+  normalized = normalized.replace(
+    /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?) (\d{2}:\d{2})$/,
+    '$1+$2',
+  );
+
   // If no time component, add midnight
   if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
     normalized += 'T00:00:00';
