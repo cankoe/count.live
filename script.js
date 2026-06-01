@@ -808,6 +808,46 @@ let lastVerticalState = false;
 
 let countdownBuiltForUnits = null;
 
+// Lay out a `.countdown` to fit its width, synchronously (before paint, so
+// there's no visible jump / CLS). The digit font is viewport-relative, so on
+// some widths a single row would be far too wide; rather than squashing the
+// tiles (which overlaps the digits) we shrink the font to fit via --fit-scale,
+// and only stack vertically when even the smallest legible size won't fit.
+// Returns true if it stacked. Measures the row's *natural* width via the
+// `.measuring` class (see styles.css) so the decision ignores flex squashing.
+const COUNTDOWN_MIN_FIT_SCALE = 0.55;
+function applyCountdownLayout(el) {
+  el.classList.remove('vertical');
+  el.style.setProperty('--fit-scale', '1');
+  el.classList.add('measuring');
+  // Reading scrollWidth forces a synchronous reflow; no paint happens before we
+  // remove `.measuring`, so the un-shrunk state is never shown.
+  const natural = el.scrollWidth;
+  const avail = el.clientWidth;
+  el.classList.remove('measuring');
+
+  if (natural <= avail + 2) {
+    return false; // fits at full size
+  }
+  // Shrink the row to fit. Most sizes scale with --fit-scale, but a little
+  // fixed chrome (mostly in the small builder preview) doesn't, so converge
+  // with a couple of cheap correction passes: apply a scale, measure the real
+  // residual, correct. Bails out to stacking if it can't fit while staying
+  // legible. Runs only on (re)build/resize, so the extra reflows are rare.
+  let scale = (avail / natural) * 0.99;
+  for (let i = 0; i < 4 && scale >= COUNTDOWN_MIN_FIT_SCALE; i++) {
+    el.style.setProperty('--fit-scale', scale.toFixed(3));
+    if (el.scrollWidth <= el.clientWidth + 2) {
+      return false; // fits as a single row by shrinking the digits
+    }
+    scale *= (el.clientWidth / el.scrollWidth) * 0.99;
+  }
+  // Too many units for one legible row — stack them.
+  el.style.setProperty('--fit-scale', '1');
+  el.classList.add('vertical');
+  return true;
+}
+
 function renderCountdown(values, units, isLarge) {
   const countdown = document.getElementById('countdown');
   const unitsKey = units.join(',') + (isLarge ? ':L' : '');
@@ -846,15 +886,9 @@ function renderCountdown(values, units, isLarge) {
     });
 
     // Decide horizontal vs stacked layout synchronously, before this frame
-    // paints. Reading scrollWidth forces a reflow but no paint happens in
-    // between, so switching to the vertical layout never produces a visible
-    // jump (CLS) — this previously ran in requestAnimationFrame, one frame too
-    // late, which is what made narrow embeds shift on load.
-    const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-    if (needsVertical !== lastVerticalState) {
-      lastVerticalState = needsVertical;
-      countdown.classList.toggle('vertical', needsVertical);
-    }
+    // paints, so switching to the vertical layout never produces a visible jump
+    // (CLS) — this previously ran in requestAnimationFrame, one frame too late.
+    lastVerticalState = applyCountdownLayout(countdown);
   } else {
     // Fast path: just update the text content of existing value elements
     units.forEach((unit) => {
@@ -2420,6 +2454,10 @@ function updatePreview() {
       }
     });
     previewBuiltForUnits = units.join(',');
+
+    // Match the live countdown: stack the units when a single row would
+    // overflow the preview frame (otherwise many units overflow horizontally).
+    applyCountdownLayout(previewCountdown);
   }
 
   function updatePreviewCountdown() {
@@ -2469,15 +2507,9 @@ let resizeTimeout;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimeout);
   resizeTimeout = setTimeout(() => {
-    lastVerticalState = false; // Reset to recheck
     const countdown = document.getElementById('countdown');
     if (countdown && countdown.children.length > 0) {
-      countdown.classList.remove('vertical');
-      // Measure synchronously (forces a reflow with the class removed) so the
-      // relayout lands in a single frame instead of flashing horizontal first.
-      const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-      lastVerticalState = needsVertical;
-      countdown.classList.toggle('vertical', needsVertical);
+      lastVerticalState = applyCountdownLayout(countdown);
     }
   }, 100);
 });

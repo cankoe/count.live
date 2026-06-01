@@ -110,7 +110,7 @@ body.builder-mode {
   justify-content: center;
   align-items: center;
   flex-wrap: nowrap;
-  gap: clamp(0.25rem, 2vw, 1rem);
+  gap: calc(clamp(0.25rem, 2vw, 1rem) * var(--fit-scale, 1));
   width: 100%;
   /* Reserve height before JS renders numbers to prevent CLS */
   min-height: clamp(4rem, 15vw, 10rem);
@@ -121,29 +121,38 @@ body.builder-mode {
   gap: 0.5rem;
 }
 
+/* Applied only for an instant while JS measures the row's natural width.
+   Disabling shrink means a row that would otherwise squash its tiles to "fit"
+   (overlapping the digits) instead reports a real overflow, so the
+   horizontal->vertical decision is correct on narrow screens too. Removed
+   synchronously before paint, so it never renders. */
+.countdown.measuring .unit {
+  flex-shrink: 0;
+}
+
 .countdown.large .unit {
-  padding: clamp(0.5rem, 2vw, 1.5rem) clamp(0.5rem, 2vw, 2rem);
+  padding: calc(clamp(0.5rem, 2vw, 1.5rem) * var(--fit-scale, 1)) calc(clamp(0.5rem, 2vw, 2rem) * var(--fit-scale, 1));
 }
 
 .countdown.large .value {
-  font-size: clamp(2rem, 12vw, 8rem);
+  font-size: calc(clamp(2rem, 12vw, 8rem) * var(--fit-scale, 1));
 }
 
 .countdown.large .label {
-  font-size: clamp(0.6rem, 1.5vw, 1.1rem);
+  font-size: calc(clamp(0.6rem, 1.5vw, 1.1rem) * var(--fit-scale, 1));
 }
 
 .unit {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: clamp(0.25rem, 1vw, 1rem) clamp(0.25rem, 1.5vw, 1.5rem);
+  padding: calc(clamp(0.25rem, 1vw, 1rem) * var(--fit-scale, 1)) calc(clamp(0.25rem, 1.5vw, 1.5rem) * var(--fit-scale, 1));
   min-width: 0;
   flex-shrink: 1;
 }
 
 .value {
-  font-size: clamp(1.5rem, 8vw, 5rem);
+  font-size: calc(clamp(1.5rem, 8vw, 5rem) * var(--fit-scale, 1));
   font-weight: 200;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -151,7 +160,7 @@ body.builder-mode {
 }
 
 .label {
-  font-size: clamp(0.5rem, 1.2vw, 0.9rem);
+  font-size: calc(clamp(0.5rem, 1.2vw, 0.9rem) * var(--fit-scale, 1));
   text-transform: uppercase;
   letter-spacing: 0.1em;
   margin-top: 0.25rem;
@@ -160,7 +169,7 @@ body.builder-mode {
 }
 
 .separator {
-  font-size: clamp(1rem, 6vw, 4rem);
+  font-size: calc(clamp(1rem, 6vw, 4rem) * var(--fit-scale, 1));
   font-weight: 200;
   opacity: 0.5;
   align-self: center;
@@ -171,7 +180,7 @@ body.builder-mode {
 }
 
 .countdown.large .separator {
-  font-size: clamp(1.5rem, 10vw, 6rem);
+  font-size: calc(clamp(1.5rem, 10vw, 6rem) * var(--fit-scale, 1));
   margin-bottom: clamp(0.9rem, 2vw, 1.4rem);
 }
 
@@ -255,7 +264,7 @@ body.builder-mode {
 }
 
 .milliseconds .value {
-  font-size: clamp(1.5rem, 6vw, 3rem);
+  font-size: calc(clamp(1.5rem, 6vw, 3rem) * var(--fit-scale, 1));
   display: inline-block;
   min-width: 3ch;
   text-align: center;
@@ -263,7 +272,7 @@ body.builder-mode {
 }
 
 .countdown.large .milliseconds .value {
-  font-size: clamp(2.5rem, 10vw, 5rem);
+  font-size: calc(clamp(2.5rem, 10vw, 5rem) * var(--fit-scale, 1));
 }
 
 @media (max-width: 600px) {
@@ -272,24 +281,24 @@ body.builder-mode {
   }
 
   .countdown:not(.vertical) {
-    gap: 0.25rem;
+    gap: calc(0.25rem * var(--fit-scale, 1));
   }
 
   .countdown:not(.vertical) .unit {
-    padding: 0.25rem 0.35rem;
+    padding: calc(0.25rem * var(--fit-scale, 1)) calc(0.35rem * var(--fit-scale, 1));
   }
 
   .countdown:not(.vertical) .value {
-    font-size: clamp(1rem, 5vw, 2rem);
+    font-size: calc(clamp(1rem, 5vw, 2rem) * var(--fit-scale, 1));
   }
 
   .countdown:not(.vertical) .label {
-    font-size: 0.45rem;
+    font-size: calc(0.45rem * var(--fit-scale, 1));
     letter-spacing: 0.05em;
   }
 
   .countdown:not(.vertical) .separator {
-    font-size: clamp(0.75rem, 4vw, 1.5rem);
+    font-size: calc(clamp(0.75rem, 4vw, 1.5rem) * var(--fit-scale, 1));
     margin-bottom: 0.7rem;
   }
 
@@ -882,25 +891,25 @@ body.builder-light .email-button-small {
 }
 
 .preview-frame .countdown {
-  gap: 0.5rem;
+  gap: calc(0.5rem * var(--fit-scale, 1));
   min-height: 0;
 }
 
 .preview-frame .unit {
-  padding: 0.5rem;
-  min-width: 50px;
+  padding: calc(0.5rem * var(--fit-scale, 1));
+  min-width: calc(50px * var(--fit-scale, 1));
 }
 
 .preview-frame .value {
-  font-size: 1.5rem;
+  font-size: calc(1.5rem * var(--fit-scale, 1));
 }
 
 .preview-frame .label {
-  font-size: 0.6rem;
+  font-size: calc(0.6rem * var(--fit-scale, 1));
 }
 
 .preview-frame .separator {
-  font-size: 1.25rem;
+  font-size: calc(1.25rem * var(--fit-scale, 1));
   align-self: center;
   margin-bottom: 0.85rem;
 }
@@ -1257,20 +1266,20 @@ body.builder-light .email-button-small {
   }
 
   .preview-frame .value {
-    font-size: 1.2rem;
+    font-size: calc(1.2rem * var(--fit-scale, 1));
   }
 
   .preview-frame .label {
-    font-size: 0.5rem;
+    font-size: calc(0.5rem * var(--fit-scale, 1));
   }
 
   .preview-frame .unit {
-    padding: 0.3rem;
-    min-width: 40px;
+    padding: calc(0.3rem * var(--fit-scale, 1));
+    min-width: calc(40px * var(--fit-scale, 1));
   }
 
   .preview-frame .separator {
-    font-size: 1rem;
+    font-size: calc(1rem * var(--fit-scale, 1));
     align-self: center;
     margin-bottom: 0.75rem;
   }
@@ -1332,12 +1341,12 @@ body.builder-light .email-button-small {
   }
 
   .preview-frame .countdown {
-    gap: 0.25rem;
+    gap: calc(0.25rem * var(--fit-scale, 1));
     min-height: 0;
   }
 
   .preview-frame .unit {
-    min-width: 35px;
+    min-width: calc(35px * var(--fit-scale, 1));
   }
 }
 
