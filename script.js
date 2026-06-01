@@ -845,14 +845,16 @@ function renderCountdown(values, units, isLarge) {
       }
     });
 
-    // Check for overflow once after build
-    requestAnimationFrame(() => {
-      const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-      if (needsVertical !== lastVerticalState) {
-        lastVerticalState = needsVertical;
-        countdown.classList.toggle('vertical', needsVertical);
-      }
-    });
+    // Decide horizontal vs stacked layout synchronously, before this frame
+    // paints. Reading scrollWidth forces a reflow but no paint happens in
+    // between, so switching to the vertical layout never produces a visible
+    // jump (CLS) — this previously ran in requestAnimationFrame, one frame too
+    // late, which is what made narrow embeds shift on load.
+    const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
+    if (needsVertical !== lastVerticalState) {
+      lastVerticalState = needsVertical;
+      countdown.classList.toggle('vertical', needsVertical);
+    }
   } else {
     // Fast path: just update the text content of existing value elements
     units.forEach((unit) => {
@@ -1760,7 +1762,7 @@ function initBuilder() {
   document.getElementById('b-font').addEventListener('change', updatePreview);
 
   // Background image
-  document.getElementById('b-bgimg').addEventListener('input', updatePreview);
+  document.getElementById('b-bgimg').addEventListener('input', schedulePreview);
 
   // Sound and celebration selectors
   document.getElementById('b-sound').addEventListener('change', updatePreview);
@@ -1795,12 +1797,17 @@ function initBuilder() {
   document.getElementById('b-showtz').addEventListener('change', updatePreview);
   document.getElementById('b-notify').addEventListener('change', updatePreview);
   document.getElementById('b-attribution').addEventListener('change', updatePreview);
+  // Date/start are set via the native picker (not rapidly typed) and the
+  // shareable URL keys off the date, so keep these immediate — the URL field
+  // must reflect a new date the instant it's chosen.
   document.getElementById('b-start').addEventListener('input', updatePreview);
+  document.getElementById('b-date').addEventListener('input', updatePreview);
 
-  // Add listeners to all text inputs
-  const inputs = ['b-date', 'b-title', 'b-subtitle', 'b-end'];
+  // Free-text content fields use the debounced preview so fast typing (e.g. in
+  // the title) doesn't stall on a full rebuild every keystroke (INP).
+  const inputs = ['b-title', 'b-subtitle', 'b-end'];
   inputs.forEach(id => {
-    document.getElementById(id).addEventListener('input', updatePreview);
+    document.getElementById(id).addEventListener('input', schedulePreview);
   });
 
   // Unit checkboxes
@@ -1989,8 +1996,30 @@ function closeAllOpenModals() {
 }
 
 function getPublishUrl() {
+  // A debounced live-preview update may be pending (see schedulePreview); flush
+  // it first so the URL we hand to copy/share/embed reflects the latest input.
+  flushPreview();
   const output = document.getElementById('url-output');
   return output?.dataset.fullUrl || '';
+}
+
+// Live-preview debounce. updatePreview() rebuilds the preview and rewrites the
+// browser URL/history; running it on every keystroke inflates input latency
+// (INP). Free-text fields schedule it shortly after typing pauses — short
+// enough to feel live — and any publish action flushes it via getPublishUrl().
+let previewDebounceTimer = null;
+function schedulePreview() {
+  if (previewDebounceTimer !== null) clearTimeout(previewDebounceTimer);
+  previewDebounceTimer = setTimeout(() => {
+    previewDebounceTimer = null;
+    updatePreview();
+  }, 120);
+}
+function flushPreview() {
+  if (previewDebounceTimer === null) return;
+  clearTimeout(previewDebounceTimer);
+  previewDebounceTimer = null;
+  updatePreview();
 }
 
 let celebrationTimer = null;
@@ -2444,11 +2473,11 @@ window.addEventListener('resize', () => {
     const countdown = document.getElementById('countdown');
     if (countdown && countdown.children.length > 0) {
       countdown.classList.remove('vertical');
-      requestAnimationFrame(() => {
-        const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
-        lastVerticalState = needsVertical;
-        countdown.classList.toggle('vertical', needsVertical);
-      });
+      // Measure synchronously (forces a reflow with the class removed) so the
+      // relayout lands in a single frame instead of flashing horizontal first.
+      const needsVertical = countdown.scrollWidth > countdown.clientWidth + 2;
+      lastVerticalState = needsVertical;
+      countdown.classList.toggle('vertical', needsVertical);
     }
   }, 100);
 });
