@@ -3021,6 +3021,16 @@ body.builder-light.builder-mode .accordion#builder-help .accordion-body code {
   color: var(--builder-fg, rgba(255,255,255,0.85));
 }
 
+.site-footer-badge {
+  display: inline-flex;
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+
+.site-footer-badge:hover {
+  opacity: 1;
+}
+
 @media (max-width: 400px) {
   .site-footer {
     flex-direction: column;
